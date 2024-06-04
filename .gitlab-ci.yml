@@ -1,55 +1,55 @@
 stages:
-  - build
-  - test
+  # - build
+  # - test
   - publish
   - deploy
   
-build-backend:
-  stage: build
-  image: maven:latest
-  before_script:
-      - cd metaBlog-backend
-  tags:
-    - dalfcs_docker_autoscale
-  script:
-    - echo "Starting backend build......"
-    - mvn clean install
-    - echo "Compile complete."
-    - echo "Backend build completed"
-  artifacts:
-    paths: 
-      - metaBlog-backend/target
+# build-backend:
+#   stage: build
+#   image: maven:latest
+#   before_script:
+#       - cd metaBlog-backend
+#   tags:
+#     - dalfcs_docker_autoscale
+#   script:
+#     - echo "Starting backend build......"
+#     - mvn clean install
+#     - echo "Compile complete."
+#     - echo "Backend build completed"
+#   artifacts:
+#     paths: 
+#       - metaBlog-backend/target
 
-build-frontend:
-  stage: build
-  image: node:latest
-  tags:
-    - dalfcs_docker_autoscale
-  before_script:
-    - cd metablog-frontend
-    - npm install
-    - npm i react-icons
-  script:
-    - echo "Frontend building started......"
-    - npm run build
-  artifacts:
-    paths:
-      - metablog-frontend/build
+# build-frontend:
+#   stage: build
+#   image: node:latest
+#   tags:
+#     - dalfcs_docker_autoscale
+#   before_script:
+#     - cd metablog-frontend
+#     - npm install
+#     - npm i react-icons
+#   script:
+#     - echo "Frontend building started......"
+#     - npm run build
+#   artifacts:
+#     paths:
+#       - metablog-frontend/build
 
-test-backend:
-    stage: test
-    image: maven:latest
-    tags:
-    - dalfcs_docker_autoscale
-    before_script: 
-        - cd metaBlog-backend
-    script:
-        - echo "backend testing started......"
-        - mvn test
-        - echo "backedn testing completed......"
-    only: 
-      - develop
-      - main
+# test-backend:
+#     stage: test
+#     image: maven:latest
+#     tags:
+#     - dalfcs_docker_autoscale
+#     before_script: 
+#         - cd metaBlog-backend
+#     script:
+#         - echo "backend testing started......"
+#         - mvn test
+#         - echo "backedn testing completed......"
+#     only: 
+#       - develop
+#       - main
 
 publish_backend:
   stage: publish
