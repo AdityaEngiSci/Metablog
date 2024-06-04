@@ -1,7 +1,8 @@
 stages:
   - build
   - test
-
+  - publish
+  
 build-backend:
   stage: build
   image: maven:latest
@@ -45,3 +46,57 @@ test-backend:
         - echo "backend testing started......"
         - mvn test
         - echo "backedn testing completed......"
+
+publish_backend:
+  stage: publish
+  image: docker:latest
+  services:
+    - docker:dind
+  variables:
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_HOST: "tcp://docker:2375"
+  before_script:
+      - cd metaBlog-backend
+      - ls
+      - pwd
+      - echo "Docker login started"
+      - docker login -u $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD docker.io
+      - echo "Docker login success"
+  tags:
+    - dalfcs_docker_kvm
+  script:
+    - ls
+    - pwd
+    - echo "Docker build for backend started"
+    - docker build -t $DOCKER_HUB_USERNAME/metablog_backend .
+    - echo "Docker build for backend done now pushing the image to the docker hub"
+    - docker push $DOCKER_HUB_USERNAME/metablog_backend
+    - echo "Docker image for backend pushed to the docker hub"
+  only:
+    - main
+
+publish_frontend:
+  stage: publish
+  image: docker:latest
+  services:
+    - docker:dind
+  variables:
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_HOST: "tcp://docker:2375"
+  before_script:
+      - cd metablog-frontend
+      - echo "Docker login started"
+      - docker login -u $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD docker.io
+      - echo "Docker login success"
+  tags:
+    - dalfcs_docker_kvm
+  script:
+    - echo "Docker build for frontend started"
+    - docker build -t $DOCKER_HUB_USERNAME/metablog_frontend .
+    - echo "Docker build for frontend done now pushing the image to the docker hub"
+    - docker push $DOCKER_HUB_USERNAME/metablog_frontend
+    - echo "Docker image for frontend pushed to the docker hub"
+  only:
+    - main
