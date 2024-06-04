@@ -95,7 +95,7 @@ publish_frontend:
       - docker login -u $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD docker.io
       - echo "Docker login success"
   tags:
-    - dalfcs_docker_kvm
+    - dalfcs_gitlab_docker_ci
   script:
     - echo "Docker build for frontend started"
     - docker build -t $DOCKER_HUB_USERNAME/metablog_frontend .
