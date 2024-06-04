@@ -46,6 +46,9 @@ test-backend:
         - echo "backend testing started......"
         - mvn test
         - echo "backedn testing completed......"
+    only: 
+      - develop
+      - main
 
 publish_backend:
   stage: publish
