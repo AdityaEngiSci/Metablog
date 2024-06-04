@@ -5,7 +5,7 @@ stages:
 build-backend:
   stage: build
   # image: maven:latest
-  image: maven:eclipse-temurin
+  image: openjdk:17-oracle
   before_script:
       - cd metaBlog-backend
   tags:
@@ -38,7 +38,7 @@ build-frontend:
 test-backend:
     stage: test
     # image: maven:latest
-    image: maven:eclipse-temurin
+    image: openjdk:17-oracle
     tags:
     - dalfcs_docker_kvm
     before_script: 
