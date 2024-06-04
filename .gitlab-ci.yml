@@ -4,7 +4,8 @@ stages:
 
 build-backend:
   stage: build
-  image: maven:latest
+  # image: maven:latest
+  image: maven:eclipse-temurin
   before_script:
       - cd metaBlog-backend
   tags:
@@ -36,7 +37,8 @@ build-frontend:
 
 test-backend:
     stage: test
-    image: maven:latest
+    # image: maven:latest
+    image: maven:eclipse-temurin
     tags:
     - dalfcs_docker_kvm
     before_script: 
@@ -45,6 +47,3 @@ test-backend:
         - echo "backend testing started......"
         - mvn test
         - echo "backedn testing completed......"
-    only:
-        - develop
-        - main
