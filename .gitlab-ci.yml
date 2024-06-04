@@ -1,0 +1,34 @@
+stages:
+  - build
+
+build-backend:
+  stage: build
+  image: maven:latest
+  before_script:
+      - cd metaBlog-backend
+  tags:
+    - dalfcs_docker_kvm
+  script:
+    - echo "Starting backend build......"
+    - mvn clean install
+    - echo "Compile complete."
+    - echo "Backend build completed"
+  artifacts:
+    paths: 
+      - metaBlog-backend/target
+
+build-frontend:
+  stage: build
+  image: node:latest
+  tags:
+    - dalfcs_docker_kvm
+  before_script:
+    - cd metablog-frontend
+    - npm install
+    - npm i react-icons
+  script:
+    - echo "Frontend building started......"
+    - npm run build
+  artifacts:
+    paths:
+      - metablog-frontend/build
