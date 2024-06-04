@@ -1,5 +1,6 @@
 stages:
   - build
+  - test
 
 build-backend:
   stage: build
@@ -32,3 +33,15 @@ build-frontend:
   artifacts:
     paths:
       - metablog-frontend/build
+
+test-backend:
+    stage: test
+    image: maven:latest
+    tags:
+    - dalfcs_docker_kvm
+    before_script: 
+        - cd metaBlog-backend
+    script:
+        - echo "backend testing started......"
+        - mvn test
+        - echo "backedn testing completed......"
