@@ -4,12 +4,11 @@ stages:
 
 build-backend:
   stage: build
-  # image: maven:latest
-  image: openjdk:17-oracle
+  image: maven:latest
   before_script:
       - cd metaBlog-backend
   tags:
-    - dalfcs_docker_kvm
+    - grad
   script:
     - echo "Starting backend build......"
     - mvn clean install
@@ -23,7 +22,7 @@ build-frontend:
   stage: build
   image: node:latest
   tags:
-    - dalfcs_docker_kvm
+    - grad
   before_script:
     - cd metablog-frontend
     - npm install
@@ -37,10 +36,9 @@ build-frontend:
 
 test-backend:
     stage: test
-    # image: maven:latest
-    image: openjdk:17-oracle
+    image: maven:latest
     tags:
-    - dalfcs_docker_kvm
+    - grad
     before_script: 
         - cd metaBlog-backend
     script:
