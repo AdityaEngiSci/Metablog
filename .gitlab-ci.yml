@@ -2,7 +2,6 @@ stages:
   - build
   - test
   - publish
-  - deploy
   
 build-backend:
   stage: build
@@ -108,22 +107,5 @@ publish_frontend:
     - echo "Docker build for frontend done now pushing the image to the docker hub"
     - docker push $DOCKER_HUB_USERNAME/metablog_frontend
     - echo "Docker image for frontend pushed to the docker hub"
-  only:
-    - main
-  
-deploy-backend:
-  stage: deploy
-  image: alpine:latest
-  before_script:
-    - cd metaBlog-backend
-    - apk update
-    - apk-get install openssh
-    - apk-get install sshpass
-  tags:
-    - dalfcs_docker_kvm
-  script:
-    - echo "Docker login stared"
-    - sshpass -p $VM_PASSWORD ssh -o StrictHostKeyChecking=no student@$VM_ADDRESS "docker login -u $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD docker.io"
-    - echo "Docker login done successfully..."
   only:
     - main
