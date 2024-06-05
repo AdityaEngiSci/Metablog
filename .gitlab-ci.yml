@@ -2,6 +2,7 @@ stages:
   - build
   - test
   - publish
+  - deploy
   
 build-backend:
   stage: build
@@ -107,5 +108,51 @@ publish_frontend:
     - echo "Docker build for frontend done now pushing the image to the docker hub"
     - docker push $DOCKER_HUB_USERNAME/metablog_frontend
     - echo "Docker image for frontend pushed to the docker hub"
+  only:
+    - main
+  
+deploy-backend:
+  stage: deploy
+  image: alpine:latest
+  tags:
+    - dalfcs_docker_kvm
+  before_script:
+    - cd metaBlog-backend
+    - ls
+    - pwd
+    - apk update && apk add openssh-client sshpass
+    - sudo apt-get install sshpass || true
+    - chmod 600 $VM_RSA 
+    
+  script:
+    - echo "Docker login started"
+    - sshpass -p $VM_PASSWORD ssh -o StrictHostKeyChecking=no student@$VM_NAME "docker login -u $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD docker.io"
+    - echo "Docker login success"
+    - sshpass -p $VM_PASSWORD ssh -o StrictHostKeyChecking=no student@$VM_NAME "docker pull $DOCKER_BACKEND_IMAGE"
+    - sshpass -p $VM_PASSWORD ssh -o StrictHostKeyChecking=no student@$VM_NAME  "docker container rm -f metablog-backend-container || true"
+    - sshpass -p $VM_PASSWORD ssh -o StrictHostKeyChecking=no student@$VM_NAME "docker run -d -p 8080:8080 --name metablog-backend-container $DOCKER_BACKEND_IMAGE"
+  only:
+    - main
+
+deploy-frontend:
+  stage: deploy
+  image: alpine:latest
+  tags:
+    - dalfcs_docker_kvm
+  before_script:
+    - cd metablog-frontend
+    - ls
+    - pwd
+    - apk update && apk add openssh-client sshpass
+    - sudo apt-get install sshpass || true
+    - chmod 600 $VM_RSA 
+    
+  script:
+    - echo "Docker login started"
+    - sshpass -p $VM_PASSWORD ssh -o StrictHostKeyChecking=no student@$VM_NAME "docker login -u $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD docker.io"
+    - echo "Docker login success"
+    - sshpass -p $VM_PASSWORD ssh -o StrictHostKeyChecking=no student@$VM_NAME "docker pull $DOCKER_FRONTEND_IMAGE"
+    - sshpass -p $VM_PASSWORD ssh -o StrictHostKeyChecking=no student@$VM_NAME  "docker container rm -f metablog-frontend-container || true"
+    - sshpass -p $VM_PASSWORD ssh -o StrictHostKeyChecking=no student@$VM_NAME "docker run -d -p 3000:3000 --name metablog-frontend-container $DOCKER_FRONTEND_IMAGE"
   only:
     - main
