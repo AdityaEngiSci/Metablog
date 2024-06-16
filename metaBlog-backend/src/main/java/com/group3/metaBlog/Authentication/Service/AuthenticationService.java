@@ -1,14 +1,19 @@
 package com.group3.metaBlog.Authentication.Service;
 
 import com.group3.metaBlog.Authentication.DataTransferObject.RegisterRequestDto;
+import com.group3.metaBlog.Email.Service.IEmailService;
 import com.group3.metaBlog.Enum.Role;
 import com.group3.metaBlog.Authentication.DataTransferObject.RegisterResponseDto;
 import com.group3.metaBlog.Config.ApplicationConfig;
 import com.group3.metaBlog.Jwt.ServiceLayer.JwtService;
+import com.group3.metaBlog.OTP.Service.IOTPService;
 import com.group3.metaBlog.User.Model.User;
-import com.group3.metaBlog.User.Repository.UserRepository;
+import com.group3.metaBlog.User.Repository.IUserRepository;
 import com.group3.metaBlog.Utils.MetaBlogResponse;
+import jakarta.mail.MessagingException;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,19 +28,24 @@ import java.util.Optional;
 @Service
 @AllArgsConstructor
 public class AuthenticationService implements IAuthenticationService {
-    private final UserRepository userRepository;
+    private final IUserRepository IUserRepository;
+
+    private final IOTPService otpService;
+    private final IEmailService emailService;
 
     private final JwtService jwtService;
     private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final Logger logger = LoggerFactory.getLogger(AuthenticationService.class);
 
     private final ApplicationConfig applicationConfig;
 
     private final AuthenticationManager authenticationManager;
 
     public ResponseEntity<Object> register(RegisterRequestDto request) {
-
-        Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
+        logger.info("Registering user with email: {}", request.getEmail());
+        Optional<User> existingUser = IUserRepository.findByEmail(request.getEmail());
         if (existingUser.isPresent()) {
+            logger.error("User already exists with email: {}", request.getEmail());
             return new ResponseEntity<>(MetaBlogResponse.builder()
                     .success(false)
                     .message("User already exists with this email.")
@@ -47,6 +57,7 @@ public class AuthenticationService implements IAuthenticationService {
                     .build() , HttpStatus.CONFLICT);
         }
         if(!Objects.equals(request.getRole(), "User")){
+            logger.error("Invalid Role provided in the request which is: {}", request.getRole());
             return new ResponseEntity<>(MetaBlogResponse.builder()
                     .success(false)
                     .message("Invalid Role")
@@ -60,19 +71,40 @@ public class AuthenticationService implements IAuthenticationService {
                 .registerAt((double)(System.currentTimeMillis()))
                 .lastLoginTime((double) (System.currentTimeMillis()))
                 .role(Role.User)
+                .isEmailVerified(false)
+                .isAccountLocked(false)
+                .isResetPasswordRequested(false)
+                .isTermsAccepted(true)
                 .build();
 
-//we have to save this here because I want to store the access token and refresh token in the user db.
-        userRepository.save(user);
+        IUserRepository.save(user);
+        Long user_id = user.getId();
 
+        int otp = otpService.generateOTP();
+        otpService.registerOTP(otp,user_id);
+        try {
+            emailService.sendVerificationOTP(request.getEmail(), otp);
+        } catch (MessagingException e) {
+            logger.error("Error sending email to the user with email: {}", request.getEmail());
+            logger.error("Message of the error: {}", e.getMessage());
+            return new ResponseEntity<>(MetaBlogResponse.builder()
+                    .success(false)
+                    .message("Error sending email to the user.")
+                    .build() , HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        logger.info("OTP sent to the user with email ");
+        IUserRepository.save(user);
+        logger.info("User created without JWT tokens");
         String accessToken = jwtService.generateJwtToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
 
         user.setRefreshToken(refreshToken);
         user.setAccessToken(accessToken);
 
-        userRepository.save(user);
+        IUserRepository.save(user);
 
+        logger.info("JWT token added to the user");
+        logger.info("Registration ended successfully with email: {}", request.getEmail());
         return new ResponseEntity<>(MetaBlogResponse.builder()
                 .success(true)
                 .message("User Created Successfully")
@@ -84,5 +116,46 @@ public class AuthenticationService implements IAuthenticationService {
                 .build(), HttpStatus.CREATED);
     }
 
+    public ResponseEntity<Object> forgetPassword(String email) {
+        logger.info("Forgot password request for email: {}", email);
+        Optional<User> existingUser = IUserRepository.findByEmail(email);
+        if (existingUser.isEmpty()) {
+            logger.error("User does not exist with this email");
+            return new ResponseEntity<>(MetaBlogResponse.builder()
+                    .success(false)
+                    .message("User does not exist with this email.")
+                    .build() , HttpStatus.NOT_FOUND);
+        }
+        int otp = otpService.generateOTP();
+        logger.info("OTP generated");
+        User currentUser = existingUser.get();
+        Long id = currentUser.getId();
+        otpService.registerOTP(otp,id);
+        logger.info("OTP sent to this email: {}", email);
+        return new ResponseEntity<>(MetaBlogResponse.builder()
+                .success(true)
+                .message("OTP has been sent to your email successfully.")
+                .build(), HttpStatus.OK);
+    }
+
+
+    public ResponseEntity<Object> findUser(String email) {
+
+        logger.info("Finding user with email: {}", email);
+        Optional<User> existingUser = IUserRepository.findByEmail(email);
+        if (existingUser.isEmpty()) {
+            logger.error("User does not exist with this email");
+            return new ResponseEntity<>(MetaBlogResponse.builder()
+                    .success(false)
+                    .message("User does not exist with this email.")
+                    .build() , HttpStatus.NOT_FOUND);
+        }
+        User currentUser = existingUser.get();
+        logger.info("User found with this email");
+        return new ResponseEntity<>(MetaBlogResponse.builder()
+                .success(true)
+                .message("A user with this email exists.")
+                .build(), HttpStatus.OK);
+    }
 
 }

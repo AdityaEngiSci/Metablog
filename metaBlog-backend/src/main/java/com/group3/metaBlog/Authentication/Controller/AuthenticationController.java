@@ -2,8 +2,6 @@ package com.group3.metaBlog.Authentication.Controller;
 
 import com.group3.metaBlog.Authentication.DataTransferObject.RegisterRequestDto;
 import com.group3.metaBlog.Authentication.Service.AuthenticationService;
-import com.group3.metaBlog.Jwt.ServiceLayer.JwtService;
-import com.group3.metaBlog.User.Repository.UserRepository;
 import com.group3.metaBlog.Utils.MetaBlogResponse;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.http.ResponseEntity;
@@ -29,4 +27,5 @@ public class AuthenticationController{
                     .build());
         }
     }
+
 }
