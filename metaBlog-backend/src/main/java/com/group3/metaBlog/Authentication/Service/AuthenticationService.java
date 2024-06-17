@@ -157,5 +157,4 @@ public class AuthenticationService implements IAuthenticationService {
                 .message("A user with this email exists.")
                 .build(), HttpStatus.OK);
     }
-
 }
