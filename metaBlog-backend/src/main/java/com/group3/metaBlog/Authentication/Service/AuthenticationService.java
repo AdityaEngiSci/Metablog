@@ -131,6 +131,16 @@ public class AuthenticationService implements IAuthenticationService {
         User currentUser = existingUser.get();
         Long id = currentUser.getId();
         otpService.registerOTP(otp,id);
+        try {
+            emailService.sendVerificationOTP(email, otp);
+        } catch (MessagingException e) {
+            logger.error("Error sending email to the user with email: {}", email);
+            logger.error("Message of the error: {}", e.getMessage());
+            return new ResponseEntity<>(MetaBlogResponse.builder()
+                    .success(false)
+                    .message("Error sending email to the user.")
+                    .build() , HttpStatus.INTERNAL_SERVER_ERROR);
+        }
         logger.info("OTP sent to this email: {}", email);
         return new ResponseEntity<>(MetaBlogResponse.builder()
                 .success(true)
