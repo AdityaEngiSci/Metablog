@@ -4,13 +4,18 @@ import com.group3.metaBlog.Authentication.DataTransferObject.RegisterRequestDto;
 import com.group3.metaBlog.Authentication.Service.AuthenticationService;
 import com.group3.metaBlog.Utils.MetaBlogResponse;
 import jakarta.validation.constraints.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthenticationController{
+
     private final AuthenticationService AuthenticationService;
+
+    private final Logger logger = LoggerFactory.getLogger(AuthenticationController.class);
 
     public AuthenticationController(AuthenticationService service) {
         this.AuthenticationService = service;
@@ -20,6 +25,38 @@ public class AuthenticationController{
     public ResponseEntity<Object> register(@NotNull @RequestBody RegisterRequestDto request) {
         try {
             return AuthenticationService.register(request);
+        } catch (IllegalArgumentException e) {
+            logger.error("Error registering user with email: {}" , request.getEmail());
+            logger.error("Message of the error: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
+                    .success(false)
+                    .message(e.getMessage())
+                    .build());
+        }
+    }
+
+    @PostMapping("/forget-password")
+    public ResponseEntity<Object> forgetPassword(@NotNull @RequestParam String email) {
+        try {
+            return AuthenticationService.forgetPassword(email);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
+                    .success(false)
+                    .message(e.getMessage())
+                    .build());
+        }
+    }
+
+    @GetMapping("/get-user")
+    public ResponseEntity<Object> getUser(@NotNull @RequestParam String email) {
+        try {
+            if(email.isEmpty()){
+                return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
+                        .success(false)
+                        .message("Email is empty")
+                        .build());
+            }
+            return AuthenticationService.findUser(email);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
                     .success(false)
