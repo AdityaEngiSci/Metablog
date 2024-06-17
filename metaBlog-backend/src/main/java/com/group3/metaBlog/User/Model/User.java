@@ -20,8 +20,8 @@ import java.util.List;
 public class User implements UserDetails {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Integer id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Size(min=4, message = "Minimum username length: 4 characters")
     private String username;
@@ -30,6 +30,7 @@ public class User implements UserDetails {
     @Column(unique = true,nullable = false)
     private String email;
 
+    @Column(columnDefinition = "boolean default false")
     private Boolean isEmailVerified = false;
 
     @Column(nullable = false)
@@ -47,13 +48,16 @@ public class User implements UserDetails {
 
     private String imageURL;
 
-    private Boolean isTermsAccepted;
+    @Column(columnDefinition = "boolean default false")
+    private Boolean isTermsAccepted = false;
 
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Column(columnDefinition = "boolean default false")
     private Boolean isResetPasswordRequested = false;
 
+    @Column(columnDefinition = "boolean default false")
     private Boolean isAccountLocked = false;
 
     @Override

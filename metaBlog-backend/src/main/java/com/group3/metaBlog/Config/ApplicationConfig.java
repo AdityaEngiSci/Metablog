@@ -1,6 +1,6 @@
 package com.group3.metaBlog.Config;
 
-import com.group3.metaBlog.User.Repository.UserRepository;
+import com.group3.metaBlog.User.Repository.IUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -21,14 +21,14 @@ public class ApplicationConfig {
     // and it will try to include all the configuration that is required for the application to run
     // and all the beans required for the application to run.
 
-    private final UserRepository userRepository;
+    private final IUserRepository IUserRepository;
 
     @Value("${jwt.secret.key}")
     private String SECRET_KEY;
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> userRepository.findByEmail(username).
+        return username -> IUserRepository.findByEmail(username).
                 orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
