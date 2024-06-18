@@ -1,6 +1,7 @@
 package com.group3.metaBlog.Authentication.Controller;
 
 import com.group3.metaBlog.Authentication.DataTransferObject.RegisterRequestDto;
+import com.group3.metaBlog.Authentication.DataTransferObject.ResetPasswordRequestDto;
 import com.group3.metaBlog.Authentication.Service.AuthenticationService;
 import com.group3.metaBlog.Utils.MetaBlogResponse;
 import jakarta.validation.constraints.NotNull;
@@ -40,6 +41,20 @@ public class AuthenticationController{
         try {
             return AuthenticationService.forgetPassword(email);
         } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
+                    .success(false)
+                    .message(e.getMessage())
+                    .build());
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Object> resetPassword(@NotNull @RequestBody ResetPasswordRequestDto request) {
+        try {
+            return AuthenticationService.resetPassword(request);
+        } catch (IllegalArgumentException e) {
+            logger.error("Error resetting password with OTP: {}", request.getOtp());
+            logger.error("Message of the error: {}", e.getMessage());
             return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
                     .success(false)
                     .message(e.getMessage())
