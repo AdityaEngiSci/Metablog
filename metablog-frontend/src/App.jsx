@@ -1,6 +1,16 @@
-import React, { useEffect } from 'react';
-import { Routes, Route, useNavigationType, useLocation } from 'react-router-dom';
-import SignUp from './pages/SignUp';
+import { useEffect } from "react";
+import {
+  Routes,
+  Route,
+  useNavigationType,
+  useLocation,
+} from "react-router-dom";
+import SignUp from "./pages/SignUp";
+import Login from "./pages/Login";
+import ForgotPasswordStep from "./pages/ForgotPasswordStep";
+import ForgotPasswordStep1 from "./pages/ForgotPasswordStep1";
+import ResetPasswordStep from "./pages/ResetPasswordStep";
+import ResetPasswordStep1 from "./pages/ResetPasswordStep1";
 
 function App() {
   const action = useNavigationType();
@@ -8,23 +18,41 @@ function App() {
   const pathname = location.pathname;
 
   useEffect(() => {
-    if (action !== 'POP') {
+    if (action !== "POP") {
       window.scrollTo(0, 0);
     }
   }, [action, pathname]);
 
   useEffect(() => {
-    let title = '';
-    let metaDescription = '';
+    let title = "";
+    let metaDescription = "";
 
     switch (pathname) {
-      case '/':
-        title = 'Sign Up';
-        metaDescription = 'Create a new account on MetaBlog';
+      case "/":
+        title = "";
+        metaDescription = "";
         break;
-      default:
-        title = 'MetaBlog';
-        metaDescription = 'Welcome to MetaBlog';
+      case "/login":
+        title = "";
+        metaDescription = "";
+        break;
+      case "/forgot-password-step-3":
+        title = "";
+        metaDescription = "";
+        break;
+      case "/forgot-password-step-4":
+        title = "";
+        metaDescription = "";
+        break;
+      case "/reset-password-step-3":
+        title = "";
+        metaDescription = "";
+        break;
+      case "/reset-password-step-4":
+          title = "";
+          metaDescription = "";
+        break;
+
     }
 
     if (title) {
@@ -32,14 +60,11 @@ function App() {
     }
 
     if (metaDescription) {
-      const metaDescriptionTag = document.querySelector('head > meta[name="description"]');
+      const metaDescriptionTag = document.querySelector(
+        'head > meta[name="description"]'
+      );
       if (metaDescriptionTag) {
         metaDescriptionTag.content = metaDescription;
-      } else {
-        const newMetaTag = document.createElement('meta');
-        newMetaTag.name = 'description';
-        newMetaTag.content = metaDescription;
-        document.head.appendChild(newMetaTag);
       }
     }
   }, [pathname]);
@@ -47,9 +72,12 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<SignUp />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/forgot-password-step-3" element={<ForgotPasswordStep />} />
+      <Route path="/forgot-password-step-4" element={<ForgotPasswordStep1 />} />
+      <Route path="/reset-password-step-3" element={<ResetPasswordStep />} />
+      <Route path="/reset-password-step-4" element={<ResetPasswordStep1 />} />
     </Routes>
   );
 }
-
 export default App;
-
