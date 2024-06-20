@@ -177,5 +177,33 @@ class AuthenticationServiceTest {
         inOrder.verify(otpService).registerOTP(anyInt(), eq(1L)); // Use 1L directly for verification
         inOrder.verify(emailService).sendVerificationOTP(anyString(), anyInt());
     }
+    @Test
+    void testFindUserNotFound() {
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.empty());
 
+        ResponseEntity<Object> response = authenticationService.findUser("test@example.com");
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        MetaBlogResponse responseBody = (MetaBlogResponse) response.getBody();
+        assert responseBody != null;
+        assertEquals("User does not exist with this email.", responseBody.getMessage());
+        assertEquals(false, responseBody.getSuccess());
+
+        verify(userRepository, times(1)).findByEmail("test@example.com");
+    }
+
+    @Test
+    void testFindUserSuccess() {
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+
+        ResponseEntity<Object> response = authenticationService.findUser("test@example.com");
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        MetaBlogResponse responseBody = (MetaBlogResponse) response.getBody();
+        assert responseBody != null;
+        assertEquals("A user with this email exists.", responseBody.getMessage());
+        assertEquals(true, responseBody.getSuccess());
+
+        verify(userRepository, times(1)).findByEmail("test@example.com");
+    }
 }
