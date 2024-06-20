@@ -177,6 +177,66 @@ class AuthenticationServiceTest {
         inOrder.verify(otpService).registerOTP(anyInt(), eq(1L)); // Use 1L directly for verification
         inOrder.verify(emailService).sendVerificationOTP(anyString(), anyInt());
     }
+
+    @Test
+    void testForgetPasswordUserDoesNotExist() throws MessagingException {
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.empty());
+
+        ResponseEntity<Object> response = authenticationService.forgetPassword("test@example.com");
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        MetaBlogResponse responseBody = (MetaBlogResponse) response.getBody();
+        assertNotNull(responseBody);
+        assertEquals("User does not exist with this email.", responseBody.getMessage());
+        assertFalse(responseBody.getSuccess());
+
+        verify(userRepository, times(1)).findByEmail("test@example.com");
+        verify(otpService, never()).generateOTP();
+        verify(otpService, never()).registerOTP(anyInt(), anyLong());
+        verify(emailService, never()).sendVerificationOTP(anyString(), anyInt());
+    }
+
+    @Test
+    void testForgetPasswordSuccess() throws MessagingException {
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+        when(otpService.generateOTP()).thenReturn(123456);
+
+        ResponseEntity<Object> response = authenticationService.forgetPassword("test@example.com");
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        MetaBlogResponse responseBody = (MetaBlogResponse) response.getBody();
+        assertNotNull(responseBody);
+        assertEquals("OTP has been sent to your email successfully.", responseBody.getMessage());
+        assertTrue(responseBody.getSuccess());
+
+        InOrder inOrder = inOrder(userRepository, otpService, emailService);
+        inOrder.verify(userRepository).findByEmail("test@example.com");
+        inOrder.verify(otpService).generateOTP();
+        inOrder.verify(otpService).registerOTP(anyInt(), eq(1L));
+        inOrder.verify(emailService).sendVerificationOTP(anyString(), anyInt());
+    }
+
+    @Test
+    void testForgetPasswordEmailException() throws MessagingException {
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+        when(otpService.generateOTP()).thenReturn(123456);
+        doThrow(new MessagingException("Email error")).when(emailService).sendVerificationOTP(anyString(), anyInt());
+
+        ResponseEntity<Object> response = authenticationService.forgetPassword("test@example.com");
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        MetaBlogResponse responseBody = (MetaBlogResponse) response.getBody();
+        assertNotNull(responseBody);
+        assertEquals("Error sending email to the user.", responseBody.getMessage());
+        assertFalse(responseBody.getSuccess());
+
+        InOrder inOrder = inOrder(userRepository, otpService, emailService);
+        inOrder.verify(userRepository).findByEmail("test@example.com");
+        inOrder.verify(otpService).generateOTP();
+        inOrder.verify(otpService).registerOTP(anyInt(), eq(1L));
+        inOrder.verify(emailService).sendVerificationOTP(anyString(), anyInt());
+    }
+
     @Test
     void testFindUserNotFound() {
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.empty());
