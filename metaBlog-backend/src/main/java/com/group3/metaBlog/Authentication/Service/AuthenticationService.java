@@ -147,15 +147,7 @@ public class AuthenticationService implements IAuthenticationService {
     }
 
     public ResponseEntity<Object> resetPassword(ResetPasswordRequestDto request) {
-        logger.info("Resetting password with OTP: {}", request.getOtp());
-
-        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
-            logger.error("New password and confirm password do not match");
-            return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
-                    .success(false)
-                    .message("New password and confirm password do not match.")
-                    .build());
-        }
+        logger.info("Resetting password for email: {}", request.getEmail());
 
         Optional<User> userOptional = IUserRepository.findByEmail(request.getEmail());
         if (userOptional.isEmpty()) {

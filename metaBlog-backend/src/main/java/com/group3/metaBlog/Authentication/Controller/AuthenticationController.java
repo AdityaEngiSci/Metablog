@@ -53,7 +53,7 @@ public class AuthenticationController{
         try {
             return AuthenticationService.resetPassword(request);
         } catch (IllegalArgumentException e) {
-            logger.error("Error resetting password with OTP: {}", request.getOtp());
+            logger.error("Error resetting password for user with email: {}" , request.getEmail());
             logger.error("Message of the error: {}", e.getMessage());
             return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
                     .success(false)
