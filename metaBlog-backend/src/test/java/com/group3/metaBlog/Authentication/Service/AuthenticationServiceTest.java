@@ -238,6 +238,39 @@ class AuthenticationServiceTest {
     }
 
     @Test
+    void testResetPasswordUserNotFound() {
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.empty());
+
+        ResponseEntity<Object> response = authenticationService.resetPassword(resetPasswordRequestDto);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        MetaBlogResponse responseBody = (MetaBlogResponse) response.getBody();
+        assertNotNull(responseBody);
+        assertEquals("User not found.", responseBody.getMessage());
+        assertFalse(responseBody.getSuccess());
+
+        verify(userRepository, times(1)).findByEmail("test@example.com");
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void testResetPasswordSuccess() {
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+        when(applicationConfig.passwordEncoder()).thenReturn(new BCryptPasswordEncoder());
+
+        ResponseEntity<Object> response = authenticationService.resetPassword(resetPasswordRequestDto);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        MetaBlogResponse responseBody = (MetaBlogResponse) response.getBody();
+        assertNotNull(responseBody);
+        assertEquals("Password reset successfully.", responseBody.getMessage());
+        assertTrue(responseBody.getSuccess());
+
+        verify(userRepository, times(1)).findByEmail("test@example.com");
+        verify(userRepository, times(1)).save(user);
+    }
+
+    @Test
     void testFindUserNotFound() {
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.empty());
 
