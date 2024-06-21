@@ -151,25 +151,21 @@ class AuthenticationServiceTest {
         when(applicationConfig.passwordEncoder()).thenReturn(new BCryptPasswordEncoder());
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
             User savedUser = invocation.getArgument(0);
-            savedUser.setId(1L); // Ensure the ID is set after save
+            savedUser.setId(1L);
             return savedUser;
         });
         when(otpService.generateOTP()).thenReturn(123456);
 
-        // After user creation, throw the exception during email sending
         doThrow(new MessagingException("Email error")).when(emailService).sendVerificationOTP(anyString(), anyInt());
 
-        // Call the method to test
         ResponseEntity<Object> response = authenticationService.register(registerRequestDto);
 
-        // Assertions
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         MetaBlogResponse responseBody = (MetaBlogResponse) response.getBody();
         assertNotNull(responseBody);
         assertEquals("Error sending email to the user.", responseBody.getMessage());
         assertFalse(responseBody.getSuccess());
 
-        // Verify interactions (ensure correct order of operations)
         InOrder inOrder = inOrder(userRepository, otpService, emailService);
         inOrder.verify(userRepository).findByEmail("test@example.com");
         inOrder.verify(userRepository).save(any(User.class));
