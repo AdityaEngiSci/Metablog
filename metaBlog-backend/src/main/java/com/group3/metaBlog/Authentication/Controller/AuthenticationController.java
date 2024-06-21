@@ -40,7 +40,10 @@ public class AuthenticationController{
     public ResponseEntity<Object> forgetPassword(@NotNull @RequestParam String email) {
         try {
             return AuthenticationService.forgetPassword(email);
+
         } catch (IllegalArgumentException e) {
+            logger.error("Error forgetting password for user with email: {}" , email);
+            logger.error("Message of the error: {}", e.getMessage());
             return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
                     .success(false)
                     .message(e.getMessage())
@@ -73,6 +76,8 @@ public class AuthenticationController{
             }
             return AuthenticationService.findUser(email);
         } catch (IllegalArgumentException e) {
+            logger.error("Error getting user with email: {}" , email);
+            logger.error("Message of the error: {}", e.getMessage());
             return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
                     .success(false)
                     .message(e.getMessage())
