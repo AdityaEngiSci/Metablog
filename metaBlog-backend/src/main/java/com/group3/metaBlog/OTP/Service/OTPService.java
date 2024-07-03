@@ -22,12 +22,9 @@ public class OTPService implements IOTPService {
         this.otpRepository = otpRepository;
         this.IUserRepository = IUserRepository;
     }
-    public SecureRandom getSecureRandom() {
-        return new SecureRandom();
-    }
 
     public Integer generateOTP() {
-        SecureRandom random = getSecureRandom();
+        SecureRandom random = new SecureRandom();
         return 100000 + random.nextInt(900000);
     }
 
