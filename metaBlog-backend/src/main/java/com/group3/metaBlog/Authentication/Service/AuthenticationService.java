@@ -1,11 +1,10 @@
 package com.group3.metaBlog.Authentication.Service;
 
-import com.group3.metaBlog.Authentication.DataTransferObject.RegisterRequestDto;
-import com.group3.metaBlog.Authentication.DataTransferObject.ResetPasswordRequestDto;
+import com.group3.metaBlog.Authentication.DataTransferObject.*;
 import com.group3.metaBlog.Email.Service.IEmailService;
 import com.group3.metaBlog.Enum.Role;
-import com.group3.metaBlog.Authentication.DataTransferObject.RegisterResponseDto;
 import com.group3.metaBlog.Config.ApplicationConfig;
+import com.group3.metaBlog.Exception.MetaBlogException;
 import com.group3.metaBlog.Jwt.ServiceLayer.JwtService;
 import com.group3.metaBlog.OTP.Service.IOTPService;
 import com.group3.metaBlog.User.Model.User;
@@ -18,6 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -186,5 +187,37 @@ public class AuthenticationService implements IAuthenticationService {
                 .success(true)
                 .message("A user with this email exists.")
                 .build(), HttpStatus.OK);
+    }
+
+    public ResponseEntity<Object> login(LoginRequestDto request) {
+        try {
+            User user = IUserRepository.findByEmail(request.getEmail())
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(),request.getPassword()));
+
+            String accessToken = jwtService.generateJwtToken(user);
+            String refreshToken = jwtService.generateRefreshToken(user);
+
+            user.setLastLoginTime((double) System.currentTimeMillis());
+            user.setAccessToken(accessToken);
+            user.setRefreshToken(refreshToken);
+            IUserRepository.save(user);
+
+            return new ResponseEntity<>(MetaBlogResponse.builder()
+                    .success(true)
+                    .message("Login successful")
+                    .data(LoginResponseDto.builder()
+                            .accessToken(accessToken)
+                            .refreshToken(refreshToken)
+                            .role(user.getRole().name())
+                            .build())
+                    .build(), HttpStatus.OK);
+        } catch (MetaBlogException e) {
+            return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
+                    .success(false)
+                    .message(e.getMessage())
+                    .build());
+        }
     }
 }
