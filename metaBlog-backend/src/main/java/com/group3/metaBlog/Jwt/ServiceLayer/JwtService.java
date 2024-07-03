@@ -50,7 +50,7 @@ public class JwtService {
                 .claims(userClaims)
                 .subject(((User) userDetails).getEmail())
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60))
+                .expiration(new Date(System.currentTimeMillis() + 10000 * 60 * 12))
                 .signWith(getSigningKey(), StandardSecureDigestAlgorithms.findBySigningKey(getSigningKey()))
                 .compact();
     }
