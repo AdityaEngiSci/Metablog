@@ -1,6 +1,5 @@
 package com.group3.metaBlog.Authentication.Controller;
 
-import com.group3.metaBlog.Authentication.DataTransferObject.LoginRequestDto;
 import com.group3.metaBlog.Authentication.DataTransferObject.RegisterRequestDto;
 import com.group3.metaBlog.Authentication.DataTransferObject.ResetPasswordRequestDto;
 import com.group3.metaBlog.Authentication.Service.AuthenticationService;
@@ -27,69 +26,6 @@ public class AuthenticationController{
     public ResponseEntity<Object> register(@NotNull @RequestBody RegisterRequestDto request) {
         try {
             return AuthenticationService.register(request);
-        } catch (IllegalArgumentException e) {
-            logger.error("Error registering user with email: {}" , request.getEmail());
-            logger.error("Message of the error: {}", e.getMessage());
-            return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
-                    .success(false)
-                    .message(e.getMessage())
-                    .build());
-        }
-    }
-
-    @PostMapping("/forget-password")
-    public ResponseEntity<Object> forgetPassword(@NotNull @RequestParam String email) {
-        try {
-            return AuthenticationService.forgetPassword(email);
-
-        } catch (IllegalArgumentException e) {
-            logger.error("Error forgetting password for user with email: {}" , email);
-            logger.error("Message of the error: {}", e.getMessage());
-            return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
-                    .success(false)
-                    .message(e.getMessage())
-                    .build());
-        }
-    }
-
-    @PostMapping("/reset-password")
-    public ResponseEntity<Object> resetPassword(@NotNull @RequestBody ResetPasswordRequestDto request) {
-        try {
-            return AuthenticationService.resetPassword(request);
-        } catch (IllegalArgumentException e) {
-            logger.error("Error resetting password for user with email: {}" , request.getEmail());
-            logger.error("Message of the error: {}", e.getMessage());
-            return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
-                    .success(false)
-                    .message(e.getMessage())
-                    .build());
-        }
-    }
-
-    @GetMapping("/get-user")
-    public ResponseEntity<Object> getUser(@NotNull @RequestParam String email) {
-        try {
-            if(email.isEmpty()){
-                return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
-                        .success(false)
-                        .message("Email is empty")
-                        .build());
-            }
-            return AuthenticationService.findUser(email);
-        } catch (IllegalArgumentException e) {
-            logger.error("Error getting user with email: {}" , email);
-            logger.error("Message of the error: {}", e.getMessage());
-            return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
-                    .success(false)
-                    .message(e.getMessage())
-                    .build());
-        }
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity<Object> login(@NotNull @RequestBody LoginRequestDto request) {
-        try {
-            return AuthenticationService.login(request);
         } catch (IllegalArgumentException e) {
             logger.error("Error registering user with email: {}" , request.getEmail());
             logger.error("Message of the error: {}", e.getMessage());
