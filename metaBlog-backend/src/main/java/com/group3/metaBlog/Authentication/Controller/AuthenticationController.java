@@ -1,5 +1,6 @@
 package com.group3.metaBlog.Authentication.Controller;
 
+import com.group3.metaBlog.Authentication.DataTransferObject.LoginRequestDto;
 import com.group3.metaBlog.Authentication.DataTransferObject.RegisterRequestDto;
 import com.group3.metaBlog.Authentication.DataTransferObject.ResetPasswordRequestDto;
 import com.group3.metaBlog.Authentication.Service.AuthenticationService;
@@ -78,6 +79,18 @@ public class AuthenticationController{
         } catch (IllegalArgumentException e) {
             logger.error("Error getting user with email: {}" , email);
             logger.error("Message of the error: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
+                    .success(false)
+                    .message(e.getMessage())
+                    .build());
+        }
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<Object> login(@NotNull @RequestBody LoginRequestDto request) {
+        try {
+            return AuthenticationService.login(request);
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
                     .success(false)
                     .message(e.getMessage())
