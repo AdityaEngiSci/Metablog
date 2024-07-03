@@ -1,6 +1,7 @@
 package com.group3.metaBlog.Authentication.Controller;
 
 import com.group3.metaBlog.Authentication.DataTransferObject.RegisterRequestDto;
+import com.group3.metaBlog.Authentication.DataTransferObject.ResetPasswordRequestDto;
 import com.group3.metaBlog.Authentication.Service.AuthenticationService;
 import com.group3.metaBlog.Utils.MetaBlogResponse;
 import jakarta.validation.constraints.NotNull;
@@ -39,7 +40,24 @@ public class AuthenticationController{
     public ResponseEntity<Object> forgetPassword(@NotNull @RequestParam String email) {
         try {
             return AuthenticationService.forgetPassword(email);
+
         } catch (IllegalArgumentException e) {
+            logger.error("Error forgetting password for user with email: {}" , email);
+            logger.error("Message of the error: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
+                    .success(false)
+                    .message(e.getMessage())
+                    .build());
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Object> resetPassword(@NotNull @RequestBody ResetPasswordRequestDto request) {
+        try {
+            return AuthenticationService.resetPassword(request);
+        } catch (IllegalArgumentException e) {
+            logger.error("Error resetting password for user with email: {}" , request.getEmail());
+            logger.error("Message of the error: {}", e.getMessage());
             return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
                     .success(false)
                     .message(e.getMessage())
@@ -58,6 +76,8 @@ public class AuthenticationController{
             }
             return AuthenticationService.findUser(email);
         } catch (IllegalArgumentException e) {
+            logger.error("Error getting user with email: {}" , email);
+            logger.error("Message of the error: {}", e.getMessage());
             return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
                     .success(false)
                     .message(e.getMessage())

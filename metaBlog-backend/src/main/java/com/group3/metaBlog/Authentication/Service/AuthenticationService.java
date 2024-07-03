@@ -1,6 +1,7 @@
 package com.group3.metaBlog.Authentication.Service;
 
 import com.group3.metaBlog.Authentication.DataTransferObject.RegisterRequestDto;
+import com.group3.metaBlog.Authentication.DataTransferObject.ResetPasswordRequestDto;
 import com.group3.metaBlog.Email.Service.IEmailService;
 import com.group3.metaBlog.Enum.Role;
 import com.group3.metaBlog.Authentication.DataTransferObject.RegisterResponseDto;
@@ -17,8 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -34,7 +33,6 @@ public class AuthenticationService implements IAuthenticationService {
     private final IEmailService emailService;
 
     private final JwtService jwtService;
-    private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     private final Logger logger = LoggerFactory.getLogger(AuthenticationService.class);
 
     private final ApplicationConfig applicationConfig;
@@ -148,6 +146,28 @@ public class AuthenticationService implements IAuthenticationService {
                 .build(), HttpStatus.OK);
     }
 
+    public ResponseEntity<Object> resetPassword(ResetPasswordRequestDto request) {
+        logger.info("Resetting password for email: {}", request.getEmail());
+
+        Optional<User> userOptional = IUserRepository.findByEmail(request.getEmail());
+        if (userOptional.isEmpty()) {
+            logger.error("User not found with email: {}", request.getEmail());
+            return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
+                    .success(false)
+                    .message("User not found.")
+                    .build());
+        }
+
+        User user = userOptional.get();
+        user.setPassword(applicationConfig.passwordEncoder().encode(request.getNewPassword()));
+        IUserRepository.save(user);
+        logger.info("Password reset successfully");
+
+        return ResponseEntity.ok().body(MetaBlogResponse.builder()
+                .success(true)
+                .message("Password reset successfully.")
+                .build());
+    }
 
     public ResponseEntity<Object> findUser(String email) {
 
