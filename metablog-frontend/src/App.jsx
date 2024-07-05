@@ -40,7 +40,7 @@ function App() {
         title = "";
         metaDescription = "";
         break;
-      case "/forgot-password-step-4":
+      case "/verify-otp":
         title = "";
         metaDescription = "";
         break;
@@ -74,7 +74,7 @@ function App() {
       <Route path="/" element={<SignUp />} />
       <Route path="/login" element={<Login />} />
       <Route path="/forgot-password-step-3" element={<ForgotPasswordStep />} />
-      <Route path="/forgot-password-step-4" element={<ForgotPasswordStep1 />} />
+      <Route path="/verify-otp" element={<ForgotPasswordStep1 />} />
       <Route path="/reset-password-step-3" element={<ResetPasswordStep />} />
       <Route path="/reset-password-step-4" element={<ResetPasswordStep1 />} />
     </Routes>
