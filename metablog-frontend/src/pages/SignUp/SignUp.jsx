@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import InputFields from '../components/RegisterInputFields/InputFields';
+import InputFields from '../../components/RegisterInputFields/InputFields';
 import styles from './SignUp.module.css';
+import axios from 'axios';
+import Swal from 'sweetalert2';
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -13,6 +15,7 @@ const SignUp = () => {
     password: "",
     confirmPassword: "",
     isChecked: false,
+    comingFrom: 'signup',
   });
 
   const [errorMessage, setErrorMessage] = useState('');
@@ -41,36 +44,63 @@ const SignUp = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (!isFormValid()) return;
+    if (!isFormValid()) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid Form',
+        text: 'Please fill out all fields correctly.',
+      });
+      return;
+    }
 
     const registerData = {
-      username: formData.firstName + ' ' + formData.lastName,
+      username: `${formData.firstName} ${formData.lastName}`,
       email: formData.email,
       password: formData.password,
       role: 'User', // Assuming the role is fixed as 'User'
     };
 
     try {
-      const response = await fetch('http://localhost:8080/api/v1/auth/register', {
-        method: 'POST',
+      const response = await axios.post('http://localhost:8080/api/v1/auth/register', registerData, {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(registerData),
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
+      if (response.status === 201) {
         // Handle successful registration
-        console.log('User registered successfully:', data);
-        navigate('/verify-otp');
+        console.log('User registered successfully:', response.data);
+        Swal.fire({
+          icon: 'success',
+          title: 'Registration Successful',
+          text: 'Please check your email. We have sent you an OTP for verification.',
+        }).then(() => {
+          navigate('/verify-otp', { state: { email: formData.email , comingFrom: formData.comingFrom } }); // Pass email in state
+        });
       } else {
         // Handle registration errors
-        setErrorMessage(data.message || 'Registration failed');
+        // setErrorMessage(response.data.message || 'Registration failed');
+        Swal.fire({
+          icon: 'error',
+          title: 'Registration Failed',
+          text: response.data.message || 'An error occurred. Please try again.',
+        });
       }
     } catch (error) {
-      setErrorMessage('An error occurred during registration. Please try again.');
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        Swal.fire({
+          icon: 'error',
+          title: 'oops!',
+          text: error.response.data.message,
+        });
+      } else if (error.request) {
+        // The request was made but no response was received
+        setErrorMessage('No response received from the server. Please try again.');
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        setErrorMessage('An error occurred during registration. Please try again.');
+      }
       console.error('An error occurred during registration:', error);
     }
   };

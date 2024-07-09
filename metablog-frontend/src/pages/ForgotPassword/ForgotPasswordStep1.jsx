@@ -1,45 +1,71 @@
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import FrameComponent from "../components/FrameComponent/FrameComponent";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import FrameComponent from "../../components/FrameComponent/FrameComponent";
 import styles from "./ForgotPasswordStep.module.css";
+import axios from "axios";
+import Swal from "sweetalert2";
 
 const ForgotPasswordStep = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [otp, setOtp] = useState("");
   const [otpVerified, setOtpVerified] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [email, setEmail] = useState(""); // Add state to store email
+  const [email, setEmail] = useState("");
+  const [isGoingToLogin, setIsGoingToLogin] = useState(false);
+
+  useEffect(() => {
+    if (location.state && location.state.email) {
+      setEmail(location.state.email);
+      setIsGoingToLogin(location.state.comingFrom);
+    }
+  }, [location.state]);
 
   const handleBackToLoginClick = () => {
     navigate("/reset-password-step-3");
   };
 
   const handleSendClick = () => {
-    alert("Email Sent");
+    Swal.fire({
+        icon: "success",
+        title: "Email Sent",
+        text: "Email resent successfully. Check your inbox for the OTP.",
+        });
   };
 
   const handleVerifyOTPClick = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/v1/otp/verify", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, otp: parseInt(otp) }),
-      });
+      const response = await axios.post("http://localhost:8080/api/v1/otp/verify",
+          { email, otp: parseInt(otp) },
+          { headers: { "Content-Type": "application/json" } });
 
-      const data = await response.json();
-
-      if (response.ok) {
+      if (response.status === 200) {
         setOtpVerified(true);
-        alert(data.message );
+        await Swal.fire({
+          icon: "success",
+          title: "OTP Verified",
+          text: response.data.message,
+        });
+        if (isGoingToLogin === "signup") {
+          navigate("/login");
+        }else {
+          navigate("/reset-password-step-3" , { state: { email } });
+        }
       } else {
         setOtpVerified(false);
-        setErrorMessage(data.message);
+        await Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: response.data.message,
+        });
       }
     } catch (error) {
       setOtpVerified(false);
-      setErrorMessage("An error occurred during OTP verification. Please try again.");
+      if (error.response) {
+        setErrorMessage(error.response.data.message);
+      } else {
+        setErrorMessage("An error occurred during OTP verification. Please try again.");
+      }
       console.error("An error occurred during OTP verification:", error);
     }
   };

@@ -5,11 +5,11 @@ import {
   useNavigationType,
   useLocation,
 } from "react-router-dom";
-import SignUp from "./pages/SignUp";
-import Login from "./pages/Login";
-import ForgotPasswordStep from "./pages/ForgotPasswordStep";
-import ForgotPasswordStep1 from "./pages/ForgotPasswordStep1";
-import ResetPasswordStep from "./pages/ResetPasswordStep";
+import SignUp from "./pages/SignUp/SignUp";
+import Login from "./pages/Login/Login";
+import ForgotPasswordStep from "./pages/ForgotPassword/ForgotPasswordStep";
+import ForgotPasswordStep1 from "./pages/ForgotPassword/ForgotPasswordStep1";
+import ResetPasswordStep from "./pages/ResetPassword/ResetPasswordStep";
 import ResetPasswordStep1 from "./pages/ResetPasswordStep1";
 
 function App() {
