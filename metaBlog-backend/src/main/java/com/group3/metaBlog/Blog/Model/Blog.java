@@ -33,7 +33,7 @@ public class Blog {
     private Double reviewedOn;
 
     @Column(nullable = false)
-    private int likeCount = 0;
+    private int viewCount = 0;
 
     @Enumerated(EnumType.STRING)
     private BlogStatus status;

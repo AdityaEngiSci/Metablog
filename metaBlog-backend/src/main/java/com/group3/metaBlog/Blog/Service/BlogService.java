@@ -157,7 +157,7 @@ public class BlogService {
 
             // Increment like count for each retrieved blog
             blogs.forEach(blog -> {
-                blog.setLikeCount(blog.getLikeCount() + 1);
+                blog.setViewCount(blog.getViewCount() + 1);
                 blogRepository.save(blog);
             });
 
