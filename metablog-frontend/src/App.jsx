@@ -11,6 +11,7 @@ import ForgotPasswordStep from "./pages/ForgotPassword/ForgotPasswordStep";
 import ForgotPasswordStep1 from "./pages/ForgotPassword/ForgotPasswordStep1";
 import ResetPasswordStep from "./pages/ResetPassword/ResetPasswordStep";
 import ResetPasswordStep1 from "./pages/ResetPasswordStep1";
+import './index.css';
 
 function App() {
   const action = useNavigationType();
