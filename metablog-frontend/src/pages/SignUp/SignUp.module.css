@@ -146,6 +146,12 @@
   color: var(--color-white);
   font-family: var(--font-inter);
 }
+.errorMessage {
+  color: red;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
 @media screen and (max-width: 1125px) {
   .backgroundParent {
     flex: 1;

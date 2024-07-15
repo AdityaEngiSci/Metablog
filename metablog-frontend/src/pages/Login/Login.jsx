@@ -1,9 +1,6 @@
-
-
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import FrameComponent from "../components/FrameComponent";
+import FrameComponent from "../../components/FrameComponent/FrameComponent";
 import styles from "./Login.module.css";
 
 const Login = () => {

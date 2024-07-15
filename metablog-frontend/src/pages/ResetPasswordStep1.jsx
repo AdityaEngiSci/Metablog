@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 import styles from "./ResetPasswordStep1.module.css";
