@@ -1,12 +1,12 @@
 import { Avatar, AvatarImage, AvatarFallback } from '@radix-ui/react-avatar';
 
-const handleClick = () => {
+const handleCardClick = () => {
     history.push(`/blog/${blog.id}`);
 };
 
 const BlogCard = ({ blog }) => {
     return (
-        <div className="card" onClick={handleClick}>
+        <div className="card" onClick={handleCardClick}>
             <img src={blog.imageUrl} alt={blog.title} className="w-full h-auto" />
             <div className="card-content p-4">
                 <span className="badge">{blog.category}</span>

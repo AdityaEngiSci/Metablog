@@ -13,6 +13,8 @@ import ResetPasswordStep from "./pages/ResetPassword/ResetPasswordStep";
 import ResetPasswordStep1 from "./pages/ResetPasswordStep1";
 import './index.css';
 import BlogsListing from "./pages/BlogsListing/BlogsListing";
+import BlogPage from "./pages/BlogPage/BlogPage";
+import CreateBlog from "./pages/CreateBlog/CreateBlog";
 
 function App() {
   const action = useNavigationType();
@@ -80,6 +82,8 @@ function App() {
       <Route path="/reset-password-step-3" element={<ResetPasswordStep />} />
       <Route path="/reset-password-step-4" element={<ResetPasswordStep1 />} />
       <Route path="/blogs-listing" element={<BlogsListing />} />
+      <Route path="/blog/:blogId" element={<BlogPage />}  />
+      <Route path="/create-blog" element={<CreateBlog />} />
     </Routes>
   );
 }
