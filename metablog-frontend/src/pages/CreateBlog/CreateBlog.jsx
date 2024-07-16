@@ -77,14 +77,14 @@ const CreateBlog = () => {
                             />
                             <label htmlFor="blogImage">Choose Blog Image</label>
                         </div>
-                        <button type="button">UPLOAD</button>
+                        <button type="button" className="bg-black text-white py-2 px-4 rounded-md border-none">UPLOAD</button>
                     </div>
                     <div className="form-group" style={{gridColumn: 'span 2'}}>
                         <label htmlFor="blogContent">Write Your Tech Ideas...</label>
                         <Editor
                             apiKey='ooqeeofdy8us6qptstz4ytj0cmrvbuknkoh73fg2re3j60eu' // Replace with your valid API key
                             id="blogContent"
-                            initialValue="<p>Welcome to Meta blogs!!.</p>"
+                            initialValue="<p>Welcome to Meta blogs!!</p>"
                             init={{
                                 height: 500,
                                 menubar: false,
