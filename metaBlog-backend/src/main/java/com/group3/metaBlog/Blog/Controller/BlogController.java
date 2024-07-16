@@ -6,6 +6,7 @@ import com.group3.metaBlog.Utils.MetaBlogResponse;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +18,7 @@ public class BlogController {
     private final BlogService blogService;
     private static final Logger logger = LoggerFactory.getLogger(BlogController.class);
 
-    @PostMapping("/create-blog")
+    @PostMapping(path="/create-blog", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<Object> createBlog(@RequestBody BlogRequestDto blogRequestDto, @RequestHeader("Authorization") String token) {
         if (token == null || token.isEmpty()) {
             logger.error("Token not provided");

@@ -5,6 +5,8 @@ import com.group3.metaBlog.Blog.DTO.BlogResponseDto;
 import com.group3.metaBlog.Blog.Model.Blog;
 import com.group3.metaBlog.Blog.Repository.BlogRepository;
 import com.group3.metaBlog.Enum.BlogStatus;
+import com.group3.metaBlog.Image.Model.Image;
+import com.group3.metaBlog.Image.Service.ImageService;
 import com.group3.metaBlog.Jwt.ServiceLayer.JwtService;
 import com.group3.metaBlog.User.Model.User;
 import com.group3.metaBlog.User.Repository.IUserRepository;
@@ -26,6 +28,7 @@ public class BlogService {
     private final BlogRepository blogRepository;
     private final IUserRepository userRepository;
     private final JwtService jwtService;
+    private final ImageService imageService;
     private static final Logger logger = LoggerFactory.getLogger(BlogService.class);
 
     public ResponseEntity<Object> createBlog(BlogRequestDto blogRequestDto, String token) {
@@ -49,10 +52,13 @@ public class BlogService {
                         .build(), HttpStatus.CONFLICT);
             }
 
+            Image blog_image = imageService.uploadImage(blogRequestDto.getImage());
+            String blog_image_url = blog_image.getUrl();
+
             Blog blog = Blog.builder()
                     .title(blogRequestDto.getTitle())
                     .content(blogRequestDto.getContent())
-                    .imageUrl(blogRequestDto.getImageUrl())
+                    .imageUrl(blog_image_url)
                     .createdOn((double) System.currentTimeMillis())
                     .status(BlogStatus.PENDING)
                     .build();
