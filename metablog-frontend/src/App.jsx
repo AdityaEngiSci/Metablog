@@ -12,6 +12,7 @@ import ForgotPasswordStep1 from "./pages/ForgotPassword/ForgotPasswordStep1";
 import ResetPasswordStep from "./pages/ResetPassword/ResetPasswordStep";
 import ResetPasswordStep1 from "./pages/ResetPasswordStep1";
 import './index.css';
+import BlogsListing from "./pages/BlogsListing/BlogsListing";
 
 function App() {
   const action = useNavigationType();
@@ -78,6 +79,7 @@ function App() {
       <Route path="/verify-otp" element={<ForgotPasswordStep1 />} />
       <Route path="/reset-password-step-3" element={<ResetPasswordStep />} />
       <Route path="/reset-password-step-4" element={<ResetPasswordStep1 />} />
+      <Route path="/blogs-listing" element={<BlogsListing />} />
     </Routes>
   );
 }
