@@ -48,7 +48,7 @@ const staticBlogs = [
     },
     {
         id: 5,
-        imageUrl: "blog-sample-images/blog-image-3.png",
+        imageUrl: "blog-sample-images/blog-image-1.png",
         category: "Technology",
         title: "The Impact of Technology on the Workplace: How Technology is Changing",
         authorImageUrl: "/img.png",
@@ -58,12 +58,32 @@ const staticBlogs = [
     },
     {
         id: 6,
-        imageUrl: "blog-sample-images/blog-image-1.png",
+        imageUrl: "blog-sample-images/blog-image-3.png",
         category: "Technology",
         title: "The Impact of Technology on the Workplace: How Technology is Changing",
         authorImageUrl: "/img.png",
         authorInitials: "TW",
         authorName: "Tracey Wilson",
+        date: "2022-08-20",
+    },
+    {
+        id: 7,
+        imageUrl: "blog-sample-images/blog-image-2.png",
+        category: "Technology",
+        title: "The Impact of Technology on the Workplace: How Technology is Changing",
+        authorImageUrl: "/img.png",
+        authorInitials: "JF",
+        authorName: "Jason Francisco",
+        date: "2022-08-20",
+    },
+    {
+        id: 7,
+        imageUrl: "blog-sample-images/blog-image-1.png",
+        category: "Technology",
+        title: "The Impact of Technology on the Workplace: How Technology is Changing",
+        authorImageUrl: "/img.png",
+        authorInitials: "JF",
+        authorName: "Jason Francisco",
         date: "2022-08-20",
     },
     {
@@ -117,7 +137,7 @@ function BlogsListing() {
                             </div>
                         </div>
                     )}
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-8">
                         {blogs.slice(1).map((blog) => (
                             <BlogCard key={blog.id} blog={blog}/>
                         ))}

@@ -7,7 +7,7 @@ const Header = () => {
     return (
         <header className="flex items-center justify-between h-16 px-4 border-b md:px-6 bg-white">
             <div className="flex items-center space-x-10">
-                <Link to="/" className="flex items-center gap-2 text-lg font-semibold">
+                <Link to="/blogs-listing" className="flex items-center gap-2 text-lg font-semibold">
                     <img src='/logo-black.svg' alt="MetaBlog Logo" className="w-25 h-25" />
                 </Link>
             </div>
@@ -19,18 +19,20 @@ const Header = () => {
 
             </div>
             <div className="flex items-center space-x-4">
-                <Link to="/" className="text-gray-600">
+                <Link to="/blogs-listing" className="text-gray-600">
                     Home
                 </Link>
-                <Link to="/saved" className="text-gray-600">
-                    Saved Blogs
+                <Link to="/user-blogs" className="text-gray-600">
+                    Blogs
                 </Link>
-                <Link to="/create" className="text-gray-600">
+                <Link to="/create-blog" className="text-gray-600">
                     Create Blog
                 </Link>
+                <Link to="/user-profile" className="text-gray-600">
                 <button className="rounded-full p-2 bg-gray-200">
                     <FiUser className="w-6 h-6 text-gray-600" />
                 </button>
+                </Link>
             </div>
         </header>
     );

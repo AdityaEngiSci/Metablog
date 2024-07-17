@@ -1,8 +1,8 @@
-#stages:
-#  - build
-#  - test
-#  - publish
-#  - deploy
+stages:
+  - build
+  - test
+  - publish
+  - deploy
   
 build-backend:
   stage: build
