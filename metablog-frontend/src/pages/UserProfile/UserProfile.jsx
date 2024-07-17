@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
-import './UserProfile.css'; // Import the CSS file
+import './UserProfile.css';
+import Header from "../../components/Header";
+import Footer from "../../components/Footer"; // Import the CSS file
 
 const UserProfile = () => {
     const [passwordVisible, setPasswordVisible] = useState(false);
@@ -36,30 +38,24 @@ const UserProfile = () => {
     };
 
     return (
-        <div className="max-w-xl mx-auto p-5 relative">
+        <div className="flex flex-col min-h-screen">
+            <Header/>
+        <main className="max-w-xl mx-auto p-5 relative">
             <h2 className="text-2xl font-bold mb-5">User Profile</h2>
             <div className="text-center mb-8">
-                <img src="/img.png" alt="Profile" className="w-32 h-32 rounded-full mx-auto mb-2" />
+                <img src="/image.svg" alt="Profile" className="w-32 h-32 rounded-full mx-auto mb-2" />
                 <button className="text-blue-500">Change profile photo</button>
             </div>
             <form className={`space-y-4 ${isEditingPassword ? 'blur-background' : ''}`}>
                 <label className="block">
                     Username
-                    <input type="text" value="@username123" readOnly className="w-full p-2 mt-1 border border-gray-300 rounded" />
+                    <input type="text" value="@username123" readOnly
+                           className="w-full p-2 mt-1 border border-gray-300 rounded"/>
                 </label>
                 <label className="block">
                     Email
-                    <input type="email" value="email@domain.com" readOnly className="w-full p-2 mt-1 border border-gray-300 rounded" />
-                </label>
-                <label className="block">
-                    URLs
-                    <input type="text" value="linkedin.com" className="w-full p-2 mt-1 border border-gray-300 rounded" />
-                    <input type="text" value="website.com" className="w-full p-2 mt-1 border border-gray-300 rounded" />
-                    <input type="text" value="website.town" className="w-full p-2 mt-1 border border-gray-300 rounded" />
-                </label>
-                <label className="block">
-                    Bio
-                    <textarea value="I am a designer based in Philadelphia, making great software at Figma." className="w-full p-2 mt-1 border border-gray-300 rounded resize-vertical"></textarea>
+                    <input type="email" value="email@domain.com" readOnly
+                           className="w-full p-2 mt-1 border border-gray-300 rounded"/>
                 </label>
                 <label className="block">
                     Password
@@ -71,12 +67,23 @@ const UserProfile = () => {
                             className="flex-1 p-2 border border-gray-300 rounded"
                         />
                         <button type="button" onClick={togglePasswordVisibility} className="ml-2 text-black">
-                            {passwordVisible ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
+                            {passwordVisible ? <EyeSlashIcon className="w-5 h-5"/> : <EyeIcon className="w-5 h-5"/>}
                         </button>
                         <button type="button" onClick={handlePasswordEdit} className="ml-2 text-blue-500">
                             Edit
                         </button>
                     </div>
+                </label>
+                <label className="block">
+                    URLs
+                    <input type="text" value="linkedin.com" className="w-full p-2 mt-1 border border-gray-300 rounded"/>
+                    <input type="text" value="website.com" className="w-full p-2 mt-1 border border-gray-300 rounded"/>
+                    <input type="text" value="website.town" className="w-full p-2 mt-1 border border-gray-300 rounded"/>
+                </label>
+                <label className="block">
+                    Bio
+                    <textarea value="I am a designer based in Philadelphia, making great software at Figma."
+                              className="w-full p-2 mt-1 border border-gray-300 rounded resize-vertical"></textarea>
                 </label>
                 <button type="submit" className="px-4 py-2 bg-black text-white rounded">Update changes</button>
             </form>
@@ -122,7 +129,9 @@ const UserProfile = () => {
                     </div>
                 </div>
             )}
-        </div>
+        </main>
+        <Footer/>
+    </div>
     );
 };
 

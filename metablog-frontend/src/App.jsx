@@ -16,6 +16,7 @@ import BlogsListing from "./pages/BlogsListing/BlogsListing";
 import BlogPage from "./pages/BlogPage/BlogPage";
 import CreateBlog from "./pages/CreateBlog/CreateBlog";
 import UserProfile from "./pages/UserProfile/UserProfile";
+import UserBlogs from "./pages/Blogs/UserBlogs";
 
 function App() {
   const action = useNavigationType();
@@ -86,6 +87,7 @@ function App() {
       <Route path="/blog/:blogId" element={<BlogPage />}  />
       <Route path="/create-blog" element={<CreateBlog />} />
       <Route path="/user-profile" element={<UserProfile />} />
+      <Route path="/user-blogs" element={<UserBlogs />} />
     </Routes>
   );
 }
