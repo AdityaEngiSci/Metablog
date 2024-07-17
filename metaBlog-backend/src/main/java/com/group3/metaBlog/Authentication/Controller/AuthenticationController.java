@@ -4,6 +4,8 @@ import com.group3.metaBlog.Authentication.DataTransferObject.LoginRequestDto;
 import com.group3.metaBlog.Authentication.DataTransferObject.RegisterRequestDto;
 import com.group3.metaBlog.Authentication.DataTransferObject.ResetPasswordRequestDto;
 import com.group3.metaBlog.Authentication.Service.AuthenticationService;
+import com.group3.metaBlog.Exception.MetaBlogException;
+import com.group3.metaBlog.MetaBlogApplication;
 import com.group3.metaBlog.Utils.MetaBlogResponse;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
@@ -27,7 +29,7 @@ public class AuthenticationController{
     public ResponseEntity<Object> register(@NotNull @RequestBody RegisterRequestDto request) {
         try {
             return AuthenticationService.register(request);
-        } catch (IllegalArgumentException e) {
+        } catch (MetaBlogException e) {
             logger.error("Error registering user with email: {}" , request.getEmail());
             logger.error("Message of the error: {}", e.getMessage());
             return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
@@ -42,7 +44,7 @@ public class AuthenticationController{
         try {
             return AuthenticationService.forgetPassword(email);
 
-        } catch (IllegalArgumentException e) {
+        } catch (MetaBlogException e) {
             logger.error("Error forgetting password for user with email: {}" , email);
             logger.error("Message of the error: {}", e.getMessage());
             return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
@@ -56,7 +58,7 @@ public class AuthenticationController{
     public ResponseEntity<Object> resetPassword(@NotNull @RequestBody ResetPasswordRequestDto request) {
         try {
             return AuthenticationService.resetPassword(request);
-        } catch (IllegalArgumentException e) {
+        } catch (MetaBlogException e) {
             logger.error("Error resetting password for user with email: {}" , request.getEmail());
             logger.error("Message of the error: {}", e.getMessage());
             return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
@@ -76,7 +78,7 @@ public class AuthenticationController{
                         .build());
             }
             return AuthenticationService.findUser(email);
-        } catch (IllegalArgumentException e) {
+        } catch (MetaBlogException e) {
             logger.error("Error getting user with email: {}" , email);
             logger.error("Message of the error: {}", e.getMessage());
             return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
@@ -90,7 +92,7 @@ public class AuthenticationController{
     public ResponseEntity<Object> login(@NotNull @RequestBody LoginRequestDto request) {
         try {
             return AuthenticationService.login(request);
-        } catch (IllegalArgumentException e) {
+        } catch (MetaBlogException e) {
             return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
                     .success(false)
                     .message(e.getMessage())
