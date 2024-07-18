@@ -1,5 +1,8 @@
+
+
 package com.group3.metaBlog.User.Model;
 
+import com.group3.metaBlog.Blog.Model.Blog;
 import com.group3.metaBlog.Enum.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
@@ -11,7 +14,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -60,6 +64,9 @@ public class User implements UserDetails {
     @Column(columnDefinition = "boolean default false")
     private Boolean isAccountLocked = false;
 
+    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Blog> blogs;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));
@@ -94,6 +101,6 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
-
 }
+
 
