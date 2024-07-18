@@ -11,6 +11,12 @@ import ForgotPasswordStep from "./pages/ForgotPassword/ForgotPasswordStep";
 import ForgotPasswordStep1 from "./pages/ForgotPassword/ForgotPasswordStep1";
 import ResetPasswordStep from "./pages/ResetPassword/ResetPasswordStep";
 import ResetPasswordStep1 from "./pages/ResetPasswordStep1";
+import './index.css';
+import BlogsListing from "./pages/BlogsListing/BlogsListing";
+import BlogPage from "./pages/BlogPage/BlogPage";
+import CreateBlog from "./pages/CreateBlog/CreateBlog";
+import UserProfile from "./pages/UserProfile/UserProfile";
+import UserBlogs from "./pages/Blogs/UserBlogs";
 
 function App() {
   const action = useNavigationType();
@@ -77,7 +83,13 @@ function App() {
       <Route path="/verify-otp" element={<ForgotPasswordStep1 />} />
       <Route path="/reset-password-step-3" element={<ResetPasswordStep />} />
       <Route path="/reset-password-step-4" element={<ResetPasswordStep1 />} />
+      <Route path="/blogs-listing" element={<BlogsListing />} />
+      <Route path="/blog/:blogId" element={<BlogPage />}  />
+      <Route path="/create-blog" element={<CreateBlog />} />
+      <Route path="/user-profile" element={<UserProfile />} />
+      <Route path="/user-blogs" element={<UserBlogs />} />
     </Routes>
   );
 }
+
 export default App;
