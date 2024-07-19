@@ -43,14 +43,12 @@ public class ImageService {
     @Autowired
     private AmazonS3 s3client;
 
-    @Value("${cloud.aws.s3.bucket}")
-    @Autowired
     public final String bucketName;
 
     public ImageService(IUserRepository userRepository, JwtService jwtService, @Value("${cloud.aws.s3.bucket}") String bucketName) {
         this.userRepository = userRepository;
         this.jwtService = jwtService;
-        this.bucketName = bucketName;
+        this.bucketName = "${cloud.aws.s3.bucket}";
         this.s3client = s3client;
     }
 
