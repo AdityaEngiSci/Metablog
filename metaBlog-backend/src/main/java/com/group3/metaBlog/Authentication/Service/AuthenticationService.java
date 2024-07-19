@@ -223,7 +223,7 @@ public class AuthenticationService implements IAuthenticationService {
     public ResponseEntity<Object> login(LoginRequestDto request) {
         try {
             User user = IUserRepository.findByEmail(request.getEmail())
-                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                    .orElseThrow(() -> new MetaBlogException("User not found"));
 
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(),request.getPassword()));
 
