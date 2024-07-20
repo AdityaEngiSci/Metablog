@@ -70,16 +70,19 @@ const SignUp = () => {
       if (response.status === 201) {
         // Handle successful registration
         console.log('User registered successfully:', response.data);
+        const { accessToken } = response.data.data;
+
+        // Store tokens in local storage
+        localStorage.setItem('accessToken', accessToken);
         Swal.fire({
           icon: 'success',
           title: 'Registration Successful',
           text: 'Please check your email. We have sent you an OTP for verification.',
         }).then(() => {
-          navigate('/verify-otp', { state: { email: formData.email , comingFrom: formData.comingFrom } }); // Pass email in state
+          navigate('/verify-otp', { state: { email: formData.email, comingFrom: formData.comingFrom } }); // Pass email in state
         });
       } else {
         // Handle registration errors
-        // setErrorMessage(response.data.message || 'Registration failed');
         Swal.fire({
           icon: 'error',
           title: 'Registration Failed',
