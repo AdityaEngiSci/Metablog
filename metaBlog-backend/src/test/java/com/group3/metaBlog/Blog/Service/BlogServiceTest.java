@@ -6,6 +6,8 @@ import com.group3.metaBlog.Blog.Model.Blog;
 import com.group3.metaBlog.Blog.Repository.BlogRepository;
 import com.group3.metaBlog.Blog.Service.BlogService;
 import com.group3.metaBlog.Enum.BlogStatus;
+import com.group3.metaBlog.Image.Model.Image;
+import com.group3.metaBlog.Image.Service.ImageService;
 import com.group3.metaBlog.Jwt.ServiceLayer.JwtService;
 import com.group3.metaBlog.User.Model.User;
 import com.group3.metaBlog.User.Repository.IUserRepository;
@@ -17,6 +19,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Arrays;
 import java.util.List;
@@ -33,6 +37,9 @@ class BlogServiceTest {
     private BlogRepository blogRepository;
 
     @Mock
+    private ImageService imageService;
+
+    @Mock
     private IUserRepository userRepository;
 
     @Mock
@@ -45,11 +52,13 @@ class BlogServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
     }
+    
+    MultipartFile testFile = new MockMultipartFile("image", "test.jpg", "image/jpeg", "test image content".getBytes());
 
     @Test
     void createBlogTest() {
         // Arrange
-        BlogRequestDto requestDto = new BlogRequestDto("Test Title", "Test Content", "http://test.com/image.jpg");
+        BlogRequestDto requestDto = new BlogRequestDto("Test Title", "Test Content", testFile);
         String token = "testToken";
         User user = new User();
         user.setEmail("test@example.com");
@@ -58,6 +67,9 @@ class BlogServiceTest {
         when(jwtService.extractUserEmailFromToken(token)).thenReturn("test@example.com");
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
         when(blogRepository.existsByTitleAndContent(anyString(), anyString())).thenReturn(false);
+        Image image = new Image();
+        image.setUrl("testUrl");
+        when(imageService.uploadImage(testFile)).thenReturn(image);
 
         // Act
         ResponseEntity<Object> response = blogService.createBlog(requestDto, token);
@@ -71,7 +83,7 @@ class BlogServiceTest {
     @Test
     void createBlogUserNotFoundTest() {
         // Arrange
-        BlogRequestDto requestDto = new BlogRequestDto("Test Title", "Test Content", "http://test.com/image.jpg");
+        BlogRequestDto requestDto = new BlogRequestDto("Test Title", "Test Content", testFile);
         String token = "testToken";
 
         when(jwtService.extractUserEmailFromToken(token)).thenReturn("test@example.com");
@@ -88,7 +100,7 @@ class BlogServiceTest {
     @Test
     void createBlogAlreadyExistsTest() {
         // Arrange
-        BlogRequestDto requestDto = new BlogRequestDto("Test Title", "Test Content", "http://test.com/image.jpg");
+        BlogRequestDto requestDto = new BlogRequestDto("Test Title", "Test Content", testFile);
         String token = "testToken";
         User user = new User();
         user.setEmail("test@example.com");
@@ -108,7 +120,7 @@ class BlogServiceTest {
     @Test
     void createBlogExceptionTest() {
         // Arrange
-        BlogRequestDto requestDto = new BlogRequestDto("Test Title", "Test Content", "http://test.com/image.jpg");
+        BlogRequestDto requestDto = new BlogRequestDto("Test Title", "Test Content", testFile);
         String token = "testToken";
 
         when(jwtService.extractUserEmailFromToken(token)).thenThrow(new RuntimeException("Test exception"));
@@ -251,7 +263,7 @@ class BlogServiceTest {
         blog.setId(id);
         blog.setTitle(title);
         blog.setContent(content);
-        blog.setImageUrl("http://test.com/image.jpg");
+        blog.setImageUrl("test.jpg");
         blog.setCreatedOn((double) System.currentTimeMillis());
         blog.setStatus(BlogStatus.PENDING);
         User author = new User();
