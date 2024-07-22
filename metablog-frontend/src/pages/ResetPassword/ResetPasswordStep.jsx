@@ -13,6 +13,8 @@ const ResetPasswordStep = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordType, setPasswordType] = useState("password");
   const [confirmPasswordType, setConfirmPasswordType] = useState("password");
+  const base_url = process.env.REACT_APP_BASE_URL;
+
 
   useEffect(() => {
     if (!email) {
@@ -34,7 +36,7 @@ const ResetPasswordStep = () => {
     if (!isFormValid) return;
 
     try {
-      const response = await axios.post('http://localhost:8080/api/v1/auth/reset-password', {
+      const response = await axios.post(`${base_url}/auth/reset-password`, {
         email,
         newPassword: password
       });

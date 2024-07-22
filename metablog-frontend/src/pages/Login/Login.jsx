@@ -14,6 +14,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const base_url = process.env.REACT_APP_BASE_URL;
 
   const handleForgotPasswordClick = () => {
     navigate("/forgot-password-step-3");
@@ -35,14 +36,26 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:8080/api/v1/auth/login', formData);
+      console.log(base_url);
+      const response = await axios.post(`${base_url}/auth/login`, formData);
       if (response.data.success) {
+        const { accessToken, role } = response.data.data;
+
+        // Store tokens in local storage
+        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('role', role);
+
         Swal.fire({
           icon: "success",
           title: "Success!",
           text: response.data.message || "Logged in successfully."
         })
-        navigate("/blogs-listing"); // Redirect to landing page
+        // Redirect based on role
+        if (role === 'User') {
+          navigate("/blogs-listing"); // Redirect to blogs listing page
+        } else if (role === 'Admin') {
+          navigate("/admin-home");  // Redirect to admin home page
+        }
       } else {
         Swal.fire({
           icon: "error",

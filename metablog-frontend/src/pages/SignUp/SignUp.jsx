@@ -19,6 +19,8 @@ const SignUp = () => {
   });
 
   const [errorMessage, setErrorMessage] = useState('');
+  const base_url = process.env.REACT_APP_BASE_URL;
+
 
   const handleLoginClick = () => {
     navigate('/login');
@@ -61,7 +63,7 @@ const SignUp = () => {
     };
 
     try {
-      const response = await axios.post('http://localhost:8080/api/v1/auth/register', registerData, {
+      const response = await axios.post(`${base_url}/auth/register`, registerData, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -70,16 +72,19 @@ const SignUp = () => {
       if (response.status === 201) {
         // Handle successful registration
         console.log('User registered successfully:', response.data);
+        const { accessToken } = response.data.data;
+
+        // Store tokens in local storage
+        localStorage.setItem('accessToken', accessToken);
         Swal.fire({
           icon: 'success',
           title: 'Registration Successful',
           text: 'Please check your email. We have sent you an OTP for verification.',
         }).then(() => {
-          navigate('/verify-otp', { state: { email: formData.email , comingFrom: formData.comingFrom } }); // Pass email in state
+          navigate('/verify-otp', { state: { email: formData.email, comingFrom: formData.comingFrom } }); // Pass email in state
         });
       } else {
         // Handle registration errors
-        // setErrorMessage(response.data.message || 'Registration failed');
         Swal.fire({
           icon: 'error',
           title: 'Registration Failed',

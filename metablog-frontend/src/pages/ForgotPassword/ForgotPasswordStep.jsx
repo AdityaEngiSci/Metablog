@@ -9,6 +9,7 @@ const ForgotPasswordStep = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [isEmailValid, setIsEmailValid] = useState(false);
+  const base_url = process.env.REACT_APP_BASE_URL;
 
   const handleBackToLoginClick = () => {
     navigate("/login");
@@ -17,7 +18,7 @@ const ForgotPasswordStep = () => {
   const handleSendClick = async () => {
     if (isEmailValid) {
       try {
-        const response = await axios.post('http://localhost:8080/api/v1/auth/forget-password', null, {
+        const response = await axios.post(`${base_url}/auth/forget-password`, null, {
           params: { email },
           headers: {
             'Content-Type': 'application/json',
