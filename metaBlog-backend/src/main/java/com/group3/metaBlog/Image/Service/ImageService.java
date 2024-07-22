@@ -48,7 +48,7 @@ public class ImageService {
     public ImageService(IUserRepository userRepository, JwtService jwtService, @Value("${cloud.aws.s3.bucket}") String bucketName) {
         this.userRepository = userRepository;
         this.jwtService = jwtService;
-        this.bucketName = "${cloud.aws.s3.bucket}";
+        this.bucketName = "metablog-bucket";
         this.s3client = s3client;
     }
 

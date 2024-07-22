@@ -24,6 +24,11 @@ public class ImageController {
     public ResponseEntity<Object> uploadProfileImage(@RequestParam("file") MultipartFile file,@RequestHeader("Authorization") String token) {
         try {
             Image image = imageService.uploadImage(file);
+            if(image == null)
+                return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
+                        .success(false)
+                        .message("Image not uploaded")
+                        .build());
             return imageService.setUserUrl(image.getUrl(),token);
         } catch (IllegalArgumentException | MetaBlogException e) {
             return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
