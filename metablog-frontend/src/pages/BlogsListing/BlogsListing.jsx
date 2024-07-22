@@ -2,154 +2,103 @@ import { useEffect, useState } from "react";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import BlogCard from "../../components/BlogCard";
-import Avatar from 'react-avatar';
-import {AvatarFallback, AvatarImage} from "@radix-ui/react-avatar";
-
-const staticBlogs = [
-    {
-        id: 1,
-        imageUrl: "blog-sample-images/featured-blog.png",
-        category: "Technology",
-        title: "The Impact of Technology on the Workplace: How Technology is Changing",
-        authorImageUrl: "/img.png",
-        authorInitials: "TW",
-        authorName: "Tracey Wilson",
-        date: "2022-08-20",
-    },
-    {
-        id: 2,
-        imageUrl: "blog-sample-images/blog-image-1.png",
-        category: "Technology",
-        title: "The Impact of Technology on the Workplace: How Technology is Changing",
-        authorImageUrl: "/img.png",
-        authorInitials: "TW",
-        authorName: "Tracey Wilson",
-        date: "2022-08-20",
-    },
-    {
-        id: 3,
-        imageUrl: "blog-sample-images/blog-image-2.png",
-        category: "Technology",
-        title: "The Impact of Technology on the Workplace: How Technology is Changing",
-        authorImageUrl: "/img.png",
-        authorInitials: "JF",
-        authorName: "Jason Francisco",
-        date: "2022-08-20",
-    },
-    {
-        id: 4,
-        imageUrl: "blog-sample-images/blog-image-3.png",
-        category: "Technology",
-        title: "The Impact of Technology on the Workplace: How Technology is Changing",
-        authorImageUrl: "/img.png",
-        authorInitials: "TW",
-        authorName: "Tracey Wilson",
-        date: "2022-08-20",
-    },
-    {
-        id: 5,
-        imageUrl: "blog-sample-images/blog-image-1.png",
-        category: "Technology",
-        title: "The Impact of Technology on the Workplace: How Technology is Changing",
-        authorImageUrl: "/img.png",
-        authorInitials: "TW",
-        authorName: "Tracey Wilson",
-        date: "2022-08-20",
-    },
-    {
-        id: 6,
-        imageUrl: "blog-sample-images/blog-image-3.png",
-        category: "Technology",
-        title: "The Impact of Technology on the Workplace: How Technology is Changing",
-        authorImageUrl: "/img.png",
-        authorInitials: "TW",
-        authorName: "Tracey Wilson",
-        date: "2022-08-20",
-    },
-    {
-        id: 7,
-        imageUrl: "blog-sample-images/blog-image-2.png",
-        category: "Technology",
-        title: "The Impact of Technology on the Workplace: How Technology is Changing",
-        authorImageUrl: "/img.png",
-        authorInitials: "JF",
-        authorName: "Jason Francisco",
-        date: "2022-08-20",
-    },
-    {
-        id: 7,
-        imageUrl: "blog-sample-images/blog-image-1.png",
-        category: "Technology",
-        title: "The Impact of Technology on the Workplace: How Technology is Changing",
-        authorImageUrl: "/img.png",
-        authorInitials: "JF",
-        authorName: "Jason Francisco",
-        date: "2022-08-20",
-    },
-    {
-        id: 7,
-        imageUrl: "blog-sample-images/blog-image-2.png",
-        category: "Technology",
-        title: "The Impact of Technology on the Workplace: How Technology is Changing",
-        authorImageUrl: "/img.png",
-        authorInitials: "JF",
-        authorName: "Jason Francisco",
-        date: "2022-08-20",
-    }
-    // Add more static blogs here
-];
+import Avatar from "react-avatar";
+import axios from "axios";
+import { AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 
 function BlogsListing() {
-    const [blogs, setBlogs] = useState([]);
+  const [blogs, setBlogs] = useState([]);
+  const base_url = process.env.REACT_APP_BASE_URL;
+  const [error, setError] = useState(null);
 
-    // useEffect(() => {
-    //     fetch("https://api.yourwebsite.com/blogs")
-    //         .then((response) => response.json())
-    //         .then((data) => setBlogs(data))
-    //         .catch((error) => console.error("Error fetching blogs:", error));
-    // }, []);
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        const token = localStorage.getItem("accessToken"); // Retrieve the token from local storage
+        const response = await axios.get(`${base_url}/blogs/all-blogs`, {
+          headers: {
+            Authorization: `Bearer ${token}`, // Set the authorization header
+          },
+        });
+        console.log("Fetched blogs:", response.data.data);
+        setBlogs(response.data.data);
+      } catch (error) {
+        console.error("Error fetching blogs:", error);
+        setError("Error fetching blogs. Please try again later.");
+      }
+    };
 
-    useEffect(() => {
-        // Using static data for now
-        setBlogs(staticBlogs);
-    }, []);
+    fetchBlogs();
+  }, []);
+  const formatDate = (timestamp) => {
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const date = new Date(timestamp);
+    return date.toLocaleDateString(undefined, options);
+  };
 
-    return (
-        <div className="flex flex-col min-h-screen">
-            <Header/>
-            <main className="flex-1 p-4 md:p-10">
-                <div className="grid gap-4">
-                    {blogs.length > 0 && (
-                        <div className="relative card">
-                            <img src={blogs[0].imageUrl} alt="Featured Blog" className="w-full h-auto"/>
-                            <div
-                                className="absolute bottom-4 left-4 p-4 bg-gradient-to-t from-black to-transparent text-white">
-                                <span className="badge">{blogs[0].category}</span>
-                                <h2 className="text-xl font-bold">{blogs[0].title}</h2>
-                                <div className="flex items-center space-x-2">
-                                    <Avatar>
-                                        <AvatarImage src={blogs[0].authorImageUrl} className="w-8 h-8"/>
-                                        <AvatarFallback>{blogs[0].authorInitials}</AvatarFallback>
-                                    </Avatar>
-                                    <span>{blogs[0].authorName}</span>
-                                    <span>{new Date(blogs[0].date).toLocaleDateString()}</span>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-8">
-                        {blogs.slice(1).map((blog) => (
-                            <BlogCard key={blog.id} blog={blog}/>
-                        ))}
-                    </div>
-                    <button className="mx-auto btn-outline">
-                        Load More
-                    </button>
+  return (
+    <div className=" min-h-screen justify-center items-center w-full">
+      <Header />
+      <main
+        className="p-4 md:p-10"
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <div
+          className="grid gap-4 w-10/12"
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            flexDirection: "column",
+          }}
+        >
+          {error && <div className="text-red-500">{error}</div>}
+          {blogs.length > 0 && (
+            <div
+              className="relative card"
+              style={{ width: "80vw", height: "50vh" }}
+            >
+              <img
+                src={blogs[0].imageUrl}
+                alt="Featured Blog"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  overflow: "hidden",
+                }}
+              />
+              <div className="absolute bottom-4 text-white">
+                {/* <span className="badge">{blogs[0].category}</span> */}
+                <h2 className="text-xl font-bold">{blogs[0].title}</h2>
+                <div className="flex items-center space-x-2 mt-2">
+                    <Avatar>
+                        <AvatarImage src={blogs[0].author_image_url} className="w-6 h-6 rounded-full" />
+                        <AvatarFallback className="w-6 h-6 rounded-full bg-gray-300 text-center">{blogs[0].authorInitials}</AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm font-medium">{blogs[0].author}</span>
+                    <span className="text-xs text-gray-500"> {formatDate(blogs[0].createdOn)}</span>
                 </div>
-            </main>
-            <Footer/>
+              </div>
+            </div>
+          )}
+          <div
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-8"
+            style={{ width: "80vw" }}
+          >
+            {blogs.slice(1).map((blog) => (
+              <BlogCard key={blog.id} blog={blog} />
+            ))}
+          </div>
         </div>
-    );
+      </main>
+      <Footer />
+    </div>
+  );
 }
 
 export default BlogsListing;
