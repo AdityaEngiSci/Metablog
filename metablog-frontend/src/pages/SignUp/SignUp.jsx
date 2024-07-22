@@ -19,6 +19,8 @@ const SignUp = () => {
   });
 
   const [errorMessage, setErrorMessage] = useState('');
+  const base_url = process.env.REACT_APP_BASE_URL;
+
 
   const handleLoginClick = () => {
     navigate('/login');
@@ -61,7 +63,7 @@ const SignUp = () => {
     };
 
     try {
-      const response = await axios.post('http://localhost:8080/api/v1/auth/register', registerData, {
+      const response = await axios.post(`${base_url}/auth/register`, registerData, {
         headers: {
           'Content-Type': 'application/json',
         },
