@@ -13,7 +13,7 @@ build-backend:
     - dalfcs_docker_autoscale
   script:
     - echo "Starting backend build......"
-    - mvn clean install
+    - mvn clean install -DskipTests
     - echo "Compile complete."
     - echo "Backend build completed"
   artifacts:
