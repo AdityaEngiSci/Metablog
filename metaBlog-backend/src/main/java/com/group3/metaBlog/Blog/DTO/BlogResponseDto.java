@@ -17,5 +17,6 @@ public class BlogResponseDto {
     private String imageUrl;
     private String author;
     private Double createdOn;
+    private String author_image_url;
     private String status;
 }

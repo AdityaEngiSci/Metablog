@@ -59,6 +59,7 @@ public class BlogService {
                     .title(blogRequestDto.getTitle())
                     .content(blogRequestDto.getContent())
                     .imageUrl(blog_image_url)
+                    .like_count(0)
                     .createdOn((double) System.currentTimeMillis())
                     .status(BlogStatus.PENDING)
                     .build();
@@ -67,11 +68,14 @@ public class BlogService {
             blogRepository.save(blog);
             logger.info("Blog created: {}", blog.getId());
 
+            String author_image_url = user.getImageURL();
+
             BlogResponseDto responseDto = BlogResponseDto.builder()
                     .id(blog.getId())
                     .title(blog.getTitle())
                     .content(blog.getContent())
                     .imageUrl(blog.getImageUrl())
+                    .author_image_url(author_image_url)
                     .author(blog.getAuthor().getUsername())
                     .createdOn(blog.getCreatedOn())
                     .status(blog.getStatus().name())
@@ -100,6 +104,7 @@ public class BlogService {
                     .title(blog.getTitle())
                     .content(blog.getContent())
                     .imageUrl(blog.getImageUrl())
+                    .author_image_url(blog.getAuthor().getImageURL())
                     .author(blog.getAuthor().getUsername())
                     .status(blog.getStatus().toString())
                     .createdOn(blog.getCreatedOn())
@@ -137,6 +142,7 @@ public class BlogService {
                     .title(blog.getTitle())
                     .content(blog.getContent())
                     .imageUrl(blog.getImageUrl())
+                    .author_image_url(blog.getAuthor().getImageURL())
                     .author(blog.getAuthor().getUsername())
                     .status(blog.getStatus().name())
                     .createdOn(blog.getCreatedOn())
@@ -172,6 +178,7 @@ public class BlogService {
                     .title(blog.getTitle())
                     .content(blog.getContent())
                     .imageUrl(blog.getImageUrl())
+                    .author_image_url(blog.getAuthor().getImageURL())
                     .author(blog.getAuthor().getUsername())
                     .createdOn(blog.getCreatedOn())
                     .status(blog.getStatus().name())
@@ -187,6 +194,46 @@ public class BlogService {
             return new ResponseEntity<>(MetaBlogResponse.builder()
                     .success(false)
                     .message("Error searching blogs")
+                    .build(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<Object> getBlogById(Long id) {
+        try {
+            Optional<Blog> blogOptional = blogRepository.findById(id);
+            if (!blogOptional.isPresent()) {
+                logger.error("Blog not found with id: {}", id);
+                return new ResponseEntity<>(MetaBlogResponse.builder()
+                        .success(false)
+                        .message("Blog not found")
+                        .build(), HttpStatus.NOT_FOUND);
+            }
+            Blog blog = blogOptional.get();
+            blog.setViewCount(blog.getViewCount() + 1);
+            blogRepository.save(blog);
+            logger.info("Blog retrieved with id: {}", id);
+
+            BlogResponseDto responseDto = BlogResponseDto.builder()
+                    .id(blog.getId())
+                    .title(blog.getTitle())
+                    .content(blog.getContent())
+                    .imageUrl(blog.getImageUrl())
+                    .author_image_url(blog.getAuthor().getImageURL())
+                    .author(blog.getAuthor().getUsername())
+                    .createdOn(blog.getCreatedOn())
+                    .status(blog.getStatus().name())
+                    .build();
+
+            return ResponseEntity.ok(MetaBlogResponse.builder()
+                    .success(true)
+                    .message("Blog retrieved successfully")
+                    .data(responseDto)
+                    .build());
+        } catch (Exception e) {
+            logger.error("Error retrieving blog with id: {}", id);
+            return new ResponseEntity<>(MetaBlogResponse.builder()
+                    .success(false)
+                    .message("Error retrieving blog")
                     .build(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
