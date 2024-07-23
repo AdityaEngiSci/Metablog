@@ -19,6 +19,8 @@ public class Blog {
 
     private String title;
 
+    @Lob
+    @Column( columnDefinition = "LONGTEXT")
     private String content;
 
     @Column(nullable = true)
@@ -34,6 +36,8 @@ public class Blog {
 
     @Column(nullable = false)
     private int viewCount = 0;
+
+    private int like_count = 0;
 
     @Enumerated(EnumType.STRING)
     private BlogStatus status;
