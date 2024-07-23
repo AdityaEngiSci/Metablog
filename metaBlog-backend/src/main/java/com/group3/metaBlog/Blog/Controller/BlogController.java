@@ -18,8 +18,8 @@ public class BlogController {
     private final BlogService blogService;
     private static final Logger logger = LoggerFactory.getLogger(BlogController.class);
 
-    @PostMapping(path="/create-blog", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public ResponseEntity<Object> createBlog(@RequestBody BlogRequestDto blogRequestDto, @RequestHeader("Authorization") String token) {
+    @PostMapping(path="/create-blog")
+    public ResponseEntity<Object> createBlog(@ModelAttribute BlogRequestDto blogRequestDto, @RequestHeader("Authorization") String token) {
         if (token == null || token.isEmpty()) {
             logger.error("Token not provided");
             return ResponseEntity.status(401).body(MetaBlogResponse.builder()
@@ -56,6 +56,12 @@ public class BlogController {
     @GetMapping("/search")
     public ResponseEntity<Object> searchBlogsByTitle(@RequestParam String title, @RequestHeader("Authorization") String token) {
         ResponseEntity<Object> response = blogService.searchBlogsByTitle(title);
+        return response;
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Object> getBlogById(@PathVariable Long id) {
+        ResponseEntity<Object> response = blogService.getBlogById(id);
         return response;
     }
 }
