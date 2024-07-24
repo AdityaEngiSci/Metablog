@@ -52,13 +52,12 @@ class BlogServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
     }
-    
     MultipartFile testFile = new MockMultipartFile("image", "test.jpg", "image/jpeg", "test image content".getBytes());
 
     @Test
     void createBlogTest() {
         // Arrange
-        BlogRequestDto requestDto = new BlogRequestDto("Test Title", "Test Content", testFile);
+        BlogRequestDto requestDto = new BlogRequestDto("Test Title", "Test Content", testFile, "Test Name", "Test description" );
         String token = "testToken";
         User user = new User();
         user.setEmail("test@example.com");
@@ -83,7 +82,7 @@ class BlogServiceTest {
     @Test
     void createBlogUserNotFoundTest() {
         // Arrange
-        BlogRequestDto requestDto = new BlogRequestDto("Test Title", "Test Content", testFile);
+        BlogRequestDto requestDto = new BlogRequestDto("Test Title", "Test Content", testFile, "Test Name", "Test description");
         String token = "testToken";
 
         when(jwtService.extractUserEmailFromToken(token)).thenReturn("test@example.com");
@@ -100,7 +99,7 @@ class BlogServiceTest {
     @Test
     void createBlogAlreadyExistsTest() {
         // Arrange
-        BlogRequestDto requestDto = new BlogRequestDto("Test Title", "Test Content", testFile);
+        BlogRequestDto requestDto = new BlogRequestDto("Test Title", "Test Content", testFile, "Test Name", "Test description");
         String token = "testToken";
         User user = new User();
         user.setEmail("test@example.com");
@@ -120,7 +119,7 @@ class BlogServiceTest {
     @Test
     void createBlogExceptionTest() {
         // Arrange
-        BlogRequestDto requestDto = new BlogRequestDto("Test Title", "Test Content", testFile);
+        BlogRequestDto requestDto = new BlogRequestDto("Test Title", "Test Content", testFile, "Test Name", "Test description");
         String token = "testToken";
 
         when(jwtService.extractUserEmailFromToken(token)).thenThrow(new RuntimeException("Test exception"));
