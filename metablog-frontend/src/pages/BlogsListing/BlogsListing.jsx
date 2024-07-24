@@ -20,7 +20,6 @@ function BlogsListing() {
             Authorization: `Bearer ${token}`, // Set the authorization header
           },
         });
-        console.log("Fetched blogs:", response.data.data);
         setBlogs(response.data.data);
       } catch (error) {
         console.error("Error fetching blogs:", error);
@@ -31,7 +30,7 @@ function BlogsListing() {
     fetchBlogs();
   }, []);
   const formatDate = (timestamp) => {
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const options = { year: "numeric", month: "long", day: "numeric" };
     const date = new Date(timestamp);
     return date.toLocaleDateString(undefined, options);
   };
@@ -76,12 +75,21 @@ function BlogsListing() {
                 {/* <span className="badge">{blogs[0].category}</span> */}
                 <h2 className="text-xl font-bold">{blogs[0].title}</h2>
                 <div className="flex items-center space-x-2 mt-2">
-                    <Avatar>
-                        <AvatarImage src={blogs[0].author_image_url} className="w-6 h-6 rounded-full" />
-                        <AvatarFallback className="w-6 h-6 rounded-full bg-gray-300 text-center">{blogs[0].authorInitials}</AvatarFallback>
-                    </Avatar>
-                    <span className="text-sm font-medium">{blogs[0].author}</span>
-                    <span className="text-xs text-gray-500"> {formatDate(blogs[0].createdOn)}</span>
+                  <Avatar>
+                    <AvatarImage
+                      src={blogs[0].author_image_url}
+                      className="w-6 h-6 rounded-full"
+                    />
+                    <AvatarFallback className="w-6 h-6 rounded-full bg-gray-300 text-center">
+                      {blogs[0].authorInitials}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-sm font-medium">{blogs[0].author}</span>
+                  <span className="text-xs text-gray-500">
+                    {" "}
+                    {formatDate(blogs[0].createdOn)}
+                  </span>
+                  
                 </div>
               </div>
             </div>
