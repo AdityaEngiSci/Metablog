@@ -17,7 +17,6 @@ import BlogPage from "./pages/BlogPage/BlogPage";
 import CreateBlog from "./pages/CreateBlog/CreateBlog";
 import UserProfile from "./pages/UserProfile/UserProfile";
 import UserBlogs from "./pages/Blogs/UserBlogs";
-import SearchResult from './pages/Search/SearchResult';
 import BlogManagement from './pages/AdminPage/BlogManagement';
 
 function App() {
@@ -90,7 +89,6 @@ function App() {
       <Route path="/create-blog" element={<CreateBlog />} />
       <Route path="/user-profile" element={<UserProfile />} />
       <Route path="/user-blogs" element={<UserBlogs />} />
-      <Route path="/search-result/:searchTerm" element={<SearchResult />} />
       <Route path="/admin-page" element={<BlogManagement />} />
     </Routes>
   );
