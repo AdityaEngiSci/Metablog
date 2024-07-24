@@ -53,10 +53,9 @@ public class User implements UserDetails {
     @Column(length = 5000)
     private String bio;
 
-    @ElementCollection
-    @CollectionTable(name = "user_social_links", joinColumns = @JoinColumn(name = "user_id"))
-    @Column(name = "social_link")
-    private List<String> socialLinks;
+    private String githubURL;
+
+    private String linkedinURL;
 
     @Column(columnDefinition = "boolean default false")
     private Boolean isTermsAccepted = false;
@@ -81,11 +80,9 @@ public class User implements UserDetails {
     )
     private List<Blog> savedBlogs;
 
-
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role. name()));
+        return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
     @Override

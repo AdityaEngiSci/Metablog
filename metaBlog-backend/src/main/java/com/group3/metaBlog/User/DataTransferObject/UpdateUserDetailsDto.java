@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
 
 @Data
 @Builder
@@ -15,5 +14,6 @@ public class UpdateUserDetailsDto {
     private String email;
     private String bio;
     private String imageURL;
-    private List<String> socialLinks;
+    private String githubURL;
+    private String linkedinURL;
 }

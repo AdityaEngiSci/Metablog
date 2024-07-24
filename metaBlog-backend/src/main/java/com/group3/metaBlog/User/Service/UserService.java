@@ -64,7 +64,8 @@ public class UserService implements IUserService {
 
         user.setBio(request.getBio());
         user.setImageURL(request.getImageURL());
-        user.setSocialLinks(request.getSocialLinks());
+        user.setGithubURL(request.getGithubURL());
+        user.setLinkedinURL(request.getLinkedinURL());
 
         userRepository.save(user);
         return ResponseEntity.ok().body(MetaBlogResponse.builder()
