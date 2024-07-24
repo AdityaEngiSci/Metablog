@@ -30,6 +30,10 @@ public class Blog {
     @JoinColumn(name = "author_id")
     private User author;
 
+    private String name;
+
+    private String description;
+
     private Double createdOn;
 
     private Double reviewedOn;

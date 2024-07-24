@@ -16,4 +16,6 @@ public class BlogRequestDto implements Serializable {
     private String title;
     private String content;
     private MultipartFile image;
+    private String name;
+    private String description;
 }
