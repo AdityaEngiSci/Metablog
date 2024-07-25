@@ -2,6 +2,7 @@ package com.group3.metaBlog.User.Service;
 
 import com.group3.metaBlog.Blog.Model.Blog;
 import com.group3.metaBlog.Exception.MetaBlogException;
+import com.group3.metaBlog.Jwt.ServiceLayer.JwtService;
 import com.group3.metaBlog.User.DataTransferObject.UpdateUserDetailsDto;
 import com.group3.metaBlog.User.Model.User;
 import com.group3.metaBlog.User.Repository.IUserRepository;
@@ -27,6 +28,9 @@ public class UserServiceTest {
     @Mock
     private IUserRepository userRepository;
 
+    @Mock
+    private JwtService jwtService;
+
     @InjectMocks
     private UserService userService;
 
@@ -45,10 +49,13 @@ public class UserServiceTest {
     @Test
     void getUserByIdTest() {
         Long userId = 1L;
-        User user = createUser("test@example.com");
+        String token = "valid-token";
+        String email = "test@example.com";
+        User user = createUser(email);
+        when(jwtService.extractUserEmailFromToken(token)).thenReturn(email);
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        ResponseEntity<Object> response = userService.getUserById(userId);
+        ResponseEntity<Object> response = userService.getUserById(userId, token);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertTrue(((MetaBlogResponse) response.getBody()).getSuccess());
@@ -58,10 +65,13 @@ public class UserServiceTest {
     @Test
     void getUserByIdNotFoundTest() {
         Long userId = 1L;
+        String token = "valid-token";
+        String email = "test@example.com";
+        when(jwtService.extractUserEmailFromToken(token)).thenReturn(email);
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         MetaBlogException exception = assertThrows(MetaBlogException.class, () -> {
-            userService.getUserById(userId);
+            userService.getUserById(userId, token);
         });
 
         assertEquals("User not found.", exception.getMessage());
@@ -70,10 +80,12 @@ public class UserServiceTest {
     @Test
     void getUserDetailsTest() {
         String email = "test@example.com";
+        String token = "valid-token";
         User user = createUser(email);
+        when(jwtService.extractUserEmailFromToken(token)).thenReturn(email);
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
 
-        ResponseEntity<Object> response = userService.getUserDetails(email);
+        ResponseEntity<Object> response = userService.getUserDetails(token);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertTrue(((MetaBlogResponse) response.getBody()).getSuccess());
@@ -83,10 +95,12 @@ public class UserServiceTest {
     @Test
     void getUserDetailsNotFoundTest() {
         String email = "test@example.com";
+        String token = "valid-token";
+        when(jwtService.extractUserEmailFromToken(token)).thenReturn(email);
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
         MetaBlogException exception = assertThrows(MetaBlogException.class, () -> {
-            userService.getUserDetails(email);
+            userService.getUserDetails(token);
         });
 
         assertEquals("User not found.", exception.getMessage());
@@ -95,10 +109,13 @@ public class UserServiceTest {
     @Test
     void updateUserDetailsTest() {
         UpdateUserDetailsDto request = new UpdateUserDetailsDto("test@example.com", "Test Bio", "http://test.com/image.jpg", "http://test.com/github", "http://test.com/linkedin");
-        User user = createUser("test@example.com");
+        String email = "test@example.com";
+        String token = "valid-token";
+        User user = createUser(email);
+        when(jwtService.extractUserEmailFromToken(token)).thenReturn(email);
         when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(user));
 
-        ResponseEntity<Object> response = userService.updateUserDetails(request);
+        ResponseEntity<Object> response = userService.updateUserDetails(request, token);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertTrue(((MetaBlogResponse) response.getBody()).getSuccess());
@@ -108,10 +125,13 @@ public class UserServiceTest {
     @Test
     void updateUserDetailsNotFoundTest() {
         UpdateUserDetailsDto request = new UpdateUserDetailsDto("test@example.com", "Test Bio", "http://test.com/image.jpg", "http://test.com/github", "http://test.com/linkedin");
+        String email = "test@example.com";
+        String token = "valid-token";
+        when(jwtService.extractUserEmailFromToken(token)).thenReturn(email);
         when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.empty());
 
         MetaBlogException exception = assertThrows(MetaBlogException.class, () -> {
-            userService.updateUserDetails(request);
+            userService.updateUserDetails(request, token);
         });
 
         assertEquals("User not found.", exception.getMessage());
@@ -120,11 +140,13 @@ public class UserServiceTest {
     @Test
     void getUserBlogsTest() {
         String email = "test@example.com";
+        String token = "valid-token";
         User user = createUser(email);
         user.setBlogs(Arrays.asList(new Blog(), new Blog()));
+        when(jwtService.extractUserEmailFromToken(token)).thenReturn(email);
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
 
-        ResponseEntity<Object> response = userService.getUserBlogs(email);
+        ResponseEntity<Object> response = userService.getUserBlogs(token);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertTrue(((MetaBlogResponse) response.getBody()).getSuccess());
@@ -134,10 +156,12 @@ public class UserServiceTest {
     @Test
     void getUserBlogsNotFoundTest() {
         String email = "test@example.com";
+        String token = "valid-token";
+        when(jwtService.extractUserEmailFromToken(token)).thenReturn(email);
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
         MetaBlogException exception = assertThrows(MetaBlogException.class, () -> {
-            userService.getUserBlogs(email);
+            userService.getUserBlogs(token);
         });
 
         assertEquals("User not found.", exception.getMessage());
@@ -146,11 +170,13 @@ public class UserServiceTest {
     @Test
     void getUserSavedBlogsTest() {
         String email = "test@example.com";
+        String token = "valid-token";
         User user = createUser(email);
         user.setSavedBlogs(Arrays.asList(new Blog(), new Blog()));
+        when(jwtService.extractUserEmailFromToken(token)).thenReturn(email);
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
 
-        ResponseEntity<Object> response = userService.getUserSavedBlogs(email);
+        ResponseEntity<Object> response = userService.getUserSavedBlogs(token);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertTrue(((MetaBlogResponse) response.getBody()).getSuccess());
@@ -160,10 +186,12 @@ public class UserServiceTest {
     @Test
     void getUserSavedBlogsNotFoundTest() {
         String email = "test@example.com";
+        String token = "valid-token";
+        when(jwtService.extractUserEmailFromToken(token)).thenReturn(email);
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
         MetaBlogException exception = assertThrows(MetaBlogException.class, () -> {
-            userService.getUserSavedBlogs(email);
+            userService.getUserSavedBlogs(token);
         });
 
         assertEquals("User not found.", exception.getMessage());
@@ -173,14 +201,16 @@ public class UserServiceTest {
     void saveBlogTest() {
         String email = "test@example.com";
         Long blogId = 1L;
+        String token = "valid-token";
         User user = createUser(email);
         Blog blog = new Blog();
         blog.setId(blogId);
         user.setBlogs(Arrays.asList(blog));
         user.setSavedBlogs(new ArrayList<>()); // Initialize savedBlogs list
+        when(jwtService.extractUserEmailFromToken(token)).thenReturn(email);
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
 
-        ResponseEntity<Object> response = userService.saveBlog(blogId, email);
+        ResponseEntity<Object> response = userService.saveBlog(blogId, token);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertTrue(((MetaBlogResponse) response.getBody()).getSuccess());
@@ -191,10 +221,12 @@ public class UserServiceTest {
     void saveBlogNotFoundTest() {
         String email = "test@example.com";
         Long blogId = 1L;
+        String token = "valid-token";
+        when(jwtService.extractUserEmailFromToken(token)).thenReturn(email);
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
         MetaBlogException exception = assertThrows(MetaBlogException.class, () -> {
-            userService.saveBlog(blogId, email);
+            userService.saveBlog(blogId,token);
         });
 
         assertEquals("User not found.", exception.getMessage());
@@ -204,13 +236,15 @@ public class UserServiceTest {
     void removeSavedBlogSuccess() {
         String email = "test@example.com";
         Long blogId = 1L;
+        String token = "valid-token";
         User user = createUser(email);
         Blog blog = new Blog();
         blog.setId(blogId);
         user.setSavedBlogs(new ArrayList<>(Arrays.asList(blog)));
+        when(jwtService.extractUserEmailFromToken(token)).thenReturn(email);
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
 
-        ResponseEntity<Object> response = userService.removeSavedBlog(blogId, email);
+        ResponseEntity<Object> response = userService.removeSavedBlog(blogId, token);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertTrue(((MetaBlogResponse) response.getBody()).getSuccess());
@@ -222,11 +256,13 @@ public class UserServiceTest {
     void removeSavedBlogUserNotFound() {
         String email = "notfound@example.com";
         Long blogId = 1L;
+        String token = "valid-token";
 
+        when(jwtService.extractUserEmailFromToken(token)).thenReturn(email);
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
         MetaBlogException exception = assertThrows(MetaBlogException.class, () -> {
-            userService.removeSavedBlog(blogId, email);
+            userService.removeSavedBlog(blogId,token);
         });
 
         assertEquals("User not found.", exception.getMessage());
@@ -237,14 +273,16 @@ public class UserServiceTest {
     void removeSavedBlogNotFound() {
         String email = "test@example.com";
         Long blogId = 2L;
+        String token = "valid-token";
         User user = createUser(email);
         Blog blog = new Blog();
         blog.setId(1L);
         user.setSavedBlogs(new ArrayList<>(Arrays.asList(blog)));
+        when(jwtService.extractUserEmailFromToken(token)).thenReturn(email);
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
 
         MetaBlogException exception = assertThrows(MetaBlogException.class, () -> {
-            userService.removeSavedBlog(blogId, email);
+            userService.removeSavedBlog(blogId, token);
         });
 
         assertEquals("Saved blog not found.", exception.getMessage());

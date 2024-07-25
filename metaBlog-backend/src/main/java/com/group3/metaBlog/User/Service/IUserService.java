@@ -4,11 +4,11 @@ import com.group3.metaBlog.User.DataTransferObject.UpdateUserDetailsDto;
 import org.springframework.http.ResponseEntity;
 
 public interface IUserService {
-    ResponseEntity<Object> getUserById(Long id);
-    ResponseEntity<Object> getUserDetails(String email);
-    ResponseEntity<Object> updateUserDetails(UpdateUserDetailsDto request);
-    ResponseEntity<Object> getUserBlogs(String email);
-    ResponseEntity<Object> getUserSavedBlogs(String email);
-    ResponseEntity<Object> saveBlog(Long blogId, String email);
-    ResponseEntity<Object> removeSavedBlog(Long blogId, String email);
+    ResponseEntity<Object> getUserById(Long id, String token);
+    ResponseEntity<Object> getUserDetails(String token);
+    ResponseEntity<Object> updateUserDetails(UpdateUserDetailsDto request, String token);
+    ResponseEntity<Object> getUserBlogs(String token);
+    ResponseEntity<Object> getUserSavedBlogs(String token);
+    ResponseEntity<Object> saveBlog(Long blogId, String token);
+    ResponseEntity<Object> removeSavedBlog(Long blogId, String token);
 }

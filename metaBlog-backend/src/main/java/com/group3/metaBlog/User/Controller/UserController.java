@@ -21,9 +21,18 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Object> getUserById(@PathVariable Long id) {
+    public ResponseEntity<Object> getUserById(@PathVariable Long id, @RequestHeader("Authorization") String token) {
+        if (token == null || token.isEmpty()) {
+            logger.error("Token not provided");
+            return ResponseEntity.status(401).body(MetaBlogResponse.builder()
+                    .success(false)
+                    .message("Token not provided")
+                    .build());
+        }
+
+        logger.info("Fetching user details for ID: {} with token: {}", id, token);
         try {
-            return userService.getUserById(id);
+            return userService.getUserById(id, token);
         } catch (IllegalArgumentException e) {
             logger.error("Error fetching user details for ID: {}", id);
             logger.error("Message of the error: {}", e.getMessage());
@@ -33,12 +42,22 @@ public class UserController {
                     .build());
         }
     }
+
     @GetMapping("/details")
-    public ResponseEntity<Object> getUserDetails(@NotNull @RequestParam String email) {
+    public ResponseEntity<Object> getUserDetails(@RequestHeader("Authorization") String token) {
+        if (token == null || token.isEmpty()) {
+            logger.error("Token not provided");
+            return ResponseEntity.status(401).body(MetaBlogResponse.builder()
+                    .success(false)
+                    .message("Token not provided")
+                    .build());
+        }
+
+        logger.info("Fetching user details with token: {}", token);
         try {
-            return userService.getUserDetails(email);
+            return userService.getUserDetails(token);
         } catch (IllegalArgumentException e) {
-            logger.error("Error fetching user details for email: {}", email);
+            logger.error("Error fetching user details");
             logger.error("Message of the error: {}", e.getMessage());
             return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
                     .success(false)
@@ -48,11 +67,20 @@ public class UserController {
     }
 
     @PostMapping("/update")
-    public ResponseEntity<Object> updateUserDetails(@NotNull @RequestBody UpdateUserDetailsDto request) {
+    public ResponseEntity<Object> updateUserDetails(@NotNull @RequestBody UpdateUserDetailsDto request, @RequestHeader("Authorization") String token) {
+        if (token == null || token.isEmpty()) {
+            logger.error("Token not provided");
+            return ResponseEntity.status(401).body(MetaBlogResponse.builder()
+                    .success(false)
+                    .message("Token not provided")
+                    .build());
+        }
+
+        logger.info("Updating user details with token: {}", token);
         try {
-            return userService.updateUserDetails(request);
+            return userService.updateUserDetails(request, token);
         } catch (IllegalArgumentException e) {
-            logger.error("Error updating user details for email: {}", request.getEmail());
+            logger.error("Error updating user details");
             logger.error("Message of the error: {}", e.getMessage());
             return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
                     .success(false)
@@ -62,11 +90,20 @@ public class UserController {
     }
 
     @GetMapping("/blogs")
-    public ResponseEntity<Object> getUserBlogs(@NotNull @RequestParam String email) {
+    public ResponseEntity<Object> getUserBlogs(@RequestHeader("Authorization") String token) {
+        if (token == null || token.isEmpty()) {
+            logger.error("Token not provided");
+            return ResponseEntity.status(401).body(MetaBlogResponse.builder()
+                    .success(false)
+                    .message("Token not provided")
+                    .build());
+        }
+
+        logger.info("Fetching blogs with token: {}", token);
         try {
-            return userService.getUserBlogs(email);
+            return userService.getUserBlogs(token);
         } catch (IllegalArgumentException e) {
-            logger.error("Error fetching user blogs for email: {}", email);
+            logger.error("Error fetching user blogs");
             logger.error("Message of the error: {}", e.getMessage());
             return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
                     .success(false)
@@ -76,11 +113,20 @@ public class UserController {
     }
 
     @GetMapping("/saved-blogs")
-    public ResponseEntity<Object> getUserSavedBlogs(@NotNull @RequestParam String email) {
+    public ResponseEntity<Object> getUserSavedBlogs(@RequestHeader("Authorization") String token) {
+        if (token == null || token.isEmpty()) {
+            logger.error("Token not provided");
+            return ResponseEntity.status(401).body(MetaBlogResponse.builder()
+                    .success(false)
+                    .message("Token not provided")
+                    .build());
+        }
+
+        logger.info("Fetching saved blogs with token: {}", token);
         try {
-            return userService.getUserSavedBlogs(email);
+            return userService.getUserSavedBlogs(token);
         } catch (IllegalArgumentException e) {
-            logger.error("Error fetching saved blogs for email: {}", email);
+            logger.error("Error fetching saved blogs");
             logger.error("Message of the error: {}", e.getMessage());
             return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
                     .success(false)
@@ -89,12 +135,21 @@ public class UserController {
         }
     }
 
-    @PostMapping("/save-blog")
-    public ResponseEntity<Object> saveBlog(@NotNull @RequestParam Long blogId, @NotNull @RequestParam String email) {
+    @PostMapping("/save-blog/{blogId}")
+    public ResponseEntity<Object> saveBlog(@PathVariable Long blogId, @RequestHeader("Authorization") String token) {
+        if (token == null || token.isEmpty()) {
+            logger.error("Token not provided");
+            return ResponseEntity.status(401).body(MetaBlogResponse.builder()
+                    .success(false)
+                    .message("Token not provided")
+                    .build());
+        }
+
+        logger.info("Saving blog with id: {} with token: {}", blogId, token);
         try {
-            return userService.saveBlog(blogId, email);
+            return userService.saveBlog(blogId, token);
         } catch (IllegalArgumentException e) {
-            logger.error("Error saving blog for email: {}", email);
+            logger.error("Error saving blog with id: {}", blogId);
             logger.error("Message of the error: {}", e.getMessage());
             return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
                     .success(false)
@@ -103,12 +158,21 @@ public class UserController {
         }
     }
 
-    @PostMapping("/remove-saved-blog")
-    public ResponseEntity<Object> removeSavedBlog(@NotNull @RequestParam Long blogId, @NotNull @RequestParam String email) {
+    @DeleteMapping("/remove-saved-blog/{blogId}")
+    public ResponseEntity<Object> removeSavedBlog(@PathVariable Long blogId, @RequestHeader("Authorization") String token) {
+        if (token == null || token.isEmpty()) {
+            logger.error("Token not provided");
+            return ResponseEntity.status(401).body(MetaBlogResponse.builder()
+                    .success(false)
+                    .message("Token not provided")
+                    .build());
+        }
+
+        logger.info("Removing saved blog with id: {} with token: {}", blogId, token);
         try {
-            return userService.removeSavedBlog(blogId, email);
+            return userService.removeSavedBlog(blogId, token);
         } catch (IllegalArgumentException e) {
-            logger.error("Error removing saved blog for email: {}", email);
+            logger.error("Error removing saved blog with id: {}", blogId);
             logger.error("Message of the error: {}", e.getMessage());
             return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
                     .success(false)

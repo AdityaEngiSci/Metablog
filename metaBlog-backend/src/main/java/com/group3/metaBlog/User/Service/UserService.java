@@ -2,6 +2,7 @@ package com.group3.metaBlog.User.Service;
 
 import com.group3.metaBlog.Blog.Model.Blog;
 import com.group3.metaBlog.Exception.MetaBlogException;
+import com.group3.metaBlog.Jwt.ServiceLayer.JwtService;
 import com.group3.metaBlog.User.DataTransferObject.UpdateUserDetailsDto;
 import com.group3.metaBlog.User.Model.User;
 import com.group3.metaBlog.User.Repository.IUserRepository;
@@ -19,6 +20,7 @@ import java.util.List;
 public class UserService implements IUserService {
 
     private final IUserRepository userRepository;
+    private final JwtService jwtService;
     private final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     private User findUserByEmail(String email) {
@@ -30,8 +32,9 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public ResponseEntity<Object> getUserById(Long id) {
-        logger.info("Fetching user details for ID: {}", id);
+    public ResponseEntity<Object> getUserById(Long id, String token) {
+        String email = jwtService.extractUserEmailFromToken(token);
+        logger.info("Fetching user details for ID: {} with email: {}", id, email);
         User user = userRepository.findById(id)
                 .orElseThrow(() -> {
                     logger.error("User not found with ID: {}", id);
@@ -46,7 +49,8 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public ResponseEntity<Object> getUserDetails(String email) {
+    public ResponseEntity<Object> getUserDetails(String token) {
+        String email = jwtService.extractUserEmailFromToken(token);
         logger.info("Fetching user details for email: {}", email);
         User user = findUserByEmail(email);
 
@@ -58,9 +62,10 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public ResponseEntity<Object> updateUserDetails(UpdateUserDetailsDto request) {
-        logger.info("Updating user details for email: {}", request.getEmail());
-        User user = findUserByEmail(request.getEmail());
+    public ResponseEntity<Object> updateUserDetails(UpdateUserDetailsDto request, String token) {
+        String email = jwtService.extractUserEmailFromToken(token);
+        logger.info("Updating user details for email: {}", email);
+        User user = findUserByEmail(email);
 
         user.setBio(request.getBio());
         user.setImageURL(request.getImageURL());
@@ -76,7 +81,8 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public ResponseEntity<Object> getUserBlogs(String email) {
+    public ResponseEntity<Object> getUserBlogs(String token) {
+        String email = jwtService.extractUserEmailFromToken(token);
         logger.info("Fetching blogs for user with email: {}", email);
         User user = findUserByEmail(email);
 
@@ -89,7 +95,8 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public ResponseEntity<Object> getUserSavedBlogs(String email) {
+    public ResponseEntity<Object> getUserSavedBlogs(String token) {
+        String email = jwtService.extractUserEmailFromToken(token);
         logger.info("Fetching saved blogs for user with email: {}", email);
         User user = findUserByEmail(email);
 
@@ -102,7 +109,8 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public ResponseEntity<Object> saveBlog(Long blogId, String email) {
+    public ResponseEntity<Object> saveBlog(Long blogId, String token) {
+        String email = jwtService.extractUserEmailFromToken(token);
         logger.info("Saving blog with id: {} for user with email: {}", blogId, email);
         User user = findUserByEmail(email);
 
@@ -124,7 +132,8 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public ResponseEntity<Object> removeSavedBlog(Long blogId, String email) {
+    public ResponseEntity<Object> removeSavedBlog(Long blogId, String token) {
+        String email = jwtService.extractUserEmailFromToken(token);
         logger.info("Removing saved blog with id: {} for user with email: {}", blogId, email);
         User user = findUserByEmail(email);
 
