@@ -1,9 +1,12 @@
 package com.group3.metaBlog.Blog.Model;
 
+import com.group3.metaBlog.Comment.Model.Comment;
 import com.group3.metaBlog.Enum.BlogStatus;
 import com.group3.metaBlog.User.Model.User;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -45,4 +48,7 @@ public class Blog {
 
     @Enumerated(EnumType.STRING)
     private BlogStatus status;
+
+    @OneToMany(mappedBy = "blog", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Comment> comments;
 }

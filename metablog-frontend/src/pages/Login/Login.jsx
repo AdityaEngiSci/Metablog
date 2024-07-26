@@ -36,7 +36,6 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      console.log(base_url);
       const response = await axios.post(`${base_url}/auth/login`, formData);
       if (response.data.success) {
         const { accessToken, role } = response.data.data;
@@ -64,7 +63,11 @@ const Login = () => {
         });
       }
     } catch (error) {
-      setErrorMessage("An error occurred during login. Please try again.");
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Failed to login. Please try again."
+      });
     }
   }
 

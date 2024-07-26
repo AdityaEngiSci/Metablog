@@ -34,7 +34,7 @@ const Footer = () => {
                 </div>
             </div>
             <div className="flex justify-between mt-4">
-                <span>&copy; 2022 MetaBlog</span>
+                <span>&copy; 2024 MetaBlog</span>
                 <div className="flex space-x-4">
                     <Link to="/terms">Terms of Use</Link>
                     <Link to="/privacy">Privacy Policy</Link>
