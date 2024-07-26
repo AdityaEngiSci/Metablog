@@ -1,12 +1,12 @@
 package com.group3.metaBlog.User.Service;
 
-import com.group3.metaBlog.User.DataTransferObject.UpdateUserDetailsDto;
+import com.group3.metaBlog.User.DataTransferObject.UserDetailsResponseDto;
 import org.springframework.http.ResponseEntity;
 
 public interface IUserService {
     ResponseEntity<Object> getUserById(Long id, String token);
     ResponseEntity<Object> getUserDetails(String token);
-    ResponseEntity<Object> updateUserDetails(UpdateUserDetailsDto request, String token);
+    ResponseEntity<Object> updateUserDetails(UserDetailsResponseDto request, String token);
     ResponseEntity<Object> getUserBlogs(String token);
     ResponseEntity<Object> getUserSavedBlogs(String token);
     ResponseEntity<Object> saveBlog(Long blogId, String token);

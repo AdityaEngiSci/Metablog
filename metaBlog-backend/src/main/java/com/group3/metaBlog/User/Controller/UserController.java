@@ -1,6 +1,6 @@
 package com.group3.metaBlog.User.Controller;
 
-import com.group3.metaBlog.User.DataTransferObject.UpdateUserDetailsDto;
+import com.group3.metaBlog.User.DataTransferObject.UserDetailsResponseDto;
 import com.group3.metaBlog.User.Service.IUserService;
 import com.group3.metaBlog.Utils.MetaBlogResponse;
 import jakarta.validation.constraints.NotNull;
@@ -55,7 +55,7 @@ public class UserController {
 
         logger.info("Fetching user details with token: {}", token);
         try {
-            return userService.getUserDetails(token.replace("Bearer ", ""));
+            return userService.getUserDetails(token.split(" ")[1].trim());
         } catch (IllegalArgumentException e) {
             logger.error("Error fetching user details");
             logger.error("Message of the error: {}", e.getMessage());
@@ -67,7 +67,7 @@ public class UserController {
     }
 
     @PostMapping("/update")
-    public ResponseEntity<Object> updateUserDetails(@NotNull @RequestBody UpdateUserDetailsDto request, @RequestHeader("Authorization") String token) {
+    public ResponseEntity<Object> updateUserDetails(@NotNull @RequestBody UserDetailsResponseDto request, @RequestHeader("Authorization") String token) {
         if (token == null || token.isEmpty()) {
             logger.error("Token not provided");
             return ResponseEntity.status(401).body(MetaBlogResponse.builder()
@@ -78,7 +78,7 @@ public class UserController {
 
         logger.info("Updating user details with token: {}", token);
         try {
-            return userService.updateUserDetails(request, token.replace("Bearer ", ""));
+            return userService.updateUserDetails(request, token.split(" ")[1].trim());
         } catch (IllegalArgumentException e) {
             logger.error("Error updating user details");
             logger.error("Message of the error: {}", e.getMessage());
@@ -124,7 +124,7 @@ public class UserController {
 
         logger.info("Fetching saved blogs with token: {}", token);
         try {
-            return userService.getUserSavedBlogs(token.replace("Bearer ", ""));
+            return userService.getUserSavedBlogs(token.split(" ")[1].trim());
         } catch (IllegalArgumentException e) {
             logger.error("Error fetching saved blogs");
             logger.error("Message of the error: {}", e.getMessage());
@@ -147,7 +147,7 @@ public class UserController {
 
         logger.info("Saving blog with id: {} with token: {}", blogId, token);
         try {
-            return userService.saveBlog(blogId, token.replace("Bearer ", ""));
+            return userService.saveBlog(blogId, token.split(" ")[1].trim());
         } catch (IllegalArgumentException e) {
             logger.error("Error saving blog with id: {}", blogId);
             logger.error("Message of the error: {}", e.getMessage());
@@ -170,7 +170,7 @@ public class UserController {
 
         logger.info("Removing saved blog with id: {} with token: {}", blogId, token);
         try {
-            return userService.removeSavedBlog(blogId, token.replace("Bearer ", ""));
+            return userService.removeSavedBlog(blogId, token.split(" ")[1].trim());
         } catch (IllegalArgumentException e) {
             logger.error("Error removing saved blog with id: {}", blogId);
             logger.error("Message of the error: {}", e.getMessage());

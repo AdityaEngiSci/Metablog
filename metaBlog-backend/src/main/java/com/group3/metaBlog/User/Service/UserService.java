@@ -3,7 +3,8 @@ package com.group3.metaBlog.User.Service;
 import com.group3.metaBlog.Blog.Model.Blog;
 import com.group3.metaBlog.Exception.MetaBlogException;
 import com.group3.metaBlog.Jwt.ServiceLayer.JwtService;
-import com.group3.metaBlog.User.DataTransferObject.UpdateUserDetailsDto;
+import com.group3.metaBlog.User.DataTransferObject.SavedBlogResponseDto;
+import com.group3.metaBlog.User.DataTransferObject.UserDetailsResponseDto;
 import com.group3.metaBlog.User.Model.User;
 import com.group3.metaBlog.User.Repository.IUserRepository;
 import com.group3.metaBlog.Utils.MetaBlogResponse;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -42,10 +44,19 @@ public class UserService implements IUserService {
                         return new MetaBlogException("User not found.");
                     });
 
+            UserDetailsResponseDto userDetailsResponseDto = UserDetailsResponseDto.builder()
+                    .imageURL(user.getImageURL())
+                    .email(user.getEmail())
+                    .password(user.getPassword())
+                    .linkedinURL(user.getLinkedinURL())
+                    .githubURL(user.getGithubURL())
+                    .bio(user.getBio())
+                    .build();
+
             return ResponseEntity.ok().body(MetaBlogResponse.builder()
                     .success(true)
                     .message("User details fetched successfully.")
-                    .data(user)
+                    .data(userDetailsResponseDto)
                     .build());
         } catch (MetaBlogException e) {
             logger.error("Error fetching user details for ID: {}", id);
@@ -64,10 +75,19 @@ public class UserService implements IUserService {
             logger.info("Fetching user details for email: {}", email);
             User user = findUserByEmail(email);
 
+            UserDetailsResponseDto userDetailsResponseDto = UserDetailsResponseDto.builder()
+                    .imageURL(user.getImageURL())
+                    .email(user.getEmail())
+                    .password(user.getPassword())
+                    .linkedinURL(user.getLinkedinURL())
+                    .githubURL(user.getGithubURL())
+                    .bio(user.getBio())
+                    .build();
+
             return ResponseEntity.ok().body(MetaBlogResponse.builder()
                     .success(true)
                     .message("User details fetched successfully.")
-                    .data(user)
+                    .data(userDetailsResponseDto)
                     .build());
         } catch (MetaBlogException e) {
             logger.error("Error fetching user details");
@@ -80,7 +100,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public ResponseEntity<Object> updateUserDetails(UpdateUserDetailsDto request, String token) {
+    public ResponseEntity<Object> updateUserDetails(UserDetailsResponseDto request, String token) {
         try {
             String email = jwtService.extractUserEmailFromToken(token);
             logger.info("Updating user details for email: {}", email);
@@ -95,7 +115,6 @@ public class UserService implements IUserService {
             return ResponseEntity.ok().body(MetaBlogResponse.builder()
                     .success(true)
                     .message("User details updated successfully.")
-                    .data(user)
                     .build());
         } catch (Exception e) {
             logger.error("Error updating user details");
@@ -137,7 +156,15 @@ public class UserService implements IUserService {
             logger.info("Fetching saved blogs for user with email: {}", email);
             User user = findUserByEmail(email);
 
-            List<Blog> savedBlogs = user.getSavedBlogs();
+            List<SavedBlogResponseDto> savedBlogs = user.getSavedBlogs().stream().map(blog -> SavedBlogResponseDto.builder()
+                    .id(blog.getId())
+                    .title(blog.getTitle())
+                    .imageUrl(blog.getImageUrl())
+                    .author(blog.getAuthor().getUsername())
+                    .author_image_url(blog.getAuthor().getImageURL())
+                    .createdOn(blog.getCreatedOn())
+                    .build()).collect(Collectors.toList());
+
             return ResponseEntity.ok().body(MetaBlogResponse.builder()
                     .success(true)
                     .message("User saved blogs fetched successfully.")
