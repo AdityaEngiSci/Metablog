@@ -3,7 +3,7 @@ package com.group3.metaBlog.Blog.Service;
 import com.group3.metaBlog.Blog.DTO.BlogRequestDto;
 import com.group3.metaBlog.Blog.DTO.BlogResponseDto;
 import com.group3.metaBlog.Blog.Model.Blog;
-import com.group3.metaBlog.Blog.Repository.BlogRepository;
+import com.group3.metaBlog.Blog.Repository.IBlogRepository;
 import com.group3.metaBlog.Enum.BlogStatus;
 import com.group3.metaBlog.Image.Model.Image;
 import com.group3.metaBlog.Image.Service.ImageService;
@@ -25,7 +25,7 @@ import java.util.Optional;
 @AllArgsConstructor
 public class BlogService {
 
-    private final BlogRepository blogRepository;
+    private final IBlogRepository blogRepository;
     private final IUserRepository userRepository;
     private final JwtService jwtService;
     private final ImageService imageService;
