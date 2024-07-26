@@ -23,15 +23,14 @@ const UserProfile = () => {
     const accessToken = localStorage.getItem("accessToken");
 
     useEffect(() => {
-        // Fetch user data on mount
         const fetchUserData = async () => {
             try {
-                const response = await axios.get(`${BASE_URL}/users/profile`, {
+                const response = await axios.get(`${BASE_URL}/user/details`, {
                     headers: {
                         Authorization: `Bearer ${accessToken}`,
                     },
                 });
-                const userData = response.data;
+                const userData = response.data.data;
                 setUsername(userData.username);
                 setEmail(userData.email);
                 setBio(userData.bio);
@@ -116,7 +115,6 @@ const UserProfile = () => {
                     },
                 }
             );
-
             alert('Profile updated successfully');
         } catch (error) {
             console.error('Error updating profile:', error);
