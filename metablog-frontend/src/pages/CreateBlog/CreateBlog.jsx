@@ -17,6 +17,8 @@ const CreateBlog = () => {
   const [blogImageUrl, setBlogImageUrl] = useState("");
   const [blogTitle, setTitle] = useState("");
   const BASE_URL = process.env.REACT_APP_BASE_URL;
+  const TINY_MCE_KEY = process.env.REACT_APP_TINY_MCE_KEY;
+  console.log("TINY_MCE_KEY", TINY_MCE_KEY);
   const accessToken = localStorage.getItem("accessToken");
 
   const onDrop = useCallback((acceptedFiles) => {
@@ -137,7 +139,7 @@ const CreateBlog = () => {
           <div className="form-group" style={{ gridColumn: "span 2" }}>
             <label htmlFor="blogContent">Write Your Tech Ideas...</label>
             <Editor
-              apiKey="ooqeeofdy8us6qptstz4ytj0cmrvbuknkoh73fg2re3j60eu" // Replace with your valid API key
+              apiKey= {TINY_MCE_KEY}
               id="blogContent"
               initialValue="<p>Welcome to Meta blogs!!</p>"
               init={{
