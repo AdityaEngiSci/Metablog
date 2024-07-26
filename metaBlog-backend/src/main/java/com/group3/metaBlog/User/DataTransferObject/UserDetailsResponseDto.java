@@ -5,17 +5,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UpdateUserDetailsDto {
-    private String email;
-    private String username;
-    private String password;
-    private String bio;
+public class UserDetailsResponseDto {
     private String imageURL;
-    private String githubURL;
+    private String email;
+    private String password;
     private String linkedinURL;
+    private String githubURL;
+    private String bio;
 }
