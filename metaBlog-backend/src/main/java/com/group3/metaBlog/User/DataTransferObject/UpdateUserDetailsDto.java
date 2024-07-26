@@ -12,6 +12,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UpdateUserDetailsDto {
     private String email;
+    private String username;
+    private String password;
     private String bio;
     private String imageURL;
     private String githubURL;
