@@ -33,124 +33,185 @@ public class UserService implements IUserService {
 
     @Override
     public ResponseEntity<Object> getUserById(Long id, String token) {
-        String email = jwtService.extractUserEmailFromToken(token);
-        logger.info("Fetching user details for ID: {} with email: {}", id, email);
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> {
-                    logger.error("User not found with ID: {}", id);
-                    return new MetaBlogException("User not found.");
-                });
+        try {
+            String email = jwtService.extractUserEmailFromToken(token);
+            logger.info("Fetching user details for ID: {} with email: {}", id, email);
+            User user = userRepository.findById(id)
+                    .orElseThrow(() -> {
+                        logger.error("User not found with ID: {}", id);
+                        return new MetaBlogException("User not found.");
+                    });
 
-        return ResponseEntity.ok().body(MetaBlogResponse.builder()
-                .success(true)
-                .message("User details fetched successfully.")
-                .data(user)
-                .build());
+            return ResponseEntity.ok().body(MetaBlogResponse.builder()
+                    .success(true)
+                    .message("User details fetched successfully.")
+                    .data(user)
+                    .build());
+        } catch (MetaBlogException e) {
+            logger.error("Error fetching user details for ID: {}", id);
+            logger.error("Message of the error: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
+                    .success(false)
+                    .message(e.getMessage())
+                    .build());
+        }
     }
 
     @Override
     public ResponseEntity<Object> getUserDetails(String token) {
-        String email = jwtService.extractUserEmailFromToken(token);
-        logger.info("Fetching user details for email: {}", email);
-        User user = findUserByEmail(email);
+        try {
+            String email = jwtService.extractUserEmailFromToken(token);
+            logger.info("Fetching user details for email: {}", email);
+            User user = findUserByEmail(email);
 
-        return ResponseEntity.ok().body(MetaBlogResponse.builder()
-                .success(true)
-                .message("User details fetched successfully.")
-                .data(user)
-                .build());
+            return ResponseEntity.ok().body(MetaBlogResponse.builder()
+                    .success(true)
+                    .message("User details fetched successfully.")
+                    .data(user)
+                    .build());
+        } catch (MetaBlogException e) {
+            logger.error("Error fetching user details");
+            logger.error("Message of the error: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
+                    .success(false)
+                    .message(e.getMessage())
+                    .build());
+        }
     }
 
     @Override
     public ResponseEntity<Object> updateUserDetails(UpdateUserDetailsDto request, String token) {
-        String email = jwtService.extractUserEmailFromToken(token);
-        logger.info("Updating user details for email: {}", email);
-        User user = findUserByEmail(email);
+        try {
+            String email = jwtService.extractUserEmailFromToken(token);
+            logger.info("Updating user details for email: {}", email);
+            User user = findUserByEmail(email);
 
-        user.setBio(request.getBio());
-        user.setImageURL(request.getImageURL());
-        user.setGithubURL(request.getGithubURL());
-        user.setLinkedinURL(request.getLinkedinURL());
+            user.setBio(request.getBio());
+            user.setImageURL(request.getImageURL());
+            user.setGithubURL(request.getGithubURL());
+            user.setLinkedinURL(request.getLinkedinURL());
 
-        userRepository.save(user);
-        return ResponseEntity.ok().body(MetaBlogResponse.builder()
-                .success(true)
-                .message("User details updated successfully.")
-                .data(user)
-                .build());
+            userRepository.save(user);
+            return ResponseEntity.ok().body(MetaBlogResponse.builder()
+                    .success(true)
+                    .message("User details updated successfully.")
+                    .data(user)
+                    .build());
+        } catch (Exception e) {
+            logger.error("Error updating user details");
+            logger.error("Message of the error: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
+                    .success(false)
+                    .message(e.getMessage())
+                    .build());
+        }
     }
 
     @Override
     public ResponseEntity<Object> getUserBlogs(String token) {
-        String email = jwtService.extractUserEmailFromToken(token);
-        logger.info("Fetching blogs for user with email: {}", email);
-        User user = findUserByEmail(email);
+        try {
+            String email = jwtService.extractUserEmailFromToken(token);
+            logger.info("Fetching blogs for user with email: {}", email);
+            User user = findUserByEmail(email);
 
-        List<Blog> blogs = user.getBlogs();
-        return ResponseEntity.ok().body(MetaBlogResponse.builder()
-                .success(true)
-                .message("User blogs fetched successfully.")
-                .data(blogs)
-                .build());
+            List<Blog> blogs = user.getBlogs();
+            return ResponseEntity.ok().body(MetaBlogResponse.builder()
+                    .success(true)
+                    .message("User blogs fetched successfully.")
+                    .data(blogs)
+                    .build());
+        } catch (Exception e) {
+            logger.error("Error fetching user blogs");
+            logger.error("Message of the error: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
+                    .success(false)
+                    .message(e.getMessage())
+                    .build());
+        }
     }
 
     @Override
     public ResponseEntity<Object> getUserSavedBlogs(String token) {
-        String email = jwtService.extractUserEmailFromToken(token);
-        logger.info("Fetching saved blogs for user with email: {}", email);
-        User user = findUserByEmail(email);
+        try {
+            String email = jwtService.extractUserEmailFromToken(token);
+            logger.info("Fetching saved blogs for user with email: {}", email);
+            User user = findUserByEmail(email);
 
-        List<Blog> savedBlogs = user.getSavedBlogs();
-        return ResponseEntity.ok().body(MetaBlogResponse.builder()
-                .success(true)
-                .message("User saved blogs fetched successfully.")
-                .data(savedBlogs)
-                .build());
+            List<Blog> savedBlogs = user.getSavedBlogs();
+            return ResponseEntity.ok().body(MetaBlogResponse.builder()
+                    .success(true)
+                    .message("User saved blogs fetched successfully.")
+                    .data(savedBlogs)
+                    .build());
+        } catch (Exception e) {
+            logger.error("Error fetching user saved blogs");
+            logger.error("Message of the error: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
+                    .success(false)
+                    .message(e.getMessage())
+                    .build());
+        }
     }
 
     @Override
     public ResponseEntity<Object> saveBlog(Long blogId, String token) {
-        String email = jwtService.extractUserEmailFromToken(token);
-        logger.info("Saving blog with id: {} for user with email: {}", blogId, email);
-        User user = findUserByEmail(email);
+        try {
+            String email = jwtService.extractUserEmailFromToken(token);
+            logger.info("Saving blog with id: {} for user with email: {}", blogId, email);
+            User user = findUserByEmail(email);
 
-        Blog blog = user.getBlogs().stream().filter(b -> b.getId().equals(blogId))
-                .findFirst()
-                .orElseThrow(() -> {
-                    logger.error("Blog not found with id: {}", blogId);
-                    return new MetaBlogException("Blog not found.");
-                });
+            Blog blog = user.getBlogs().stream().filter(b -> b.getId().equals(blogId))
+                    .findFirst()
+                    .orElseThrow(() -> {
+                        logger.error("Blog not found with id: {}", blogId);
+                        return new MetaBlogException("Blog not found.");
+                    });
 
-        user.getSavedBlogs().add(blog);
-        userRepository.save(user);
+            user.getSavedBlogs().add(blog);
+            userRepository.save(user);
 
-        return ResponseEntity.ok().body(MetaBlogResponse.builder()
-                .success(true)
-                .message("Blog saved successfully.")
-                .data(blog)
-                .build());
+            return ResponseEntity.ok().body(MetaBlogResponse.builder()
+                    .success(true)
+                    .message("Blog saved successfully.")
+                    .data(blog)
+                    .build());
+        } catch (MetaBlogException e) {
+            logger.error("Error saving blog: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
+                    .success(false)
+                    .message(e.getMessage())
+                    .build());
+        }
     }
 
     @Override
     public ResponseEntity<Object> removeSavedBlog(Long blogId, String token) {
-        String email = jwtService.extractUserEmailFromToken(token);
-        logger.info("Removing saved blog with id: {} for user with email: {}", blogId, email);
-        User user = findUserByEmail(email);
+        try {
+            String email = jwtService.extractUserEmailFromToken(token);
+            logger.info("Removing saved blog with id: {} for user with email: {}", blogId, email);
+            User user = findUserByEmail(email);
 
-        Blog blog = user.getSavedBlogs().stream().filter(b -> b.getId().equals(blogId))
-                .findFirst()
-                .orElseThrow(() -> {
-                    logger.error("Saved blog not found with id: {}", blogId);
-                    return new MetaBlogException("Saved blog not found.");
-                });
+            Blog blog = user.getSavedBlogs().stream().filter(b -> b.getId().equals(blogId))
+                    .findFirst()
+                    .orElseThrow(() -> {
+                        logger.error("Saved blog not found with id: {}", blogId);
+                        return new MetaBlogException("Saved blog not found.");
+                    });
 
-        user.getSavedBlogs().remove(blog);
-        userRepository.save(user);
+            user.getSavedBlogs().remove(blog);
+            userRepository.save(user);
 
-        return ResponseEntity.ok().body(MetaBlogResponse.builder()
-                .success(true)
-                .message("Saved blog removed successfully.")
-                .data(blog)
-                .build());
+            return ResponseEntity.ok().body(MetaBlogResponse.builder()
+                    .success(true)
+                    .message("Saved blog removed successfully.")
+                    .data(blog)
+                    .build());
+        } catch (MetaBlogException e) {
+            logger.error("Error removing saved blog: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
+                    .success(false)
+                    .message(e.getMessage())
+                    .build());
+        }
     }
 }

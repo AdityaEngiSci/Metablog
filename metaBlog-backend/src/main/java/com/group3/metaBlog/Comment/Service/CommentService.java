@@ -29,56 +29,72 @@ public class CommentService implements ICommentService {
 
     @Override
     public ResponseEntity<Object> createComment(CreateCommentDto request) {
-        logger.info("Creating comment for blogId: {}", request.getBlogId());
+        try {
+            logger.info("Creating comment for blogId: {}", request.getBlogId());
 
-        Optional<Blog> blogOptional = blogRepository.findById(request.getBlogId());
-        if (blogOptional.isEmpty()) {
-            logger.error("Blog not found with id: {}", request.getBlogId());
-            throw new MetaBlogException("Blog not found.");
+            Optional<Blog> blogOptional = blogRepository.findById(request.getBlogId());
+            if (blogOptional.isEmpty()) {
+                logger.error("Blog not found with id: {}", request.getBlogId());
+                throw new MetaBlogException("Blog not found.");
+            }
+
+            Optional<User> userOptional = userRepository.findById(request.getUserId());
+            if (userOptional.isEmpty()) {
+                logger.error("User not found with id: {}", request.getUserId());
+                throw new MetaBlogException("User not found.");
+            }
+
+            Blog blog = blogOptional.get();
+            User user = userOptional.get();
+
+            Comment comment = Comment.builder()
+                    .content(request.getContent())
+                    .blog(blog)
+                    .user(user)
+                    .createdOn(System.currentTimeMillis() / 1000.0)
+                    .build();
+
+            commentRepository.save(comment);
+
+            return ResponseEntity.ok().body(MetaBlogResponse.builder()
+                    .success(true)
+                    .message("Comment created successfully.")
+                    .data(comment)
+                    .build());
+        } catch (MetaBlogException e) {
+            logger.error("Error creating comment: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
+                    .success(false)
+                    .message(e.getMessage())
+                    .build());
         }
-
-        Optional<User> userOptional = userRepository.findById(request.getUserId());
-        if (userOptional.isEmpty()) {
-            logger.error("User not found with id: {}", request.getUserId());
-            throw new MetaBlogException("User not found.");
-        }
-
-        Blog blog = blogOptional.get();
-        User user = userOptional.get();
-
-        Comment comment = Comment.builder()
-                .content(request.getContent())
-                .blog(blog)
-                .user(user)
-                .createdOn(System.currentTimeMillis() / 1000.0)
-                .build();
-
-        commentRepository.save(comment);
-
-        return ResponseEntity.ok().body(MetaBlogResponse.builder()
-                .success(true)
-                .message("Comment created successfully.")
-                .data(comment)
-                .build());
     }
 
     @Override
     public ResponseEntity<Object> getCommentsByBlog(Long blogId) {
-        logger.info("Fetching comments for blogId: {}", blogId);
+        try {
+            logger.info("Fetching comments for blogId: {}", blogId);
 
-        Optional<Blog> blogOptional = blogRepository.findById(blogId);
-        if (blogOptional.isEmpty()) {
-            logger.error("Blog not found with id: {}", blogId);
-            throw new MetaBlogException("Blog not found.");
+            Optional<Blog> blogOptional = blogRepository.findById(blogId);
+            if (blogOptional.isEmpty()) {
+                logger.error("Blog not found with id: {}", blogId);
+                throw new MetaBlogException("Blog not found.");
+            }
+
+            Blog blog = blogOptional.get();
+            List<Comment> comments = commentRepository.findByBlog(blog);
+
+            return ResponseEntity.ok().body(MetaBlogResponse.builder()
+                    .success(true)
+                    .message("Comments fetched successfully.")
+                    .data(comments)
+                    .build());
+        } catch (MetaBlogException e) {
+            logger.error("Error fetching comments: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
+                    .success(false)
+                    .message(e.getMessage())
+                    .build());
         }
-
-        Blog blog = blogOptional.get();
-        List<Comment> comments = commentRepository.findByBlog(blog);
-
-        return ResponseEntity.ok().body(MetaBlogResponse.builder()
-                .success(true)
-                .message("Comments fetched successfully.")
-                .data(comments)
-                .build());
     }
 }
