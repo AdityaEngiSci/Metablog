@@ -5,7 +5,6 @@ import com.group3.metaBlog.Blog.Repository.IBlogRepository;
 import com.group3.metaBlog.Comment.DataTransferObject.CreateCommentDto;
 import com.group3.metaBlog.Comment.Model.Comment;
 import com.group3.metaBlog.Comment.Repository.ICommentRepository;
-import com.group3.metaBlog.Exception.MetaBlogException;
 import com.group3.metaBlog.User.Model.User;
 import com.group3.metaBlog.User.Repository.IUserRepository;
 import com.group3.metaBlog.Utils.MetaBlogResponse;
@@ -19,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -57,7 +57,7 @@ class CommentServiceTest {
         ResponseEntity<Object> response = commentService.createComment(request);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertTrue(((MetaBlogResponse) response.getBody()).getSuccess());
+        assertTrue(((MetaBlogResponse) Objects.requireNonNull(response.getBody())).getSuccess());
         verify(commentRepository, times(1)).save(any(Comment.class));
     }
 
@@ -67,29 +67,33 @@ class CommentServiceTest {
 
         when(blogRepository.findById(1L)).thenReturn(Optional.empty());
 
-        Exception exception = assertThrows(MetaBlogException.class, () -> {
-            commentService.createComment(request);
-        });
+        ResponseEntity<Object> response = commentService.createComment(request);
 
-        assertEquals("Blog not found.", exception.getMessage());
-        verify(commentRepository, times(0)).save(any(Comment.class));
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        MetaBlogResponse responseBody = (MetaBlogResponse) response.getBody();
+        assertNotNull(responseBody);
+        assertEquals("Blog not found.", responseBody.getMessage());
+        assertEquals(false, responseBody.getSuccess());
+
+        verify(commentRepository, never()).save(any(Comment.class)); // Ensure comment wasn't saved
     }
 
     @Test
     void createCommentUserNotFoundTest() {
         CreateCommentDto request = new CreateCommentDto("Test content", 1L, 1L);
-        Blog blog = new Blog();
-        blog.setId(1L);
 
-        when(blogRepository.findById(1L)).thenReturn(Optional.of(blog));
+        when(blogRepository.findById(1L)).thenReturn(Optional.of(new Blog()));
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
-        Exception exception = assertThrows(MetaBlogException.class, () -> {
-            commentService.createComment(request);
-        });
+        ResponseEntity<Object> response = commentService.createComment(request);
 
-        assertEquals("User not found.", exception.getMessage());
-        verify(commentRepository, times(0)).save(any(Comment.class));
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode()); // 404 for resource not found
+        MetaBlogResponse responseBody = (MetaBlogResponse) response.getBody();
+        assertNotNull(responseBody);
+        assertEquals("User not found.", responseBody.getMessage());
+        assertEquals(false, responseBody.getSuccess());
+
+        verify(commentRepository, never()).save(any(Comment.class)); // Ensure comment wasn't saved
     }
 
     @Test
@@ -105,7 +109,7 @@ class CommentServiceTest {
         ResponseEntity<Object> response = commentService.getCommentsByBlog(blogId);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertTrue(((MetaBlogResponse) response.getBody()).getSuccess());
+        assertTrue(((MetaBlogResponse) Objects.requireNonNull(response.getBody())).getSuccess());
         assertEquals(2, ((List<Comment>) ((MetaBlogResponse) response.getBody()).getData()).size());
     }
 
@@ -115,11 +119,15 @@ class CommentServiceTest {
 
         when(blogRepository.findById(blogId)).thenReturn(Optional.empty());
 
-        Exception exception = assertThrows(MetaBlogException.class, () -> {
-            commentService.getCommentsByBlog(blogId);
-        });
+        ResponseEntity<Object> response = commentService.getCommentsByBlog(blogId);
 
-        assertEquals("Blog not found.", exception.getMessage());
-        verify(commentRepository, times(0)).findByBlog(any(Blog.class));
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode()); // 404 for resource not found
+
+        MetaBlogResponse responseBody = (MetaBlogResponse) response.getBody();
+        assertNotNull(responseBody);
+        assertEquals("Blog not found.", responseBody.getMessage());
+        assertEquals(false, responseBody.getSuccess());
+
+        verify(commentRepository, never()).findByBlog(any(Blog.class)); // Ensure no comments fetched
     }
 }

@@ -1,11 +1,10 @@
 package com.group3.metaBlog.Authentication.Service;
 
-import com.group3.metaBlog.Authentication.DataTransferObject.RegisterRequestDto;
-import com.group3.metaBlog.Authentication.DataTransferObject.RegisterResponseDto;
-import com.group3.metaBlog.Authentication.DataTransferObject.ResetPasswordRequestDto;
+import com.group3.metaBlog.Authentication.DataTransferObject.*;
 import com.group3.metaBlog.Config.ApplicationConfig;
 import com.group3.metaBlog.Email.Service.IEmailService;
 import com.group3.metaBlog.Enum.Role;
+import com.group3.metaBlog.Exception.MetaBlogException;
 import com.group3.metaBlog.Jwt.ServiceLayer.JwtService;
 import com.group3.metaBlog.OTP.Service.IOTPService;
 import com.group3.metaBlog.User.Model.User;
@@ -23,7 +22,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import jakarta.mail.MessagingException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -63,6 +61,8 @@ class AuthenticationServiceTest {
     private User user;
     private RegisterRequestDto registerRequestDto;
     private ResetPasswordRequestDto resetPasswordRequestDto;
+    private LoginRequestDto loginRequestDto;
+
 
     @BeforeEach
     void setUp() {
@@ -74,6 +74,8 @@ class AuthenticationServiceTest {
                 .username("testUser")
                 .email("test@example.com")
                 .password("password")
+                .accessToken("accessToken")
+                .refreshToken("refreshToken")
                 .role(Role.User)
                 .build();
         registerRequestDto = new RegisterRequestDto();
@@ -85,6 +87,14 @@ class AuthenticationServiceTest {
         resetPasswordRequestDto = new ResetPasswordRequestDto();
         resetPasswordRequestDto.setEmail("test@example.com");
         resetPasswordRequestDto.setNewPassword("newPassword");
+
+        loginRequestDto = new LoginRequestDto();
+        loginRequestDto.setEmail("test@example.com");
+        loginRequestDto.setPassword("password");
+
+        LoginResponseDto loginResponseDto = new LoginResponseDto();
+        loginResponseDto.setAccessToken("accessToken");
+        loginResponseDto.setRefreshToken("refreshToken");
     }
 
     @Test
@@ -175,6 +185,23 @@ class AuthenticationServiceTest {
     }
 
     @Test
+    void testRegisterMetaBlogException() {
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+        when(otpService.generateOTP()).thenReturn(123456);
+        when(applicationConfig.passwordEncoder()).thenReturn(new BCryptPasswordEncoder());
+        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArguments()[0]);
+
+        doThrow(new MetaBlogException("MetaBlogException occurred")).when(jwtService).generateJwtToken(any());
+
+        ResponseEntity<Object> response = authenticationService.register(registerRequestDto);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        MetaBlogResponse responseBody = (MetaBlogResponse) response.getBody();
+        assertNotNull(responseBody);
+        assertEquals("MetaBlogException occurred", responseBody.getMessage());
+        assertFalse(responseBody.getSuccess());
+    }
+    @Test
     void testForgetPasswordUserDoesNotExist() throws MessagingException {
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.empty());
 
@@ -234,6 +261,21 @@ class AuthenticationServiceTest {
     }
 
     @Test
+    void testForgetPasswordMetaBlogException() {
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+        when(otpService.generateOTP()).thenReturn(123456);
+        doThrow(new MetaBlogException("MetaBlogException occurred")).when(otpService).registerOTP(anyInt(), anyLong());
+
+        ResponseEntity<Object> response = authenticationService.forgetPassword("test@example.com");
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        MetaBlogResponse responseBody = (MetaBlogResponse) response.getBody();
+        assertNotNull(responseBody);
+        assertEquals("MetaBlogException occurred", responseBody.getMessage());
+        assertFalse(responseBody.getSuccess());
+    }
+
+    @Test
     void testResetPasswordUserNotFound() {
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.empty());
 
@@ -267,6 +309,21 @@ class AuthenticationServiceTest {
     }
 
     @Test
+    void testResetPasswordMetaBlogException() {
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+        when(applicationConfig.passwordEncoder()).thenReturn(new BCryptPasswordEncoder());
+        doThrow(new MetaBlogException("MetaBlogException occurred")).when(userRepository).save(any(User.class));
+
+        ResponseEntity<Object> response = authenticationService.resetPassword(resetPasswordRequestDto);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        MetaBlogResponse responseBody = (MetaBlogResponse) response.getBody();
+        assertNotNull(responseBody);
+        assertEquals("MetaBlogException occurred", responseBody.getMessage());
+        assertFalse(responseBody.getSuccess());
+    }
+
+    @Test
     void testFindUserNotFound() {
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.empty());
 
@@ -280,7 +337,6 @@ class AuthenticationServiceTest {
 
         verify(userRepository, times(1)).findByEmail("test@example.com");
     }
-
     @Test
     void testFindUserSuccess() {
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
@@ -294,5 +350,65 @@ class AuthenticationServiceTest {
         assertEquals(true, responseBody.getSuccess());
 
         verify(userRepository, times(1)).findByEmail("test@example.com");
+    }
+
+    @Test
+    void testFindUserMetaBlogException() {
+        doThrow(new MetaBlogException("MetaBlogException occurred")).when(userRepository).findByEmail(anyString());
+
+        ResponseEntity<Object> response = authenticationService.findUser("test@example.com");
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        MetaBlogResponse responseBody = (MetaBlogResponse) response.getBody();
+        assertNotNull(responseBody);
+        assertEquals("MetaBlogException occurred", responseBody.getMessage());
+        assertFalse(responseBody.getSuccess());
+    }
+
+    @Test
+    void loginSuccessTest() {
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+        when(jwtService.generateJwtToken(user)).thenReturn(user.getAccessToken());
+        when(jwtService.generateRefreshToken(user)).thenReturn(user.getRefreshToken());
+
+        ResponseEntity<Object> response = authenticationService.login(loginRequestDto);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        MetaBlogResponse metaBlogResponse = (MetaBlogResponse) response.getBody();
+        assert metaBlogResponse != null;
+        assertTrue(metaBlogResponse.getSuccess());
+        assertEquals("Login successful", metaBlogResponse.getMessage());
+        LoginResponseDto data = (LoginResponseDto) metaBlogResponse.getData();
+        assertEquals(user.getAccessToken(), data.getAccessToken());
+        assertEquals(user.getRefreshToken(), data.getRefreshToken());
+        assertEquals(user.getRole().name(), data.getRole());
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    void loginUserNotFoundTest() {
+        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.empty());
+
+        ResponseEntity<Object> response = authenticationService.login(loginRequestDto);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        MetaBlogResponse metaBlogResponse = (MetaBlogResponse) response.getBody();
+        assertFalse(metaBlogResponse.getSuccess());
+        assertEquals("User not found", metaBlogResponse.getMessage());
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void loginMetaBlogExceptionTest() {
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+        doThrow(new MetaBlogException("MetaBlogException occurred")).when(authenticationManager).authenticate(any());
+
+        ResponseEntity<Object> response = authenticationService.login(loginRequestDto);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        MetaBlogResponse metaBlogResponse = (MetaBlogResponse) response.getBody();
+        assertNotNull(metaBlogResponse);
+        assertFalse(metaBlogResponse.getSuccess());
+        assertEquals("MetaBlogException occurred", metaBlogResponse.getMessage());
     }
 }

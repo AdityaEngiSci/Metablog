@@ -1,6 +1,7 @@
 package com.group3.metaBlog.User.Service;
 
 import com.group3.metaBlog.Blog.Model.Blog;
+import com.group3.metaBlog.Blog.Repository.IBlogRepository;
 import com.group3.metaBlog.Jwt.ServiceLayer.JwtService;
 import com.group3.metaBlog.User.DataTransferObject.UserDetailsResponseDto;
 import com.group3.metaBlog.User.Model.User;
@@ -10,27 +11,27 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
-import org.slf4j.Logger;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 public class UserServiceTest {
 
     @Mock
+    private IBlogRepository blogRepository;
+    @Mock
     private IUserRepository userRepository;
 
     @Mock
     private JwtService jwtService;
-
-    @Mock
-    private Logger logger;
 
     @InjectMocks
     private UserService userService;
@@ -70,8 +71,8 @@ public class UserServiceTest {
         ResponseEntity<Object> response = userService.getUserById(userId, token);
 
         verify(userRepository).findById(userId);
-        assertEquals(200, response.getStatusCodeValue());
-        assertEquals(true, ((MetaBlogResponse) response.getBody()).getSuccess());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(true, ((MetaBlogResponse<?>) Objects.requireNonNull(response.getBody())).getSuccess());
     }
 
     @Test
@@ -83,8 +84,8 @@ public class UserServiceTest {
         ResponseEntity<Object> response = userService.getUserById(userId, token);
 
         verify(userRepository).findById(userId);
-        assertEquals(400, response.getStatusCodeValue());
-        assertEquals(false, ((MetaBlogResponse) response.getBody()).getSuccess());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(false, ((MetaBlogResponse<?>) Objects.requireNonNull(response.getBody())).getSuccess());
     }
 
     @Test
@@ -95,8 +96,8 @@ public class UserServiceTest {
         ResponseEntity<Object> response = userService.getUserDetails(token);
 
         verify(userRepository).findByEmail(user.getEmail());
-        assertEquals(200, response.getStatusCodeValue());
-        assertEquals(true, ((MetaBlogResponse) response.getBody()).getSuccess());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(true, ((MetaBlogResponse<?>) Objects.requireNonNull(response.getBody())).getSuccess());
     }
 
     @Test
@@ -107,8 +108,8 @@ public class UserServiceTest {
         ResponseEntity<Object> response = userService.getUserDetails(token);
 
         verify(userRepository).findByEmail(user.getEmail());
-        assertEquals(400, response.getStatusCodeValue());
-        assertEquals(false, ((MetaBlogResponse) response.getBody()).getSuccess());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(false, ((MetaBlogResponse<?>) Objects.requireNonNull(response.getBody())).getSuccess());
     }
 
     @Test
@@ -126,8 +127,8 @@ public class UserServiceTest {
         ResponseEntity<Object> response = userService.updateUserDetails(userDetails, token);
 
         verify(userRepository).save(user);
-        assertEquals(200, response.getStatusCodeValue());
-        assertEquals(true, ((MetaBlogResponse) response.getBody()).getSuccess());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(true, ((MetaBlogResponse<?>) Objects.requireNonNull(response.getBody())).getSuccess());
     }
 
     @Test
@@ -144,8 +145,8 @@ public class UserServiceTest {
 
         ResponseEntity<Object> response = userService.updateUserDetails(userDetails, token);
 
-        assertEquals(400, response.getStatusCodeValue());
-        assertEquals(false, ((MetaBlogResponse) response.getBody()).getSuccess());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(false, ((MetaBlogResponse<?>) Objects.requireNonNull(response.getBody())).getSuccess());
     }
 
     @Test
@@ -157,8 +158,8 @@ public class UserServiceTest {
         ResponseEntity<Object> response = userService.getUserBlogs(token);
 
         verify(userRepository).findByEmail(user.getEmail());
-        assertEquals(200, response.getStatusCodeValue());
-        assertEquals(true, ((MetaBlogResponse) response.getBody()).getSuccess());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(true, ((MetaBlogResponse<?>) Objects.requireNonNull(response.getBody())).getSuccess());
     }
 
     @Test
@@ -168,8 +169,8 @@ public class UserServiceTest {
 
         ResponseEntity<Object> response = userService.getUserBlogs(token);
 
-        assertEquals(400, response.getStatusCodeValue());
-        assertEquals(false, ((MetaBlogResponse) response.getBody()).getSuccess());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(false, ((MetaBlogResponse<?>) Objects.requireNonNull(response.getBody())).getSuccess());
     }
 
     @Test
@@ -181,20 +182,23 @@ public class UserServiceTest {
         ResponseEntity<Object> response = userService.getUserSavedBlogs(token);
 
         verify(userRepository).findByEmail(user.getEmail());
-        assertEquals(200, response.getStatusCodeValue());
-        assertEquals(true, ((MetaBlogResponse) response.getBody()).getSuccess());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(true, ((MetaBlogResponse<?>) Objects.requireNonNull(response.getBody())).getSuccess());
     }
     @Test
     public void SaveBlogBlogNotFoundTest() {
         user.getBlogs().clear(); // Ensure the user has no blogs
         when(jwtService.extractUserEmailFromToken(token)).thenReturn(user.getEmail());
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+        when(blogRepository.findById(1L)).thenReturn(Optional.empty());
 
         ResponseEntity<Object> response = userService.saveBlog(1L, token);
 
-        assertEquals(400, response.getStatusCodeValue());
-        assertEquals(false, ((MetaBlogResponse) response.getBody()).getSuccess());
-        assertEquals("Blog not found.", ((MetaBlogResponse) response.getBody()).getMessage());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(false, ((MetaBlogResponse<?>) Objects.requireNonNull(response.getBody())).getSuccess());
+        assertEquals("Blog not found.", ((MetaBlogResponse<?>) response.getBody()).getMessage());
+
+        assertFalse(user.getSavedBlogs().contains(blog));
     }
     @Test
     public void RemoveSavedBlogSavedBlogNotFoundTest() {
@@ -204,9 +208,9 @@ public class UserServiceTest {
 
         ResponseEntity<Object> response = userService.removeSavedBlog(1L, token);
 
-        assertEquals(400, response.getStatusCodeValue());
-        assertEquals(false, ((MetaBlogResponse) response.getBody()).getSuccess());
-        assertEquals("Saved blog not found.", ((MetaBlogResponse) response.getBody()).getMessage());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(false, ((MetaBlogResponse<?>) Objects.requireNonNull(response.getBody())).getSuccess());
+        assertEquals("Saved blog not found.", ((MetaBlogResponse<?>) response.getBody()).getMessage());
     }
 
     @Test
@@ -216,21 +220,25 @@ public class UserServiceTest {
 
         ResponseEntity<Object> response = userService.getUserSavedBlogs(token);
 
-        assertEquals(400, response.getStatusCodeValue());
-        assertEquals(false, ((MetaBlogResponse) response.getBody()).getSuccess());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(false, ((MetaBlogResponse<?>) Objects.requireNonNull(response.getBody())).getSuccess());
     }
 
     @Test
     public void SaveBlogSuccessTest() {
-        user.getBlogs().add(blog);
+        user.getBlogs().clear();
         when(jwtService.extractUserEmailFromToken(token)).thenReturn(user.getEmail());
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+        when(blogRepository.findById(blog.getId())).thenReturn(Optional.of(blog));
 
         ResponseEntity<Object> response = userService.saveBlog(blog.getId(), token);
 
         verify(userRepository).save(user);
-        assertEquals(200, response.getStatusCodeValue());
-        assertEquals(true, ((MetaBlogResponse) response.getBody()).getSuccess());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(true, ((MetaBlogResponse<?>) Objects.requireNonNull(response.getBody())).getSuccess());
+
+        assertTrue(user.getSavedBlogs().contains(blog));
+
     }
 
     @Test
@@ -240,8 +248,8 @@ public class UserServiceTest {
 
         ResponseEntity<Object> response = userService.saveBlog(blog.getId(), token);
 
-        assertEquals(400, response.getStatusCodeValue());
-        assertEquals(false, ((MetaBlogResponse) response.getBody()).getSuccess());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(false, ((MetaBlogResponse<?>) Objects.requireNonNull(response.getBody())).getSuccess());
     }
 
     @Test
@@ -253,8 +261,8 @@ public class UserServiceTest {
         ResponseEntity<Object> response = userService.removeSavedBlog(blog.getId(), token);
 
         verify(userRepository).save(user);
-        assertEquals(200, response.getStatusCodeValue());
-        assertEquals(true, ((MetaBlogResponse) response.getBody()).getSuccess());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(true, ((MetaBlogResponse<?>) Objects.requireNonNull(response.getBody())).getSuccess());
     }
 
     @Test
@@ -264,7 +272,7 @@ public class UserServiceTest {
 
         ResponseEntity<Object> response = userService.removeSavedBlog(blog.getId(), token);
 
-        assertEquals(400, response.getStatusCodeValue());
-        assertEquals(false, ((MetaBlogResponse) response.getBody()).getSuccess());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(false, ((MetaBlogResponse<?>) Objects.requireNonNull(response.getBody())).getSuccess());
     }
 }
