@@ -22,10 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import jakarta.mail.MessagingException;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Optional;
@@ -65,7 +62,6 @@ class AuthenticationServiceTest {
     private RegisterRequestDto registerRequestDto;
     private ResetPasswordRequestDto resetPasswordRequestDto;
     private LoginRequestDto loginRequestDto;
-    private LoginResponseDto loginResponseDto;
 
 
     @BeforeEach
@@ -96,7 +92,7 @@ class AuthenticationServiceTest {
         loginRequestDto.setEmail("test@example.com");
         loginRequestDto.setPassword("password");
 
-        loginResponseDto = new LoginResponseDto();
+        LoginResponseDto loginResponseDto = new LoginResponseDto();
         loginResponseDto.setAccessToken("accessToken");
         loginResponseDto.setRefreshToken("refreshToken");
     }
@@ -379,6 +375,7 @@ class AuthenticationServiceTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         MetaBlogResponse metaBlogResponse = (MetaBlogResponse) response.getBody();
+        assert metaBlogResponse != null;
         assertTrue(metaBlogResponse.getSuccess());
         assertEquals("Login successful", metaBlogResponse.getMessage());
         LoginResponseDto data = (LoginResponseDto) metaBlogResponse.getData();
