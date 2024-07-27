@@ -1,6 +1,7 @@
 package com.group3.metaBlog.User.Service;
 
 import com.group3.metaBlog.Blog.Model.Blog;
+import com.group3.metaBlog.Blog.Repository.IBlogRepository;
 import com.group3.metaBlog.Jwt.ServiceLayer.JwtService;
 import com.group3.metaBlog.User.DataTransferObject.UserDetailsResponseDto;
 import com.group3.metaBlog.User.Model.User;
@@ -17,12 +18,14 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.ArrayList;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 public class UserServiceTest {
 
+    @Mock
+    private IBlogRepository blogRepository;
     @Mock
     private IUserRepository userRepository;
 
@@ -189,12 +192,15 @@ public class UserServiceTest {
         user.getBlogs().clear(); // Ensure the user has no blogs
         when(jwtService.extractUserEmailFromToken(token)).thenReturn(user.getEmail());
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+        when(blogRepository.findById(1L)).thenReturn(Optional.empty());
 
         ResponseEntity<Object> response = userService.saveBlog(1L, token);
 
         assertEquals(400, response.getStatusCodeValue());
         assertEquals(false, ((MetaBlogResponse) response.getBody()).getSuccess());
         assertEquals("Blog not found.", ((MetaBlogResponse) response.getBody()).getMessage());
+
+        assertFalse(user.getSavedBlogs().contains(blog));
     }
     @Test
     public void RemoveSavedBlogSavedBlogNotFoundTest() {
@@ -222,15 +228,19 @@ public class UserServiceTest {
 
     @Test
     public void SaveBlogSuccessTest() {
-        user.getBlogs().add(blog);
+        user.getBlogs().clear();
         when(jwtService.extractUserEmailFromToken(token)).thenReturn(user.getEmail());
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+        when(blogRepository.findById(blog.getId())).thenReturn(Optional.of(blog));
 
         ResponseEntity<Object> response = userService.saveBlog(blog.getId(), token);
 
         verify(userRepository).save(user);
         assertEquals(200, response.getStatusCodeValue());
         assertEquals(true, ((MetaBlogResponse) response.getBody()).getSuccess());
+
+        assertTrue(user.getSavedBlogs().contains(blog));
+
     }
 
     @Test

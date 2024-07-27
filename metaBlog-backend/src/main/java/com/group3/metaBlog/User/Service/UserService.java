@@ -1,6 +1,7 @@
 package com.group3.metaBlog.User.Service;
 
 import com.group3.metaBlog.Blog.Model.Blog;
+import com.group3.metaBlog.Blog.Repository.IBlogRepository;
 import com.group3.metaBlog.Exception.MetaBlogException;
 import com.group3.metaBlog.Jwt.ServiceLayer.JwtService;
 import com.group3.metaBlog.User.DataTransferObject.SavedBlogResponseDto;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 public class UserService implements IUserService {
 
     private final IUserRepository userRepository;
+    private final IBlogRepository blogRepository;
     private final JwtService jwtService;
     private final Logger logger = LoggerFactory.getLogger(UserService.class);
 
@@ -187,8 +189,7 @@ public class UserService implements IUserService {
             logger.info("Saving blog with id: {} for user with email: {}", blogId, email);
             User user = findUserByEmail(email);
 
-            Blog blog = user.getBlogs().stream().filter(b -> b.getId().equals(blogId))
-                    .findFirst()
+            Blog blog = blogRepository.findById(blogId)
                     .orElseThrow(() -> {
                         logger.error("Blog not found with id: {}", blogId);
                         return new MetaBlogException("Blog not found.");
