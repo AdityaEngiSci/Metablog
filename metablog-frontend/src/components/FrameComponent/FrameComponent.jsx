@@ -1,18 +1,12 @@
 import PropTypes from "prop-types";
-import styles from "./FrameComponent.module.css";
 
 const FrameComponent = ({ className = "" }) => {
   return (
-    <div className={[styles.backgroundParent, className].join(" ")}>
-      <img className={styles.backgroundIcon} alt="" src="/background.svg" />
-      <div className={styles.logoParent}>
-        <img
-          className={styles.logoIcon}
-          loading="lazy"
-          alt=""
-          src="/logo.svg"
-        />
-        <h1 className={styles.blogsToDive}>Blogs to dive into tech</h1>
+    <div className={`relative w-full md:w-1/2 ${className}`}>
+      <img className="absolute inset-0 w-full h-full object-cover" src="/background.svg" alt="background" />
+      <div className="relative flex flex-col items-start justify-start p-20 h-full">
+        <img className="w-40 mb-10" src="/logo.svg" alt="MetaBlog Logo" />
+        <h1 className="text-4xl font-bold text-white">Blogs to dive into tech</h1>
       </div>
     </div>
   );

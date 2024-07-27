@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import Header from "../../components/Header";
-import Footer from "../../components/Footer";
-import BlogCard from "../../components/BlogCard";
+import Header from "../../components/Header/Header";
+import Footer from "../../components/Footer/Footer";
+import BlogCard from "../../components/BlogCard/BlogCard";
 import Avatar from "react-avatar";
 import axios from "axios";
 import { AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";

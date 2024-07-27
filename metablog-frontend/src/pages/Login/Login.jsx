@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import FrameComponent from "../../components/FrameComponent/FrameComponent";
-import styles from "./Login.module.css";
 import axios from "axios";
 import Swal from "sweetalert2";
 
@@ -82,69 +81,62 @@ const Login = () => {
   }, [formData]);
 
   return (
-      <div className={styles.login}>
-        <FrameComponent />
-        <div className={styles.authContainer}>
-          <div className={styles.authFields}>
-            <div className={styles.authHeader}>
-              <h1 className={styles.welcomeBack}>Welcome Back</h1>
-              <div className={styles.dontHaveAnContainer}>
-                <span>{`Don’t have an account? `}</span>
-                <span className={styles.signUp} onClick={handleSignUpClick}>
-                Sign Up
-              </span>
+    <div className="flex flex-col md:flex-row w-full h-screen">
+      <FrameComponent />
+      <div className="flex flex-col items-center justify-center w-full md:w-1/2 p-8 md:p-20 bg-white">
+        <div className="w-full max-w-md">
+          <h1 className="text-4xl font-bold mb-6 text-gray-900">Welcome Back</h1>
+          <p className="text-lg mb-4 text-gray-700">
+            Don’t have an account?{' '}
+            <span className="text-blue-600 cursor-pointer font-semibold" onClick={handleSignUpClick}>
+              Sign Up
+            </span>
+          </p>
+          {errorMessage && <div className="text-red-500 mb-4 text-base">{errorMessage}</div>}
+          <form className="space-y-6" onSubmit={handleLogin}>
+            <div className="space-y-4">
+              <input
+                className="w-full p-3 border border-gray-300 rounded text-gray-900 placeholder-gray-500 text-base"
+                name="email"
+                placeholder="Email"
+                type="text"
+                value={formData.email}
+                onChange={handleChange}
+              />
+              <div className="relative">
+                <input
+                  className="w-full p-3 border border-gray-300 rounded text-gray-900 placeholder-gray-500 text-base"
+                  name="password"
+                  placeholder="Password"
+                  type={showPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={handleChange}
+                />
+                <img
+                  className="absolute top-3 right-3 w-5 h-5 cursor-pointer"
+                  alt="toggle visibility"
+                  src={showPassword ? "/iconoutlineeye.svg" : "/iconoutlineeyeoff.svg"}
+                  onClick={() => setShowPassword(!showPassword)}
+                />
+              </div>
+              <div
+                className="text-base text-blue-600 cursor-pointer font-semibold"
+                onClick={handleForgotPasswordClick}
+              >
+                Forgot Password
               </div>
             </div>
-            <form className={styles.credentials} onSubmit={handleLogin}>
-              <div className={styles.inputFields}>
-                <div className={styles.inputTrio}>
-                  <input
-                      className={styles.email}
-                      name="email"
-                      placeholder="Email"
-                      type="text"
-                      value={formData.email}
-                      onChange={handleChange}
-                  />
-                </div>
-                <div className={styles.inputTrio1}>
-                  <input
-                      className={styles.password}
-                      name="password"
-                      placeholder="Password"
-                      type={showPassword ? "text" : "password"}
-                      value={formData.password}
-                      onChange={handleChange}
-                  />
-                  <img
-                      className={styles.iconoutlineeyeOff}
-                      alt=""
-                      src={showPassword ? "/iconoutlineeye.svg" : "/iconoutlineeyeoff.svg"}
-                      onClick={() => setShowPassword(!showPassword)}
-                      style={{ cursor: "pointer" }}
-                  />
-                </div>
-                <div className={styles.inputTrio2}>
-                  <div
-                      className={styles.forgotPassword}
-                      onClick={handleForgotPasswordClick}
-                  >
-                    Forgot Password
-                  </div>
-                </div>
-              </div>
-              {errorMessage && <div className={styles.errorMessage}>{errorMessage}</div>}
-              <button
-                  className={`${styles.submission} ${!isFormValid ? styles.disabledButton : ''}`}
-                  type="submit"
-                  disabled={!isFormValid}
-              >
-                <div className={styles.login1}>Login</div>
-              </button>
-            </form>
-          </div>
+            <button
+              className={`w-full py-3 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition text-base ${!isFormValid ? 'opacity-50 cursor-not-allowed' : ''}`}
+              type="submit"
+              disabled={!isFormValid}
+            >
+              Login
+            </button>
+          </form>
         </div>
       </div>
+    </div>
   );
 };
 

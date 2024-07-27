@@ -19,8 +19,8 @@ import UserProfile from "./pages/UserProfile/UserProfile";
 import UserBlogs from "./pages/Blogs/UserBlogs";
 import SearchResult from './pages/Search/SearchResult';
 import BlogManagement from './pages/AdminPage/BlogManagement';
-import ProtectedRoute from './components/ProtectedRoute';
-import AdminRoute from './components/AdminRoute';
+import ProtectedRoute from './components/RouteProtection/ProtectedRoute';
+import AdminRoute from './components/RouteProtection/AdminRoute';
 
 function App() {
   const action = useNavigationType();

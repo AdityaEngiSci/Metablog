@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import FrameComponent from "../../components/FrameComponent/FrameComponent";
-import styles from "./ForgotPasswordStep.module.css";
 import axios from "axios";
 import Swal from "sweetalert2";
 
@@ -56,48 +55,40 @@ const ForgotPasswordStep = () => {
   }, [email]);
 
   return (
-      <div className={styles.forgotPasswordStep3}>
-        <FrameComponent />
-        <div className={styles.formContainer}>
-          <div className={styles.form}>
-            <div className={styles.instructions}>
-              <h1 className={styles.forgotPassword}>Forgot Password</h1>
-              <div className={styles.enterTheEmail}>
-                Enter your registered email address to get the OTP.
-              </div>
-            </div>
-            <form className={styles.emailSendForm}>
-              <input
-                  className={styles.emailInput}
-                  type="email"
-                  placeholder="Email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-              />
-              <button
-                  type="button"
-                  className={`${styles.submitButton} ${!isEmailValid ? styles.disabledButton : ""}`}
-                  onClick={handleSendClick}
-                  disabled={!isEmailValid}
-              >
-                Send
-              </button>
-            </form>
+    <div className="flex flex-col md:flex-row w-full h-screen">
+      <FrameComponent />
+      <div className="flex flex-col items-center justify-center w-full md:w-1/2 p-8 md:p-20 bg-white">
+        <div className="w-full max-w-md">
+          <h1 className="text-4xl font-bold mb-6 text-gray-900">Forgot Password</h1>
+          <p className="text-lg mb-4 text-gray-700">Enter your registered email address to get the OTP.</p>
+          <form className="space-y-6">
+            <input
+              className="w-full p-3 border border-gray-300 rounded text-gray-900 placeholder-gray-500 text-base"
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
             <button
-                type="button"
-                className={styles.backToLoginButton}
-                onClick={handleBackToLoginClick}
+              type="button"
+              className={`w-full py-3 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition text-base ${!isEmailValid ? 'opacity-50 cursor-not-allowed' : ''}`}
+              onClick={handleSendClick}
+              disabled={!isEmailValid}
             >
-              Back to Login
+              Send
             </button>
-          </div>
+          </form>
+          <button
+            type="button"
+            className="w-full py-3 mt-4 rounded border border-gray-300 bg-gray-100 text-gray-900 font-semibold hover:bg-gray-200 transition text-base"
+            onClick={handleBackToLoginClick}
+          >
+            Back to Login
+          </button>
         </div>
       </div>
+    </div>
   );
 };
 
 export default ForgotPasswordStep;
-
-
-
-

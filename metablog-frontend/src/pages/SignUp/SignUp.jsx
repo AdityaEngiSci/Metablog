@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import InputFields from '../../components/RegisterInputFields/InputFields';
-import styles from './SignUp.module.css';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
@@ -19,8 +18,6 @@ const SignUp = () => {
   });
 
   const [errorMessage, setErrorMessage] = useState('');
-  const base_url = process.env.REACT_APP_BASE_URL;
-
 
   const handleLoginClick = () => {
     navigate('/login');
@@ -34,13 +31,13 @@ const SignUp = () => {
   const isFormValid = () => {
     const { firstName, lastName, email, password, confirmPassword, isChecked } = formData;
     return (
-        firstName.trim() !== '' &&
-        lastName.trim() !== '' &&
-        isEmailValid(email) &&
-        password.trim() !== '' &&
-        confirmPassword.trim() !== '' &&
-        isChecked &&
-        password === confirmPassword
+      firstName.trim() !== '' &&
+      lastName.trim() !== '' &&
+      isEmailValid(email) &&
+      password.trim() !== '' &&
+      confirmPassword.trim() !== '' &&
+      isChecked &&
+      password === confirmPassword
     );
   };
 
@@ -62,20 +59,24 @@ const SignUp = () => {
       role: 'User', // Assuming the role is fixed as 'User'
     };
 
+    const formDataObj = new FormData();
+    Object.keys(registerData).forEach(key => {
+      formDataObj.append(key, registerData[key]);
+    });
+    if (formData.image) {
+      formDataObj.append('image', formData.image);
+    }
+
     try {
-      const response = await axios.post(`${base_url}/auth/register`, registerData, {
+      const response = await axios.post('http://localhost:8080/api/v1/auth/register', formDataObj, {
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'multipart/form-data',
         },
       });
 
       if (response.status === 201) {
         // Handle successful registration
         console.log('User registered successfully:', response.data);
-        const { accessToken } = response.data.data;
-
-        // Store tokens in local storage
-        localStorage.setItem('accessToken', accessToken);
         Swal.fire({
           icon: 'success',
           title: 'Registration Successful',
@@ -96,7 +97,7 @@ const SignUp = () => {
         // The request was made and the server responded with a status code
         Swal.fire({
           icon: 'error',
-          title: 'oops!',
+          title: 'Oops!',
           text: error.response.data.message,
         });
       } else if (error.request) {
@@ -111,35 +112,37 @@ const SignUp = () => {
   };
 
   return (
-      <div className={styles.signUp3}>
-        <div className={styles.backgroundParent}>
-          <img className={styles.backgroundIcon} alt="" src="/background.svg" />
-          <div className={styles.headerContent}>
-            <img className={styles.logoIcon} loading="lazy" alt="" src="/logo.svg" />
-            <h1 className={styles.blogsToDive}>Blogs to dive into tech</h1>
-          </div>
+    <div className="flex flex-col md:flex-row w-full h-screen">
+      <div className="relative w-full md:w-1/2">
+        <img className="absolute inset-0 w-full h-full object-cover" src="/background.svg" alt="background" />
+        <div className="relative flex flex-col items-start justify-start p-20 h-full">
+          <img className="w-40 mb-10" src="/logo.svg" alt="MetaBlog Logo" />
+          <h1 className="text-4xl font-bold text-white">Blogs to dive into tech</h1>
         </div>
-        <div className={styles.loginOptionsParent}>
-          <div className={styles.loginOptions}>
-            <h1 className={styles.createAccount}>Create account</h1>
-            <div className={styles.alreadyHaveAnContainer}>
-              <span>{`Already have an account? `}</span>
-              <span className={styles.login} onClick={handleLoginClick}>Login</span>
-            </div>
-          </div>
-          {errorMessage && <div className={styles.errorMessage}>{errorMessage}</div>}
-          <form className={styles.signUpForm} onSubmit={handleSubmit}>
+      </div>
+      <div className="flex flex-col items-center justify-center w-full md:w-1/2 p-8 md:p-20 bg-white">
+        <div className="w-full max-w-md">
+          <h1 className="text-3xl font-bold mb-6 text-gray-900">Create Account</h1>
+          <p className="text-base mb-4 text-gray-700">
+            Already have an account?{' '}
+            <span className="text-blue-600 cursor-pointer" onClick={handleLoginClick}>
+              Login
+            </span>
+          </p>
+          {errorMessage && <div className="text-red-500 mb-4">{errorMessage}</div>}
+          <form className="space-y-6" onSubmit={handleSubmit}>
             <InputFields formData={formData} setFormData={setFormData} />
             <button
-                className={`${styles.submitButton} ${!isFormValid() ? styles.disabledButton : ''}`}
-                type="submit"
-                disabled={!isFormValid()}
+              className={`w-full py-3 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition ${!isFormValid() ? 'opacity-50 cursor-not-allowed' : ''}`}
+              type="submit"
+              disabled={!isFormValid()}
             >
-              <b className={styles.createAccount1}>Create Account</b>
+              Create Account
             </button>
           </form>
         </div>
       </div>
+    </div>
   );
 };
 
