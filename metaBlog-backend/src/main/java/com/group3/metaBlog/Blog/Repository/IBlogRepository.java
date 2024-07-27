@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface BlogRepository extends JpaRepository<Blog, Long> {
+public interface IBlogRepository extends JpaRepository<Blog, Long> {
     List<Blog> findByTitleContaining(String title);
     boolean existsByTitleAndContent(String title, String content);
     List<Blog> findByStatus(BlogStatus status);

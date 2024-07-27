@@ -3,8 +3,7 @@ package com.group3.metaBlog.Blog.Service;
 import com.group3.metaBlog.Blog.DTO.BlogRequestDto;
 import com.group3.metaBlog.Blog.DTO.BlogResponseDto;
 import com.group3.metaBlog.Blog.Model.Blog;
-import com.group3.metaBlog.Blog.Repository.BlogRepository;
-import com.group3.metaBlog.Blog.Service.BlogService;
+import com.group3.metaBlog.Blog.Repository.IBlogRepository;
 import com.group3.metaBlog.Enum.BlogStatus;
 import com.group3.metaBlog.Image.Model.Image;
 import com.group3.metaBlog.Image.Service.ImageService;
@@ -34,7 +33,7 @@ import static org.mockito.Mockito.*;
 class BlogServiceTest {
 
     @Mock
-    private BlogRepository blogRepository;
+    private IBlogRepository blogRepository;
 
     @Mock
     private ImageService imageService;

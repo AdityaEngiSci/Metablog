@@ -10,7 +10,7 @@ build-backend:
   before_script:
       - cd metaBlog-backend
   tags:
-    - dalfcs_docker_autoscale
+    - dalfcs_gitlab_docker_ci
   script:
     - echo "Starting backend build......"
     - mvn clean install -DskipTests
@@ -27,7 +27,7 @@ build-frontend:
   stage: build
   image: node:latest
   tags:
-    - dalfcs_docker_autoscale
+    - dalfcs_gitlab_docker_ci
   before_script:
     - cd metablog-frontend
     - npm install
@@ -46,7 +46,7 @@ test-backend:
     stage: test
     image: maven:latest
     tags:
-    - dalfcs_docker_autoscale
+    - dalfcs_gitlab_docker_ci
     before_script: 
         - cd metaBlog-backend
     script:
