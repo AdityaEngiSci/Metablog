@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import BlogCard from "../../components/BlogCard";
+import BlogCard from "../../components/BlogCard/BlogCard";
 import {AvatarFallback, AvatarImage} from "@radix-ui/react-avatar";
 import Avatar from "react-avatar";
 import { FaFacebookF, FaTwitter, FaInstagram , FaGithub, FaLinkedin,FaYoutube, FaGlobe} from 'react-icons/fa';

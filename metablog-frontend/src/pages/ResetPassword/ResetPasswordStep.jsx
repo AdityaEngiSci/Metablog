@@ -1,7 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { useState , useEffect} from "react";
+import { useState, useEffect } from "react";
 import FrameComponent from "../../components/FrameComponent/FrameComponent";
-import styles from "./ResetPasswordStep.module.css";
 import axios from "axios";
 import Swal from "sweetalert2";
 
@@ -14,7 +13,6 @@ const ResetPasswordStep = () => {
   const [passwordType, setPasswordType] = useState("password");
   const [confirmPasswordType, setConfirmPasswordType] = useState("password");
   const base_url = process.env.REACT_APP_BASE_URL;
-
 
   useEffect(() => {
     if (!email) {
@@ -76,68 +74,62 @@ const ResetPasswordStep = () => {
   const isFormValid = password && confirmPassword && password === confirmPassword;
 
   return (
-      <div className={styles.resetPasswordStep3}>
-        <FrameComponent />
-        <div className={styles.content}>
-          <div className={styles.resetTitleParent}>
-            <div className={styles.resetTitle}>
-              <h1 className={styles.resetPassword}>Reset Password</h1>
-              <div className={styles.chooseANew}>
-                Choose a new password for your account
-              </div>
+    <div className="flex flex-col md:flex-row w-full h-screen">
+      <FrameComponent />
+      <div className="flex flex-col items-center justify-center w-full md:w-1/2 p-8 md:p-20 bg-white">
+        <div className="w-full max-w-md">
+          <h1 className="text-4xl font-bold mb-6 text-gray-900">Reset Password</h1>
+          <p className="text-lg mb-4 text-gray-700">Choose a new password for your account</p>
+          <form className="space-y-6">
+            <div className="relative">
+              <input
+                className="w-full p-3 border border-gray-300 rounded text-gray-900 placeholder-gray-500 text-base"
+                placeholder="Your new password"
+                type={passwordType}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <img
+                className="absolute top-3 right-3 w-5 h-5 cursor-pointer"
+                alt="toggle visibility"
+                src="/iconoutlineeyeoff.svg"
+                onClick={togglePasswordVisibility}
+              />
             </div>
-            <form className={styles.passwordFields}>
-              <div className={styles.passwordInputs}>
-                <div className={styles.inputLabels}>
-                  <input
-                      className={styles.yourNewPassword}
-                      placeholder="Your new password"
-                      type={passwordType}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                  />
-                  <img
-                      className={styles.iconoutlineeyeOff}
-                      alt=""
-                      src="/iconoutlineeyeoff.svg"
-                      onClick={togglePasswordVisibility}
-                  />
-                </div>
-                <div className={styles.inputLabels1}>
-                  <input
-                      className={styles.confirmYourNew}
-                      placeholder="Confirm your new password"
-                      type={confirmPasswordType}
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                  />
-                  <img
-                      className={styles.iconoutlineeyeOff1}
-                      alt=""
-                      src="/iconoutlineeyeoff.svg"
-                      onClick={toggleConfirmPasswordVisibility}
-                  />
-                </div>
-              </div>
-              <button
-                  type="button"
-                  className={`${styles.resetButton} ${!isFormValid ? styles.disabledButton : ""}`}
-                  onClick={handleResetPasswordClick}
-                  disabled={!isFormValid}
-              >
-                <div className={styles.resetPasswordText}>Reset Password</div>
-              </button>
-              <button
-                  type="button"
-                  className={styles.loginLink}
-                  onClick={handleBackToLoginClick}
-              >
-                <div className={styles.backToLogin}>Back to Login</div>
-              </button>
-            </form>
-          </div>
+            <div className="relative">
+              <input
+                className="w-full p-3 border border-gray-300 rounded text-gray-900 placeholder-gray-500 text-base"
+                placeholder="Confirm your new password"
+                type={confirmPasswordType}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+              <img
+                className="absolute top-3 right-3 w-5 h-5 cursor-pointer"
+                alt="toggle visibility"
+                src="/iconoutlineeyeoff.svg"
+                onClick={toggleConfirmPasswordVisibility}
+              />
+            </div>
+            <button
+              type="button"
+              className={`w-full py-3 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition text-base ${!isFormValid ? 'opacity-50 cursor-not-allowed' : ''}`}
+              onClick={handleResetPasswordClick}
+              disabled={!isFormValid}
+            >
+              Reset Password
+            </button>
+            <button
+              type="button"
+              className="w-full py-3 mt-4 rounded border border-gray-300 bg-gray-100 text-gray-900 font-semibold hover:bg-gray-200 transition text-base"
+              onClick={handleBackToLoginClick}
+            >
+              Back to Login
+            </button>
+          </form>
         </div>
       </div>
+    </div>
   );
 };
 

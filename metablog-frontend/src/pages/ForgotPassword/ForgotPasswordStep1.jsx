@@ -1,11 +1,10 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import FrameComponent from "../../components/FrameComponent/FrameComponent";
-import styles from "./ForgotPasswordStep.module.css";
 import axios from "axios";
 import Swal from "sweetalert2";
 
-const ForgotPasswordStep = () => {
+const VerifyOTP = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [otp, setOtp] = useState("");
@@ -27,17 +26,17 @@ const ForgotPasswordStep = () => {
 
   const handleSendClick = () => {
     Swal.fire({
-        icon: "success",
-        title: "Email Sent",
-        text: "Email resent successfully. Check your inbox for the OTP.",
-        });
+      icon: "success",
+      title: "Email Sent",
+      text: "Email resent successfully. Check your inbox for the OTP.",
+    });
   };
 
   const handleVerifyOTPClick = async () => {
     try {
       const response = await axios.post("http://localhost:8080/api/v1/otp/verify",
-          { email, otp: parseInt(otp) },
-          { headers: { "Content-Type": "application/json" } });
+        { email, otp: parseInt(otp) },
+        { headers: { "Content-Type": "application/json" } });
 
       if (response.status === 200) {
         setOtpVerified(true);
@@ -48,8 +47,8 @@ const ForgotPasswordStep = () => {
         });
         if (isGoingToLogin === "signup") {
           navigate("/login");
-        }else {
-          navigate("/reset-password-step-3" , { state: { email } });
+        } else {
+          navigate("/reset-password-step-3", { state: { email } });
         }
       } else {
         setOtpVerified(false);
@@ -79,54 +78,52 @@ const ForgotPasswordStep = () => {
   };
 
   return (
-      <div className={styles.forgotPasswordStep3}>
-        <FrameComponent />
-        <div className={styles.formContainer}>
-          <div className={styles.otpForm}>
-            <div className={styles.instructions}>
-              <button type="button" className={styles.resendButton} onClick={handleSendClick}>
-                Resend Email
+    <div className="flex flex-col md:flex-row w-full h-screen">
+      <FrameComponent />
+      <div className="flex flex-col items-center justify-center w-full md:w-1/2 p-8 md:p-20 bg-white">
+        <div className="w-full max-w-md">
+          <button
+            type="button"
+            className="mb-4 py-2 px-4 rounded border border-blue-700 text-blue-700 hover:bg-blue-100 transition"
+            onClick={handleSendClick}
+          >
+            Resend Email
+          </button>
+          <p className="text-sm mb-4 text-gray-700">We have sent a verification code to your registered email address</p>
+          <div className="space-y-4">
+            <p className="text-lg font-semibold mb-4 text-gray-700">OTP Verification Code</p>
+            <div className="flex space-x-4">
+              <input
+                type="text"
+                maxLength="6"
+                className="w-full p-3 border border-gray-500 rounded text-gray-900"
+                placeholder="Enter OTP"
+                value={otp}
+                onChange={handleOtpChange}
+              />
+              <button
+                type="button"
+                className={`py-3 px-6 rounded bg-blue-700 text-white font-bold hover:bg-blue-800 transition ${otp.length !== 6 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                onClick={handleVerifyOTPClick}
+                disabled={otp.length !== 6}
+              >
+                Verify OTP
               </button>
             </div>
-            <form className={styles.emailSendForm}>
-              <div className={styles.enterTheEmail}>
-                <p>We have sent a verification code to your registered email address</p>
-              </div>
-            </form>
-            <div className={styles.otpContainer}>
-              <div className={styles.checkYourEmail}>OTP Verification Code</div>
-              <div className={styles.otpInputContainer}>
-                <input
-                    type="text"
-                    maxLength="6"
-                    className={styles.otpInput}
-                    placeholder="Enter OTP"
-                    value={otp}
-                    onChange={handleOtpChange}
-                />
-                <button
-                    type="button"
-                    className={`${styles.verifyButton} ${otp.length !== 6 ? styles.disabledButton : ""}`}
-                    onClick={handleVerifyOTPClick}
-                    disabled={otp.length !== 6}
-                >
-                  Verify OTP
-                </button>
-              </div>
-            </div>
-            {errorMessage && <div className={styles.errorMessage}>{errorMessage}</div>}
-            <button
-                type="button"
-                className={`${styles.backToLoginButton} ${!otpVerified ? styles.disabledButton : ""}`}
-                onClick={handleBackToLoginClick}
-                disabled={!otpVerified}
-            >
-              Proceed
-            </button>
           </div>
+          {errorMessage && <div className="text-red-500 mt-4">{errorMessage}</div>}
+          <button
+            type="button"
+            className={`mt-4 w-full py-3 rounded border border-blue-800 text-blue-900 font-bold hover:bg-blue-100 transition ${!otpVerified ? 'opacity-50 cursor-not-allowed' : ''}`}
+            onClick={handleBackToLoginClick}
+            disabled={!otpVerified}
+          >
+            Proceed
+          </button>
         </div>
       </div>
+    </div>
   );
 };
 
-export default ForgotPasswordStep;
+export default VerifyOTP;

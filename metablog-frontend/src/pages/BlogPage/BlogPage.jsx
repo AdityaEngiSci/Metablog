@@ -1,7 +1,7 @@
 import React from "react";
 import { useParams } from "react-router-dom";
-import Header from "../../components/Header";
-import Footer from "../../components/Footer";
+import Header from "../../components/Header/Header";
+import Footer from "../../components/Footer/Footer";
 import axios from "axios";
 import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
 import "./BlogPage.css";

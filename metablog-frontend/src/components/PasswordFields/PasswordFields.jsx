@@ -1,40 +1,39 @@
 import PropTypes from "prop-types";
-import styles from "./PasswordFields.module.css";
 
 const PasswordFields = ({ className = "" }) => {
   return (
-    <form className={[styles.passwordFields, className].join(" ")}>
-      <div className={styles.passwordInputs}>
-        <div className={styles.inputLabels}>
+    <form className={`space-y-4 ${className}`}>
+      <div className="space-y-4">
+        <div className="relative">
           <input
-            className={styles.yourNewPassword}
+            className="w-full p-3 border border-gray-300 rounded"
             placeholder="Your new password"
-            type="text"
+            type="password"
           />
           <img
-            className={styles.iconoutlineeyeOff}
-            alt=""
+            className="absolute top-3 right-3 w-5 h-5 cursor-pointer"
+            alt="toggle visibility"
             src="/iconoutlineeyeoff.svg"
           />
         </div>
-        <div className={styles.inputLabels1}>
+        <div className="relative">
           <input
-            className={styles.confirmYourNew}
+            className="w-full p-3 border border-gray-300 rounded"
             placeholder="Confirm your new password"
-            type="text"
+            type="password"
           />
           <img
-            className={styles.iconoutlineeyeOff1}
-            alt=""
+            className="absolute top-3 right-3 w-5 h-5 cursor-pointer"
+            alt="toggle visibility"
             src="/iconoutlineeyeoff.svg"
           />
         </div>
       </div>
-      <button className={styles.resetButton}>
-        <div className={styles.resetPassword}>Reset Password</div>
+      <button className="w-full py-3 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition">
+        Reset Password
       </button>
-      <button className={styles.loginLink}>
-        <div className={styles.backToLogin}>Back to Login</div>
+      <button className="mt-4 w-full py-3 rounded border border-blue-600 text-blue-600 hover:bg-blue-50 transition">
+        Back to Login
       </button>
     </form>
   );

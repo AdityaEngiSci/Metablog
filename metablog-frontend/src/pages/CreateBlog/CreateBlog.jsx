@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from "react";
 import { Editor } from "@tinymce/tinymce-react";
-import Header from "../../components/Header";
-import Footer from "../../components/Footer";
+import Header from "../../components/Header/Header";
+import Footer from "../../components/Footer/Footer";
 import "./CreateBlog.css";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";

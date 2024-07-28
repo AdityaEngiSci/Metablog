@@ -1,8 +1,8 @@
 import React from "react";
 import { useLocation, useParams } from "react-router-dom";
-import Header from "../../components/Header";
-import Footer from "../../components/Footer";
-import BlogCard from "../../components/BlogCard";
+import Header from "../../components/Header/Header";
+import Footer from "../../components/Footer/Footer";
+import BlogCard from "../../components/BlogCard/BlogCard";
 
 const SearchResult = () => {
   const location = useLocation();
