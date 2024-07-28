@@ -46,10 +46,17 @@ class AdminServiceTest {
 
     @InjectMocks
     private AdminBlogService adminBlogService;
-
+    private AdminRequestDto requestDto;
+    private Blog blog;
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        requestDto = new AdminRequestDto();
+        requestDto.setBlogId(1L);
+
+        blog = new Blog();
+        blog.setId(1L);
+        blog.setStatus(BlogStatus.PENDING);
     }
 
     @Test
@@ -146,82 +153,82 @@ class AdminServiceTest {
     }
 
     @Test
-    void updateBlogStatusApproveTest() {
-        // Arrange
-        AdminRequestDto requestDto = new AdminRequestDto(BLOG_ID_1, APPROVE_STATUS);
-        Blog blog = createBlog(BLOG_ID_1, TEST_BLOG_TITLE, BlogStatus.PENDING);
-        when(adminBlogRepository.findById(BLOG_ID_1)).thenReturn(Optional.of(blog));
+    void updateBlogStatus_ApprovedStatus_Success() {
+        requestDto.setStatus("APPROVED");
+        when(adminBlogRepository.findById(1L)).thenReturn(Optional.of(blog));
+        when(adminBlogRepository.save(any(Blog.class))).thenReturn(blog);
 
-        // Act
         ResponseEntity<Object> response = adminBlogService.updateBlogStatus(requestDto);
 
-        // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertTrue(((MetaBlogResponse) response.getBody()).getSuccess());
-        verify(adminBlogRepository).save(argThat(savedBlog ->
-                savedBlog.getStatus() == BlogStatus.APPROVED && savedBlog.getReviewedOn() != null
-        ));
+        MetaBlogResponse<?> metaBlogResponse = (MetaBlogResponse<?>) response.getBody();
+        assertNotNull(metaBlogResponse);
+        assertTrue(metaBlogResponse.getSuccess());
+        assertEquals("Blog status updated successfully", metaBlogResponse.getMessage());
+        assertEquals(BlogStatus.APPROVED, blog.getStatus());
+        assertNotNull(blog.getReviewedOn());
+        verify(adminBlogRepository).save(blog);
     }
 
     @Test
-    void updateBlogStatusRejectTest() {
-        // Arrange
-        AdminRequestDto requestDto = new AdminRequestDto(BLOG_ID_1, REJECT_STATUS);
-        Blog blog = createBlog(BLOG_ID_1, TEST_BLOG_TITLE, BlogStatus.PENDING);
-        when(adminBlogRepository.findById(BLOG_ID_1)).thenReturn(Optional.of(blog));
+    void updateBlogStatus_RejectedStatus_Success() {
+        requestDto.setStatus("REJECTED");
+        when(adminBlogRepository.findById(1L)).thenReturn(Optional.of(blog));
+        when(adminBlogRepository.save(any(Blog.class))).thenReturn(blog);
 
-        // Act
         ResponseEntity<Object> response = adminBlogService.updateBlogStatus(requestDto);
 
-        // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertTrue(((MetaBlogResponse) response.getBody()).getSuccess());
-        verify(adminBlogRepository).save(argThat(savedBlog ->
-                savedBlog.getStatus() == BlogStatus.REJECTED && savedBlog.getReviewedOn() != null
-        ));
+        MetaBlogResponse<?> metaBlogResponse = (MetaBlogResponse<?>) response.getBody();
+        assertNotNull(metaBlogResponse);
+        assertTrue(metaBlogResponse.getSuccess());
+        assertEquals("Blog status updated successfully", metaBlogResponse.getMessage());
+        assertEquals(BlogStatus.REJECTED, blog.getStatus());
+        assertNotNull(blog.getReviewedOn());
+        verify(adminBlogRepository).save(blog);
     }
 
     @Test
-    void updateBlogStatusInvalidStatusTest() {
-        // Arrange
-        AdminRequestDto requestDto = new AdminRequestDto(BLOG_ID_1, INVALID_STATUS);
-        Blog blog = createBlog(BLOG_ID_1, TEST_BLOG_TITLE, BlogStatus.PENDING);
-        when(adminBlogRepository.findById(BLOG_ID_1)).thenReturn(Optional.of(blog));
+    void updateBlogStatus_InvalidStatus_BadRequest() {
+        requestDto.setStatus("INVALID");
+        when(adminBlogRepository.findById(1L)).thenReturn(Optional.of(blog));
 
-        // Act
         ResponseEntity<Object> response = adminBlogService.updateBlogStatus(requestDto);
 
-        // Assert
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertFalse(((MetaBlogResponse) response.getBody()).getSuccess());
+        MetaBlogResponse<?> metaBlogResponse = (MetaBlogResponse<?>) response.getBody();
+        assertNotNull(metaBlogResponse);
+        assertFalse(metaBlogResponse.getSuccess());
+        assertEquals("Invalid status", metaBlogResponse.getMessage());
+        verify(adminBlogRepository, never()).save(any(Blog.class));
     }
 
     @Test
-    void updateBlogStatusBlogNotFoundTest() {
-        // Arrange
-        AdminRequestDto requestDto = new AdminRequestDto(BLOG_ID_1, APPROVE_STATUS);
-        when(adminBlogRepository.findById(BLOG_ID_1)).thenReturn(Optional.empty());
+    void updateBlogStatus_BlogNotFound_ThrowsException() {
+        when(adminBlogRepository.findById(1L)).thenReturn(Optional.empty());
 
-        // Act
         ResponseEntity<Object> response = adminBlogService.updateBlogStatus(requestDto);
 
-        // Assert
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertFalse(((MetaBlogResponse) response.getBody()).getSuccess());
+        MetaBlogResponse<?> metaBlogResponse = (MetaBlogResponse<?>) response.getBody();
+        assertNotNull(metaBlogResponse);
+        assertFalse(metaBlogResponse.getSuccess());
+        assertEquals("Error updating blog status", metaBlogResponse.getMessage());
+        verify(adminBlogRepository, never()).save(any(Blog.class));
     }
 
     @Test
-    void updateBlogStatusExceptionTest() {
-        // Arrange
-        AdminRequestDto requestDto = new AdminRequestDto(BLOG_ID_1, APPROVE_STATUS);
-        when(adminBlogRepository.findById(BLOG_ID_1)).thenThrow(new RuntimeException(TEST_EXCEPTION_MESSAGE));
+    void updateBlogStatus_ExceptionDuringExecution_InternalServerError() {
+        when(adminBlogRepository.findById(1L)).thenThrow(new RuntimeException("Unexpected error"));
 
-        // Act
         ResponseEntity<Object> response = adminBlogService.updateBlogStatus(requestDto);
 
-        // Assert
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertFalse(((MetaBlogResponse) response.getBody()).getSuccess());
+        MetaBlogResponse<?> metaBlogResponse = (MetaBlogResponse<?>) response.getBody();
+        assertNotNull(metaBlogResponse);
+        assertFalse(metaBlogResponse.getSuccess());
+        assertEquals("Error updating blog status", metaBlogResponse.getMessage());
+        verify(adminBlogRepository, never()).save(any(Blog.class));
     }
 
     private Blog createBlog(Long id, String title, BlogStatus status) {

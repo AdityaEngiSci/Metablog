@@ -5,6 +5,8 @@ import com.group3.metaBlog.Blog.Repository.IBlogRepository;
 import com.group3.metaBlog.Comment.DataTransferObject.CreateCommentDto;
 import com.group3.metaBlog.Comment.Model.Comment;
 import com.group3.metaBlog.Comment.Repository.ICommentRepository;
+import com.group3.metaBlog.Exception.MetaBlogException;
+import com.group3.metaBlog.Jwt.ServiceLayer.JwtService;
 import com.group3.metaBlog.User.Model.User;
 import com.group3.metaBlog.User.Repository.IUserRepository;
 import com.group3.metaBlog.Utils.MetaBlogResponse;
@@ -18,7 +20,6 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -35,6 +36,9 @@ class CommentServiceTest {
     @Mock
     private IUserRepository userRepository;
 
+    @Mock
+    private JwtService jwtService;
+
     @InjectMocks
     private CommentService commentService;
 
@@ -45,55 +49,65 @@ class CommentServiceTest {
 
     @Test
     void createCommentSuccessTest() {
-        CreateCommentDto request = new CreateCommentDto("Test content", 1L, 1L);
+        CreateCommentDto request = new CreateCommentDto("Test content", 1L);
+        String token = "Bearer testToken";
+        String userEmail = "test@example.com";
         Blog blog = new Blog();
         blog.setId(1L);
         User user = new User();
-        user.setId(1L);
+        user.setEmail(userEmail);
 
+        when(jwtService.extractUserEmailFromToken("testToken")).thenReturn(userEmail);
         when(blogRepository.findById(1L)).thenReturn(Optional.of(blog));
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail(userEmail)).thenReturn(Optional.of(user));
+        when(commentRepository.save(any(Comment.class))).thenAnswer(i -> i.getArguments()[0]);
 
-        ResponseEntity<Object> response = commentService.createComment(request);
+        ResponseEntity<Object> response = commentService.createComment(request, token);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertTrue(((MetaBlogResponse) Objects.requireNonNull(response.getBody())).getSuccess());
+        assertTrue(((MetaBlogResponse) response.getBody()).getSuccess());
         verify(commentRepository, times(1)).save(any(Comment.class));
     }
 
     @Test
     void createCommentBlogNotFoundTest() {
-        CreateCommentDto request = new CreateCommentDto("Test content", 1L, 1L);
+        CreateCommentDto request = new CreateCommentDto("Test content", 1L);
+        String token = "Bearer testToken";
+        String userEmail = "test@example.com";
 
+        when(jwtService.extractUserEmailFromToken("testToken")).thenReturn(userEmail);
         when(blogRepository.findById(1L)).thenReturn(Optional.empty());
 
-        ResponseEntity<Object> response = commentService.createComment(request);
+        ResponseEntity<Object> response = commentService.createComment(request, token);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         MetaBlogResponse responseBody = (MetaBlogResponse) response.getBody();
         assertNotNull(responseBody);
         assertEquals("Blog not found.", responseBody.getMessage());
-        assertEquals(false, responseBody.getSuccess());
+        assertFalse(responseBody.getSuccess());
 
-        verify(commentRepository, never()).save(any(Comment.class)); // Ensure comment wasn't saved
+        verify(commentRepository, never()).save(any(Comment.class));
     }
 
     @Test
     void createCommentUserNotFoundTest() {
-        CreateCommentDto request = new CreateCommentDto("Test content", 1L, 1L);
+        CreateCommentDto request = new CreateCommentDto("Test content", 1L);
+        String token = "Bearer testToken";
+        String userEmail = "test@example.com";
 
+        when(jwtService.extractUserEmailFromToken("testToken")).thenReturn(userEmail);
         when(blogRepository.findById(1L)).thenReturn(Optional.of(new Blog()));
-        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(userEmail)).thenReturn(Optional.empty());
 
-        ResponseEntity<Object> response = commentService.createComment(request);
+        ResponseEntity<Object> response = commentService.createComment(request, token);
 
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode()); // 404 for resource not found
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         MetaBlogResponse responseBody = (MetaBlogResponse) response.getBody();
         assertNotNull(responseBody);
         assertEquals("User not found.", responseBody.getMessage());
-        assertEquals(false, responseBody.getSuccess());
+        assertFalse(responseBody.getSuccess());
 
-        verify(commentRepository, never()).save(any(Comment.class)); // Ensure comment wasn't saved
+        verify(commentRepository, never()).save(any(Comment.class));
     }
 
     @Test
@@ -109,7 +123,7 @@ class CommentServiceTest {
         ResponseEntity<Object> response = commentService.getCommentsByBlog(blogId);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertTrue(((MetaBlogResponse<?>) Objects.requireNonNull(response.getBody())).getSuccess());
+        assertTrue(((MetaBlogResponse<?>) response.getBody()).getSuccess());
         assertEquals(2, ((List<Comment>) ((MetaBlogResponse) response.getBody()).getData()).size());
     }
 
@@ -121,13 +135,31 @@ class CommentServiceTest {
 
         ResponseEntity<Object> response = commentService.getCommentsByBlog(blogId);
 
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode()); // 404 for resource not found
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 
         MetaBlogResponse responseBody = (MetaBlogResponse) response.getBody();
         assertNotNull(responseBody);
         assertEquals("Blog not found.", responseBody.getMessage());
-        assertEquals(false, responseBody.getSuccess());
+        assertFalse(responseBody.getSuccess());
 
-        verify(commentRepository, never()).findByBlog(any(Blog.class)); // Ensure no comments fetched
+        verify(commentRepository, never()).findByBlog(any(Blog.class));
+    }
+
+    @Test
+    void createCommentInvalidTokenTest() {
+        CreateCommentDto request = new CreateCommentDto("Test content", 1L);
+        String token = "Bearer InvalidToken";
+
+        when(jwtService.extractUserEmailFromToken("InvalidToken")).thenThrow(new MetaBlogException("Invalid token"));
+
+        ResponseEntity<Object> response = commentService.createComment(request, token);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        MetaBlogResponse responseBody = (MetaBlogResponse) response.getBody();
+        assertNotNull(responseBody);
+        assertEquals("Invalid token", responseBody.getMessage());
+        assertFalse(responseBody.getSuccess());
+
+        verify(commentRepository, never()).save(any(Comment.class));
     }
 }

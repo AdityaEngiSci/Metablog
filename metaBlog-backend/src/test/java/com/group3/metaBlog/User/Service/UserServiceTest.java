@@ -2,8 +2,13 @@ package com.group3.metaBlog.User.Service;
 
 import com.group3.metaBlog.Blog.Model.Blog;
 import com.group3.metaBlog.Blog.Repository.IBlogRepository;
+import com.group3.metaBlog.Config.ApplicationConfig;
+import com.group3.metaBlog.Image.Model.Image;
+import com.group3.metaBlog.Image.Service.ImageService;
 import com.group3.metaBlog.Jwt.ServiceLayer.JwtService;
+import com.group3.metaBlog.User.DataTransferObject.SavedBlogResponseDto;
 import com.group3.metaBlog.User.DataTransferObject.UserDetailsResponseDto;
+import com.group3.metaBlog.User.DataTransferObject.UserUpdateRequestDto;
 import com.group3.metaBlog.User.Model.User;
 import com.group3.metaBlog.User.Repository.IUserRepository;
 import com.group3.metaBlog.Utils.MetaBlogResponse;
@@ -14,8 +19,10 @@ import org.mockito.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -29,6 +36,12 @@ public class UserServiceTest {
     private IBlogRepository blogRepository;
     @Mock
     private IUserRepository userRepository;
+
+    @Mock
+    private ImageService imageService;
+
+    @Mock
+    private ApplicationConfig applicationConfig;
 
     @Mock
     private JwtService jwtService;
@@ -113,40 +126,134 @@ public class UserServiceTest {
     }
 
     @Test
-    public void UpdateUserDetailsSuccessTest() {
+    public void updateUserDetailsWithImageSuccessTest() {
         when(jwtService.extractUserEmailFromToken(token)).thenReturn(user.getEmail());
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
 
-        UserDetailsResponseDto userDetails = UserDetailsResponseDto.builder()
-                .bio("new bio")
-                .imageURL("new imageURL")
-                .githubURL("new githubURL")
-                .linkedinURL("new linkedinURL")
-                .build();
+        UserUpdateRequestDto updateRequest = new UserUpdateRequestDto();
+        updateRequest.setUserName("newUsername");
+        updateRequest.setBio("new bio");
+        updateRequest.setGithubURL("new githubURL");
+        updateRequest.setLinkedinURL("new linkedinURL");
 
-        ResponseEntity<Object> response = userService.updateUserDetails(userDetails, token);
+        MultipartFile mockFile = mock(MultipartFile.class);
+        Optional<MultipartFile> optionalFile = Optional.of(mockFile);
+        updateRequest.setImageURL(optionalFile);
+
+        Image mockImage = new Image();
+        mockImage.setUrl("newImageUrl");
+        when(imageService.uploadImage(mockFile)).thenReturn(mockImage);
+
+        ResponseEntity<Object> response = userService.updateUserDetails(updateRequest, token);
 
         verify(userRepository).save(user);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(true, ((MetaBlogResponse<?>) Objects.requireNonNull(response.getBody())).getSuccess());
+        assertEquals("newImageUrl", user.getImageURL());
+        assertEquals("newUsername", user.getUsername());
+        assertEquals("new bio", user.getBio());
+        assertEquals("new githubURL", user.getGithubURL());
+        assertEquals("new linkedinURL", user.getLinkedinURL());
     }
 
     @Test
-    public void UpdateUserDetailsUserNotFoundTest() {
+    public void updateUserDetailsWithoutImageSuccessTest() {
         when(jwtService.extractUserEmailFromToken(token)).thenReturn(user.getEmail());
-        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
 
-        UserDetailsResponseDto userDetails = UserDetailsResponseDto.builder()
-                .bio("new bio")
-                .imageURL("new imageURL")
-                .githubURL("new githubURL")
-                .linkedinURL("new linkedinURL")
-                .build();
+        UserUpdateRequestDto updateRequest = new UserUpdateRequestDto();
+        updateRequest.setUserName("newUsername");
+        updateRequest.setBio("new bio");
+        updateRequest.setGithubURL("new githubURL");
+        updateRequest.setLinkedinURL("new linkedinURL");
+        updateRequest.setImageURL(Optional.empty());
 
-        ResponseEntity<Object> response = userService.updateUserDetails(userDetails, token);
+        ResponseEntity<Object> response = userService.updateUserDetails(updateRequest, token);
+
+        verify(userRepository).save(user);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(true, ((MetaBlogResponse<?>) Objects.requireNonNull(response.getBody())).getSuccess());
+        assertEquals("newUsername", user.getUsername());
+        assertEquals("new bio", user.getBio());
+        assertEquals("new githubURL", user.getGithubURL());
+        assertEquals("new linkedinURL", user.getLinkedinURL());
+    }
+
+    @Test
+    public void updateUserDetailsExceptionTest() {
+        when(jwtService.extractUserEmailFromToken(token)).thenReturn(user.getEmail());
+        when(userRepository.findByEmail(user.getEmail())).thenThrow(new RuntimeException("Database error"));
+
+        UserUpdateRequestDto updateRequest = new UserUpdateRequestDto();
+
+        ResponseEntity<Object> response = userService.updateUserDetails(updateRequest, token);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals(false, ((MetaBlogResponse<?>) Objects.requireNonNull(response.getBody())).getSuccess());
+        assertEquals("Database error", ((MetaBlogResponse<?>) response.getBody()).getMessage());
+    }
+
+    @Test
+    public void getUserSavedBlogsSuccessTest() {
+        user.getSavedBlogs().add(blog);
+        when(jwtService.extractUserEmailFromToken(token)).thenReturn(user.getEmail());
+        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+
+        ResponseEntity<Object> response = userService.getUserSavedBlogs(token);
+
+        verify(userRepository).findByEmail(user.getEmail());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(true, ((MetaBlogResponse<?>) Objects.requireNonNull(response.getBody())).getSuccess());
+
+        List<SavedBlogResponseDto> savedBlogs = (List<SavedBlogResponseDto>) ((MetaBlogResponse<?>) response.getBody()).getData();
+        assertNotNull(savedBlogs);
+        assertEquals(1, savedBlogs.size());
+        assertEquals(blog.getId(), savedBlogs.get(0).getId());
+        assertEquals(blog.getTitle(), savedBlogs.get(0).getTitle());
+        assertEquals(blog.getImageUrl(), savedBlogs.get(0).getImageUrl());
+        assertEquals(blog.getAuthor().getUsername(), savedBlogs.get(0).getAuthor());
+        assertEquals(blog.getAuthor().getImageURL(), savedBlogs.get(0).getAuthor_image_url());
+        assertEquals(blog.getCreatedOn(), savedBlogs.get(0).getCreatedOn());
+    }
+
+    @Test
+    public void getUserSavedBlogsExceptionTest() {
+        when(jwtService.extractUserEmailFromToken(token)).thenReturn(user.getEmail());
+        when(userRepository.findByEmail(user.getEmail())).thenThrow(new RuntimeException("Database error"));
+
+        ResponseEntity<Object> response = userService.getUserSavedBlogs(token);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(false, ((MetaBlogResponse<?>) Objects.requireNonNull(response.getBody())).getSuccess());
+        assertEquals("Database error", ((MetaBlogResponse<?>) response.getBody()).getMessage());
+    }
+
+    @Test
+    public void saveBlogSuccessTest() {
+        when(jwtService.extractUserEmailFromToken(token)).thenReturn(user.getEmail());
+        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+        when(blogRepository.findById(blog.getId())).thenReturn(Optional.of(blog));
+
+        ResponseEntity<Object> response = userService.saveBlog(blog.getId(), token);
+
+        verify(userRepository).save(user);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(true, ((MetaBlogResponse<?>) Objects.requireNonNull(response.getBody())).getSuccess());
+        assertTrue(user.getSavedBlogs().contains(blog));
+    }
+
+    @Test
+    public void removeSavedBlogSuccessTest() {
+        user.getSavedBlogs().add(blog);
+        when(jwtService.extractUserEmailFromToken(token)).thenReturn(user.getEmail());
+        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+
+        ResponseEntity<Object> response = userService.removeSavedBlog(blog.getId(), token);
+
+        verify(userRepository).save(user);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(true, ((MetaBlogResponse<?>) Objects.requireNonNull(response.getBody())).getSuccess());
+        assertFalse(user.getSavedBlogs().contains(blog));
     }
 
     @Test
