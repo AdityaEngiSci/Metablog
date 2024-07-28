@@ -2,6 +2,7 @@ package com.group3.metaBlog.Comment.Service;
 
 import com.group3.metaBlog.Blog.Model.Blog;
 import com.group3.metaBlog.Blog.Repository.IBlogRepository;
+import com.group3.metaBlog.Comment.DataTransferObject.CommentResponseDTO;
 import com.group3.metaBlog.Comment.DataTransferObject.CreateCommentDto;
 import com.group3.metaBlog.Comment.Model.Comment;
 import com.group3.metaBlog.Comment.Repository.ICommentRepository;
@@ -112,19 +113,60 @@ class CommentServiceTest {
 
     @Test
     void getCommentsByBlogSuccessTest() {
+        // Arrange
         Long blogId = 1L;
         Blog blog = new Blog();
         blog.setId(blogId);
-        List<Comment> comments = Arrays.asList(new Comment(), new Comment());
+
+        User user1 = new User();
+        user1.setUsername("user1");
+        user1.setImageURL("image1.jpg");
+
+        User user2 = new User();
+        user2.setUsername("user2");
+        user2.setImageURL("image2.jpg");
+
+        Comment comment1 = new Comment();
+        comment1.setId(1L);
+        comment1.setContent("Comment 1");
+        comment1.setCreatedOn(1234567890.0);
+        comment1.setUser(user1);
+
+        Comment comment2 = new Comment();
+        comment2.setId(2L);
+        comment2.setContent("Comment 2");
+        comment2.setCreatedOn(1234567891.0);
+        comment2.setUser(user2);
+
+        List<Comment> comments = Arrays.asList(comment1, comment2);
 
         when(blogRepository.findById(blogId)).thenReturn(Optional.of(blog));
         when(commentRepository.findByBlog(blog)).thenReturn(comments);
 
+        // Act
         ResponseEntity<Object> response = commentService.getCommentsByBlog(blogId);
 
+        // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertTrue(((MetaBlogResponse<?>) response.getBody()).getSuccess());
-        assertEquals(2, ((List<Comment>) ((MetaBlogResponse) response.getBody()).getData()).size());
+        assertEquals("Comments fetched successfully.", ((MetaBlogResponse<?>) response.getBody()).getMessage());
+
+        List<CommentResponseDTO> responseDTOs = (List<CommentResponseDTO>) ((MetaBlogResponse<?>) response.getBody()).getData();
+        assertEquals(2, responseDTOs.size());
+
+        CommentResponseDTO dto1 = responseDTOs.get(0);
+        assertEquals(1L, dto1.getId());
+        assertEquals("Comment 1", dto1.getContent());
+        assertEquals(1234567890.0, dto1.getCreatedOn());
+        assertEquals("user1", dto1.getAuthor());
+        assertEquals("image1.jpg", dto1.getAuthor_image_url());
+
+        CommentResponseDTO dto2 = responseDTOs.get(1);
+        assertEquals(2L, dto2.getId());
+        assertEquals("Comment 2", dto2.getContent());
+        assertEquals(1234567891.0, dto2.getCreatedOn());
+        assertEquals("user2", dto2.getAuthor());
+        assertEquals("image2.jpg", dto2.getAuthor_image_url());
     }
 
     @Test
