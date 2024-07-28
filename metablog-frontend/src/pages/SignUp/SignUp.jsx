@@ -6,10 +6,12 @@ import Swal from 'sweetalert2';
 
 const SignUp = () => {
   const navigate = useNavigate();
+  const BASE_URL = process.env.REACT_APP_BASE_URL;
 
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
+    username: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -67,11 +69,15 @@ const SignUp = () => {
       formDataObj.append('image', formData.image);
     }
 
+    const requestObj = {
+      username: `${formData.firstName} ${formData.lastName}`,
+      email: formData.email,
+      password: formData.password,
+      role: 'User'
+    }
+
     try {
-      const response = await axios.post('http://localhost:8080/api/v1/auth/register', formDataObj, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+      const response = await axios.post(`${BASE_URL}/auth/register`, requestObj, {
       });
 
       if (response.status === 201) {

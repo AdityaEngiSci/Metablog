@@ -12,6 +12,7 @@ const VerifyOTP = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [email, setEmail] = useState("");
   const [isGoingToLogin, setIsGoingToLogin] = useState(false);
+  const BASE_URL = process.env.REACT_APP_BASE_URL;
 
   useEffect(() => {
     if (location.state && location.state.email) {
@@ -34,7 +35,7 @@ const VerifyOTP = () => {
 
   const handleVerifyOTPClick = async () => {
     try {
-      const response = await axios.post("http://localhost:8080/api/v1/otp/verify",
+      const response = await axios.post(`${BASE_URL}/otp/verify`,
         { email, otp: parseInt(otp) },
         { headers: { "Content-Type": "application/json" } });
 
