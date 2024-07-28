@@ -1,22 +1,19 @@
 package com.group3.metaBlog.OTP.Controller;
 
 import com.group3.metaBlog.OTP.DataTransferObject.VerifyOTPRequestDto;
-import com.group3.metaBlog.OTP.Service.OTPService;
+import com.group3.metaBlog.OTP.Service.IOTPService;
 import com.group3.metaBlog.Utils.MetaBlogResponse;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/otp")
 public class OTPController {
 
-    private final OTPService otpService;
+    private final IOTPService otpService;
 
-    public OTPController(OTPService otpService) {
+    public OTPController(IOTPService otpService) {
         this.otpService = otpService;
     }
 

@@ -1,7 +1,7 @@
 package com.group3.metaBlog.Admin.Controller;
 
 import com.group3.metaBlog.Admin.DTO.AdminRequestDto;
-import com.group3.metaBlog.Admin.Service.AdminBlogService;
+import com.group3.metaBlog.Admin.Service.IAdminBlogService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 @AllArgsConstructor
 public class AdminBlogController {
 
-    private final AdminBlogService adminBlogService;
+    private final IAdminBlogService adminBlogService;
 
     @GetMapping("/pending")
     public ResponseEntity<Object> getPendingBlogs() {

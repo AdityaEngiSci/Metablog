@@ -23,7 +23,7 @@ import java.util.Optional;
 
 @Service
 @AllArgsConstructor
-public class BlogService {
+public class BlogService implements IBlogService {
 
     private static final Logger logger = LoggerFactory.getLogger(BlogService.class);
     private final IBlogRepository blogRepository;
@@ -31,6 +31,7 @@ public class BlogService {
     private final JwtService jwtService;
     private final ImageService imageService;
 
+    @Override
     public ResponseEntity<Object> createBlog(BlogRequestDto blogRequestDto, String token) {
         try {
             String userEmail = jwtService.extractUserEmailFromToken(token);
@@ -95,11 +96,14 @@ public class BlogService {
         }
     }
 
+    @Override
     public ResponseEntity<Object> getAllBlogs() {
         try {
             List<Blog> blogs = blogRepository.findAll();
             logger.info("Retrieved {} blogs", blogs.size());
-            List<BlogResponseDto> responseDTO = blogs.stream().map(blog -> BlogResponseDto.builder()
+            List<BlogResponseDto> responseDTO = blogs.stream()
+                    .filter(blog -> blog.getStatus() == BlogStatus.APPROVED)
+                    .map(blog -> BlogResponseDto.builder()
                     .id(blog.getId())
                     .title(blog.getTitle())
                     .content(blog.getContent())
@@ -123,6 +127,7 @@ public class BlogService {
         }
     }
 
+    @Override
     public ResponseEntity<Object> getBlogsByUser(String token) {
         try {
             String userEmail = jwtService.extractUserEmailFromToken(token);
@@ -162,6 +167,7 @@ public class BlogService {
 
     }
 
+    @Override
     public ResponseEntity<Object> searchBlogsByTitle(String title) {
         try {
             List<Blog> blogs = blogRepository.findByTitleContaining(title);
@@ -173,7 +179,9 @@ public class BlogService {
                 blogRepository.save(blog);
             });
 
-            List<BlogResponseDto> responseDTO = blogs.stream().map(blog -> BlogResponseDto.builder()
+            List<BlogResponseDto> responseDTO = blogs.stream()
+                    .filter(blog -> blog.getStatus() == BlogStatus.APPROVED)
+                    .map(blog -> BlogResponseDto.builder()
                     .id(blog.getId())
                     .title(blog.getTitle())
                     .content(blog.getContent())
@@ -198,6 +206,7 @@ public class BlogService {
         }
     }
 
+    @Override
     public ResponseEntity<Object> getBlogById(Long id) {
         try {
             Optional<Blog> blogOptional = blogRepository.findById(id);

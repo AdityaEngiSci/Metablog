@@ -23,22 +23,18 @@ import org.springframework.stereotype.Service;
 import java.util.Objects;
 import java.util.Optional;
 
-
 @Service
 @AllArgsConstructor
 public class AuthenticationService implements IAuthenticationService {
     private final IUserRepository IUserRepository;
-
     private final IOTPService otpService;
     private final IEmailService emailService;
-
     private final JwtService jwtService;
     private final Logger logger = LoggerFactory.getLogger(AuthenticationService.class);
-
     private final ApplicationConfig applicationConfig;
-
     private final AuthenticationManager authenticationManager;
 
+    @Override
     public ResponseEntity<Object> register(RegisterRequestDto request) {
         try {
             logger.info("Registering user with email: {}", request.getEmail());
@@ -121,6 +117,7 @@ public class AuthenticationService implements IAuthenticationService {
         }
     }
 
+    @Override
     public ResponseEntity<Object> forgetPassword(String email) {
         try {
             logger.info("Forgot password request for email: {}", email);
@@ -160,6 +157,7 @@ public class AuthenticationService implements IAuthenticationService {
         }
     }
 
+    @Override
     public ResponseEntity<Object> resetPassword(ResetPasswordRequestDto request) {
         try {
             logger.info("Resetting password for email: {}", request.getEmail());
@@ -190,6 +188,7 @@ public class AuthenticationService implements IAuthenticationService {
         }
     }
 
+    @Override
     public ResponseEntity<Object> findUser(String email) {
         try {
             logger.info("Finding user with email: {}", email);
@@ -214,6 +213,7 @@ public class AuthenticationService implements IAuthenticationService {
         }
     }
 
+    @Override
     public ResponseEntity<Object> login(LoginRequestDto request) {
         try {
             User user = IUserRepository.findByEmail(request.getEmail())

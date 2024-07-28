@@ -24,7 +24,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class ImageService {
+public class ImageService implements IImageService {
 
     private static final Logger logger = LoggerFactory.getLogger(ImageService.class);
     private final IUserRepository userRepository;
@@ -33,6 +33,7 @@ public class ImageService {
     private final AmazonS3 s3client;
     public String bucketName;
 
+    @Override
     public Image uploadImage(MultipartFile file) {
         try {
             String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
@@ -57,6 +58,7 @@ public class ImageService {
         }
     }
 
+    @Override
     public ResponseEntity<Object> getProfileImage(String token) {
         try {
             String userEmail = jwtService.extractUserEmailFromToken(token);
@@ -105,6 +107,7 @@ public class ImageService {
         }
     }
 
+    @Override
     public ResponseEntity<Object> setUserUrl(String url, String token) {
         try {
             String userEmail = jwtService.extractUserEmailFromToken(token.split(" ")[1]);

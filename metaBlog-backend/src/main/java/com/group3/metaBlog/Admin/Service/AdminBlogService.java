@@ -3,7 +3,7 @@ package com.group3.metaBlog.Admin.Service;
 import com.group3.metaBlog.Admin.DTO.AdminResponseDto;
 import com.group3.metaBlog.Admin.DTO.AdminRequestDto;
 import com.group3.metaBlog.Enum.BlogStatus;
-import com.group3.metaBlog.Admin.Repository.AdminBlogRepository;
+import com.group3.metaBlog.Admin.Repository.IAdminBlogRepository;
 import com.group3.metaBlog.Blog.Model.Blog;
 import com.group3.metaBlog.Utils.MetaBlogResponse;
 import lombok.AllArgsConstructor;
@@ -17,11 +17,12 @@ import java.util.List;
 
 @Service
 @AllArgsConstructor
-public class AdminBlogService {
+public class AdminBlogService implements IAdminBlogService {
 
     private static final Logger logger = LoggerFactory.getLogger(AdminBlogService.class);
-    private final AdminBlogRepository adminBlogRepository;
+    private final IAdminBlogRepository adminBlogRepository;
 
+    @Override
     public ResponseEntity<Object> getPendingBlogs() {
         try {
             List<Blog> blogs = adminBlogRepository.findByStatus(BlogStatus.PENDING);
@@ -48,6 +49,7 @@ public class AdminBlogService {
         }
     }
 
+    @Override
     public ResponseEntity<Object> getApprovedBlogs() {
         try {
             List<Blog> blogs = adminBlogRepository.findByStatus(BlogStatus.APPROVED);
@@ -74,6 +76,7 @@ public class AdminBlogService {
         }
     }
 
+    @Override
     public ResponseEntity<Object> getRejectedBlogs() {
         try {
             List<Blog> blogs = adminBlogRepository.findByStatus(BlogStatus.REJECTED);
@@ -100,6 +103,7 @@ public class AdminBlogService {
         }
     }
 
+    @Override
     public ResponseEntity<Object> updateBlogStatus(AdminRequestDto requestDto) {
         try {
             Blog blog = adminBlogRepository.findById(requestDto.getBlogId())

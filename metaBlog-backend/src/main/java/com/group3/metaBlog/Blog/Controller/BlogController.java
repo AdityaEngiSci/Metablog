@@ -1,7 +1,7 @@
 package com.group3.metaBlog.Blog.Controller;
 
 import com.group3.metaBlog.Blog.DTO.BlogRequestDto;
-import com.group3.metaBlog.Blog.Service.BlogService;
+import com.group3.metaBlog.Blog.Service.IBlogService;
 import com.group3.metaBlog.Utils.MetaBlogResponse;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 public class BlogController {
 
     private static final Logger logger = LoggerFactory.getLogger(BlogController.class);
-    private final BlogService blogService;
+    private final IBlogService blogService;
 
     @PostMapping(path = "/create-blog")
     public ResponseEntity<Object> createBlog(@ModelAttribute BlogRequestDto blogRequestDto, @RequestHeader("Authorization") String token) {

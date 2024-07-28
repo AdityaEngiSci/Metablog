@@ -20,20 +20,24 @@ import java.util.Objects;
 import java.util.function.Function;
 
 @Service
-public class JwtService {
-
+public class JwtService implements IJwtService {
 
     @Value("${jwt.secret.key}")
     private String SECRET_KEY;
 
+    @Override
     public String extractUserEmailFromToken(String jwtToken) {
         return extractClaims(jwtToken, Claims::getSubject);
     }
 
-    public boolean isTokenValid(String jwt, Object userDetail) {
-        return false;
+    @Override
+    public boolean isTokenValid(String jwt, UserDetails userDetails) {
+        final String username = extractUserEmailFromToken(jwt);
+        User currentUser = (User) userDetails;
+        return (username.equals(currentUser.getEmail()) && !isTokenExpired(jwt));
     }
 
+    @Override
     public String generateJwtToken(UserDetails userDetails) {
         return generateJwtToken(new HashMap<>(), userDetails);
     }
@@ -56,25 +60,13 @@ public class JwtService {
                 .compact();
     }
 
-
-    public Boolean isTokenValid(String jwtToken, UserDetails userDetails) {
-        final String username = extractUserEmailFromToken(jwtToken);
-        User currentUser = (User) userDetails;
-        return (username.equals(currentUser.getEmail()) && !isTokenExpired(jwtToken));
-    }
-
-    public String generateRefreshToken(
-            UserDetails userDetails
-    ) {
+    @Override
+    public String generateRefreshToken(UserDetails userDetails) {
         long refreshExpiration = Instant.now().plus(7, ChronoUnit.DAYS).getEpochSecond();
         return buildToken(new HashMap<>(), userDetails, refreshExpiration);
     }
 
-    private String buildToken(
-            Map<String, Object> extraClaims,
-            UserDetails userDetails,
-            long expiration
-    ) {
+    private String buildToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration) {
         Map<String, Object> userClaims = new HashMap<>();
         userClaims.put("type", "refresh");
         return Jwts
@@ -88,6 +80,7 @@ public class JwtService {
                 .compact();
     }
 
+    @Override
     public boolean isTokenExpired(String jwtToken) {
         Date jwtExpireTime = extractExpirationOfJwt(jwtToken);
         return jwtExpireTime.before(new Date());
@@ -102,8 +95,8 @@ public class JwtService {
         return claimsTFunction.apply(claims);
     }
 
+    @Override
     public String extractJwtTokenType(String jwtToken) {
-
         return extractAllClaims(jwtToken).get("type").toString();
     }
 
@@ -116,6 +109,7 @@ public class JwtService {
         return Keys.hmacShaKeyFor(bytes);
     }
 
+    @Override
     public String getUserEmailFromToken(String token) {
         return extractUserEmailFromToken(token);
     }
