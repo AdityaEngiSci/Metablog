@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AdminRequestDto {
     private Long blogId;
-    private String status; // can be "APPROVE" or "REJECT"
+    private String status;
 }
 

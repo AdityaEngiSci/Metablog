@@ -1,6 +1,7 @@
 package com.group3.metaBlog.User.Controller;
 
 import com.group3.metaBlog.User.DataTransferObject.UserDetailsResponseDto;
+import com.group3.metaBlog.User.DataTransferObject.UserUpdateRequestDto;
 import com.group3.metaBlog.User.Service.IUserService;
 import com.group3.metaBlog.Utils.MetaBlogResponse;
 import jakarta.validation.constraints.NotNull;
@@ -66,8 +67,8 @@ public class UserController {
         }
     }
 
-    @PostMapping("/update")
-    public ResponseEntity<Object> updateUserDetails(@NotNull @RequestBody UserDetailsResponseDto request, @RequestHeader("Authorization") String token) {
+    @PutMapping("/update")
+    public ResponseEntity<Object> updateUserDetails(@ModelAttribute UserUpdateRequestDto request, @RequestHeader("Authorization") String token) {
         if (token == null || token.isEmpty()) {
             logger.error("Token not provided");
             return ResponseEntity.status(401).body(MetaBlogResponse.builder()

@@ -109,9 +109,11 @@ public class AdminBlogService implements IAdminBlogService {
             Blog blog = adminBlogRepository.findById(requestDto.getBlogId())
                     .orElseThrow(() -> new RuntimeException("Blog not found"));
 
-            if ("APPROVE".equalsIgnoreCase(requestDto.getStatus())) {
+            String APPROVED_STATUS = "APPROVED";
+            String REJECTED_STATUS = "REJECTED";
+            if (APPROVED_STATUS.trim().equalsIgnoreCase(requestDto.getStatus())) {
                 blog.setStatus(BlogStatus.APPROVED);
-            } else if ("REJECT".equalsIgnoreCase(requestDto.getStatus())) {
+            } else if (REJECTED_STATUS.trim().equalsIgnoreCase(requestDto.getStatus())) {
                 blog.setStatus(BlogStatus.REJECTED);
             } else {
                 return new ResponseEntity<>(MetaBlogResponse.builder()

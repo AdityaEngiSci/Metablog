@@ -31,7 +31,7 @@ public class ImageService implements IImageService {
     private final JwtService jwtService;
     private final ImageRepository imageRepository;
     private final AmazonS3 s3client;
-    public String bucketName;
+    public final String bucketName = "metablog-bucket";
 
     @Override
     public Image uploadImage(MultipartFile file) {

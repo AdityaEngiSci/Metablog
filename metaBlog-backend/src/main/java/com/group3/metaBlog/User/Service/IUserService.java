@@ -1,6 +1,7 @@
 package com.group3.metaBlog.User.Service;
 
 import com.group3.metaBlog.User.DataTransferObject.UserDetailsResponseDto;
+import com.group3.metaBlog.User.DataTransferObject.UserUpdateRequestDto;
 import org.springframework.http.ResponseEntity;
 
 public interface IUserService {
@@ -8,7 +9,7 @@ public interface IUserService {
 
     ResponseEntity<Object> getUserDetails(String token);
 
-    ResponseEntity<Object> updateUserDetails(UserDetailsResponseDto request, String token);
+    ResponseEntity<Object> updateUserDetails(UserUpdateRequestDto request, String token);
 
     ResponseEntity<Object> getUserBlogs(String token);
 

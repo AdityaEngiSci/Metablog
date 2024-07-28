@@ -20,7 +20,7 @@ public class CorsConfig {
                                 "http://csci5308-vm3.research.cs.dal.ca:3000",
                                 "http://172.17.0.128:3000"
                         )
-                        .allowedMethods("GET", "POST", "PUT", "DELETE")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH")
                         .allowedHeaders("*")
                         .allowCredentials(true);
             }
