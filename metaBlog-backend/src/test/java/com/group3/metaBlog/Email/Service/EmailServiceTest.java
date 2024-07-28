@@ -38,7 +38,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void testSendVerificationOTP() throws MessagingException {
+    public void SendVerificationOTPTest() throws MessagingException {
         String email = "test@example.com";
         int otp = 123456;
         String htmlContent = "<html>OTP: " + otp + "</html>";
@@ -57,7 +57,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void testSendVerificationOTP_ThrowsMetaBlogException() {
+    public void SendVerificationOTP_ThrowsMetaBlogExceptionTest() {
         String email = "test@example.com";
         int otp = 123456;
 
