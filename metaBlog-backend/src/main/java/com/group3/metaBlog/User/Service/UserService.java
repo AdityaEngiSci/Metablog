@@ -2,10 +2,14 @@ package com.group3.metaBlog.User.Service;
 
 import com.group3.metaBlog.Blog.Model.Blog;
 import com.group3.metaBlog.Blog.Repository.IBlogRepository;
+import com.group3.metaBlog.Config.ApplicationConfig;
 import com.group3.metaBlog.Exception.MetaBlogException;
+import com.group3.metaBlog.Image.Model.Image;
+import com.group3.metaBlog.Image.Service.ImageService;
 import com.group3.metaBlog.Jwt.ServiceLayer.JwtService;
 import com.group3.metaBlog.User.DataTransferObject.SavedBlogResponseDto;
 import com.group3.metaBlog.User.DataTransferObject.UserDetailsResponseDto;
+import com.group3.metaBlog.User.DataTransferObject.UserUpdateRequestDto;
 import com.group3.metaBlog.User.Model.User;
 import com.group3.metaBlog.User.Repository.IUserRepository;
 import com.group3.metaBlog.Utils.MetaBlogResponse;
@@ -14,8 +18,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,6 +32,8 @@ public class UserService implements IUserService {
     private final IUserRepository userRepository;
     private final IBlogRepository blogRepository;
     private final JwtService jwtService;
+    private final ImageService imageService;
+    private final ApplicationConfig applicationConfig;
     private final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     private User findUserByEmail(String email) {
@@ -47,6 +56,7 @@ public class UserService implements IUserService {
                     });
 
             UserDetailsResponseDto userDetailsResponseDto = UserDetailsResponseDto.builder()
+                    .userName(user.getUsername())
                     .imageURL(user.getImageURL())
                     .email(user.getEmail())
                     .password(user.getPassword())
@@ -78,9 +88,9 @@ public class UserService implements IUserService {
             User user = findUserByEmail(email);
 
             UserDetailsResponseDto userDetailsResponseDto = UserDetailsResponseDto.builder()
+                    .userName(user.getUsername())
                     .imageURL(user.getImageURL())
                     .email(user.getEmail())
-                    .password(user.getPassword())
                     .linkedinURL(user.getLinkedinURL())
                     .githubURL(user.getGithubURL())
                     .bio(user.getBio())
@@ -102,14 +112,19 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public ResponseEntity<Object> updateUserDetails(UserDetailsResponseDto request, String token) {
+    public ResponseEntity<Object> updateUserDetails(UserUpdateRequestDto request, String token) {
         try {
             String email = jwtService.extractUserEmailFromToken(token);
             logger.info("Updating user details for email: {}", email);
             User user = findUserByEmail(email);
 
+            if(request.getImageURL() != null && request.getImageURL().isPresent()) {
+                Optional<MultipartFile> file = request.getImageURL();
+                Image image = imageService.uploadImage(file.get());
+                user.setImageURL(image.getUrl());
+            }
+            user.setUsername(request.getUserName());
             user.setBio(request.getBio());
-            user.setImageURL(request.getImageURL());
             user.setGithubURL(request.getGithubURL());
             user.setLinkedinURL(request.getLinkedinURL());
 
@@ -165,7 +180,7 @@ public class UserService implements IUserService {
                     .author(blog.getAuthor().getUsername())
                     .author_image_url(blog.getAuthor().getImageURL())
                     .createdOn(blog.getCreatedOn())
-                    .build()).collect(Collectors.toList());
+                    .build()).toList();
 
             return ResponseEntity.ok().body(MetaBlogResponse.builder()
                     .success(true)
@@ -194,6 +209,14 @@ public class UserService implements IUserService {
                         logger.error("Blog not found with id: {}", blogId);
                         return new MetaBlogException("Blog not found.");
                     });
+
+            if (user.getSavedBlogs().contains(blog)) {
+                logger.warn("Blog with id: {} is already saved for user with email: {}", blogId, email);
+                return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
+                        .success(false)
+                        .message("Blog is already saved.")
+                        .build());
+            }
 
             user.getSavedBlogs().add(blog);
             userRepository.save(user);

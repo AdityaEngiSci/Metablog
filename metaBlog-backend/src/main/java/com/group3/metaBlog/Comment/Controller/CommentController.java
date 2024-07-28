@@ -7,18 +7,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/comments")
+@RequestMapping("/api/v1/comments")
 @AllArgsConstructor
 public class CommentController {
 
     private final ICommentService commentService;
 
     @PostMapping
-    public ResponseEntity<Object> createComment(@RequestBody CreateCommentDto request) {
-        return commentService.createComment(request);
+    public ResponseEntity<Object> createComment(@RequestBody CreateCommentDto request, @RequestHeader("Authorization") String token){
+        return commentService.createComment(request, token);
     }
 
-    @GetMapping("/blog/{blogId}")
+    @GetMapping("/{blogId}")
     public ResponseEntity<Object> getCommentsByBlog(@PathVariable Long blogId) {
         return commentService.getCommentsByBlog(blogId);
     }

@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface AdminBlogRepository extends JpaRepository<Blog, Long> {
+public interface IAdminBlogRepository extends JpaRepository<Blog, Long> {
     List<Blog> findByStatus(BlogStatus status);
 }

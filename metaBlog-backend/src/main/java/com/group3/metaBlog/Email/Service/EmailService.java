@@ -5,7 +5,6 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -19,24 +18,24 @@ public class EmailService implements IEmailService {
     private final JavaMailSender javaMailSender;
     private final SpringTemplateEngine templateEngine;
 
-     public void sendVerificationOTP(@NotNull String emailAddress, @NotNull Integer otp) throws MessagingException {
-         MimeMessage message = javaMailSender.createMimeMessage();
-         MimeMessageHelper helper = new MimeMessageHelper(message, true);
+    public void sendVerificationOTP(@NotNull String emailAddress, @NotNull Integer otp) throws MessagingException {
+        MimeMessage message = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
-         try {
-             helper.setTo(emailAddress);
-             helper.setSubject("Account verification OTP");
+        try {
+            helper.setTo(emailAddress);
+            helper.setSubject("Account verification OTP");
 
-             Context context = new Context();
-             context.setVariable("otp", otp);
+            Context context = new Context();
+            context.setVariable("otp", otp);
 
-             String htmlContent = templateEngine.process("verifyaccount", context);
+            String htmlContent = templateEngine.process("verifyaccount", context);
 
-             helper.setText(htmlContent, true);
+            helper.setText(htmlContent, true);
 
-             javaMailSender.send(message);
-         } catch (MessagingException e) {
-             throw new MetaBlogException("Failed to send reset email: " + e.getMessage());
-         }
-     }
+            javaMailSender.send(message);
+        } catch (MessagingException e) {
+            throw new MetaBlogException("Failed to send reset email: " + e.getMessage());
+        }
+    }
 }

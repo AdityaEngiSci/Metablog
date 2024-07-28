@@ -3,7 +3,7 @@ package com.group3.metaBlog.Admin.Service;
 import com.group3.metaBlog.Admin.DTO.AdminResponseDto;
 import com.group3.metaBlog.Admin.DTO.AdminRequestDto;
 import com.group3.metaBlog.Enum.BlogStatus;
-import com.group3.metaBlog.Admin.Repository.AdminBlogRepository;
+import com.group3.metaBlog.Admin.Repository.IAdminBlogRepository;
 import com.group3.metaBlog.Blog.Model.Blog;
 import com.group3.metaBlog.Utils.MetaBlogResponse;
 import lombok.AllArgsConstructor;
@@ -17,15 +17,16 @@ import java.util.List;
 
 @Service
 @AllArgsConstructor
-public class AdminBlogService {
+public class AdminBlogService implements IAdminBlogService {
 
-    private final AdminBlogRepository adminBlogRepository;
     private static final Logger logger = LoggerFactory.getLogger(AdminBlogService.class);
+    private final IAdminBlogRepository adminBlogRepository;
 
+    @Override
     public ResponseEntity<Object> getPendingBlogs() {
         try {
             List<Blog> blogs = adminBlogRepository.findByStatus(BlogStatus.PENDING);
-            List<AdminResponseDto> responseDtos = blogs.stream().map(blog -> AdminResponseDto.builder()
+            List<AdminResponseDto> responseDTO = blogs.stream().map(blog -> AdminResponseDto.builder()
                     .id(blog.getId())
                     .title(blog.getTitle())
                     .content(blog.getContent())
@@ -37,7 +38,7 @@ public class AdminBlogService {
             return ResponseEntity.ok(MetaBlogResponse.builder()
                     .success(true)
                     .message("Pending blogs retrieved successfully")
-                    .data(responseDtos)
+                    .data(responseDTO)
                     .build());
         } catch (Exception e) {
             logger.error("Error retrieving pending blogs: {}", e.getMessage());
@@ -48,10 +49,11 @@ public class AdminBlogService {
         }
     }
 
+    @Override
     public ResponseEntity<Object> getApprovedBlogs() {
         try {
             List<Blog> blogs = adminBlogRepository.findByStatus(BlogStatus.APPROVED);
-            List<AdminResponseDto> responseDtos = blogs.stream().map(blog -> AdminResponseDto.builder()
+            List<AdminResponseDto> responseDTO = blogs.stream().map(blog -> AdminResponseDto.builder()
                     .id(blog.getId())
                     .title(blog.getTitle())
                     .content(blog.getContent())
@@ -63,7 +65,7 @@ public class AdminBlogService {
             return ResponseEntity.ok(MetaBlogResponse.builder()
                     .success(true)
                     .message("Approved blogs retrieved successfully")
-                    .data(responseDtos)
+                    .data(responseDTO)
                     .build());
         } catch (Exception e) {
             logger.error("Error retrieving approved blogs: {}", e.getMessage());
@@ -74,10 +76,11 @@ public class AdminBlogService {
         }
     }
 
+    @Override
     public ResponseEntity<Object> getRejectedBlogs() {
         try {
             List<Blog> blogs = adminBlogRepository.findByStatus(BlogStatus.REJECTED);
-            List<AdminResponseDto> responseDtos = blogs.stream().map(blog -> AdminResponseDto.builder()
+            List<AdminResponseDto> responseDTO = blogs.stream().map(blog -> AdminResponseDto.builder()
                     .id(blog.getId())
                     .title(blog.getTitle())
                     .content(blog.getContent())
@@ -89,7 +92,7 @@ public class AdminBlogService {
             return ResponseEntity.ok(MetaBlogResponse.builder()
                     .success(true)
                     .message("Rejected blogs retrieved successfully")
-                    .data(responseDtos)
+                    .data(responseDTO)
                     .build());
         } catch (Exception e) {
             logger.error("Error retrieving rejected blogs: {}", e.getMessage());
@@ -100,14 +103,17 @@ public class AdminBlogService {
         }
     }
 
+    @Override
     public ResponseEntity<Object> updateBlogStatus(AdminRequestDto requestDto) {
         try {
             Blog blog = adminBlogRepository.findById(requestDto.getBlogId())
                     .orElseThrow(() -> new RuntimeException("Blog not found"));
 
-            if ("APPROVE".equalsIgnoreCase(requestDto.getStatus())) {
+            String APPROVED_STATUS = "APPROVED";
+            String REJECTED_STATUS = "REJECTED";
+            if (APPROVED_STATUS.trim().equalsIgnoreCase(requestDto.getStatus())) {
                 blog.setStatus(BlogStatus.APPROVED);
-            } else if ("REJECT".equalsIgnoreCase(requestDto.getStatus())) {
+            } else if (REJECTED_STATUS.trim().equalsIgnoreCase(requestDto.getStatus())) {
                 blog.setStatus(BlogStatus.REJECTED);
             } else {
                 return new ResponseEntity<>(MetaBlogResponse.builder()

@@ -18,28 +18,23 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 import java.util.Optional;
 
-
 @Service
 @AllArgsConstructor
 public class AuthenticationService implements IAuthenticationService {
     private final IUserRepository IUserRepository;
-
     private final IOTPService otpService;
     private final IEmailService emailService;
-
     private final JwtService jwtService;
     private final Logger logger = LoggerFactory.getLogger(AuthenticationService.class);
-
     private final ApplicationConfig applicationConfig;
-
     private final AuthenticationManager authenticationManager;
 
+    @Override
     public ResponseEntity<Object> register(RegisterRequestDto request) {
         try {
             logger.info("Registering user with email: {}", request.getEmail());
@@ -114,8 +109,7 @@ public class AuthenticationService implements IAuthenticationService {
                             .role("User")
                             .build())
                     .build(), HttpStatus.CREATED);
-        }
-        catch (MetaBlogException e) {
+        } catch (MetaBlogException e) {
             return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
                     .success(false)
                     .message(e.getMessage())
@@ -123,6 +117,7 @@ public class AuthenticationService implements IAuthenticationService {
         }
     }
 
+    @Override
     public ResponseEntity<Object> forgetPassword(String email) {
         try {
             logger.info("Forgot password request for email: {}", email);
@@ -154,8 +149,7 @@ public class AuthenticationService implements IAuthenticationService {
                     .success(true)
                     .message("OTP has been sent to your email successfully.")
                     .build(), HttpStatus.OK);
-        }
-        catch (MetaBlogException e) {
+        } catch (MetaBlogException e) {
             return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
                     .success(false)
                     .message(e.getMessage())
@@ -163,6 +157,7 @@ public class AuthenticationService implements IAuthenticationService {
         }
     }
 
+    @Override
     public ResponseEntity<Object> resetPassword(ResetPasswordRequestDto request) {
         try {
             logger.info("Resetting password for email: {}", request.getEmail());
@@ -185,8 +180,7 @@ public class AuthenticationService implements IAuthenticationService {
                     .success(true)
                     .message("Password reset successfully.")
                     .build());
-        }
-        catch (MetaBlogException e) {
+        } catch (MetaBlogException e) {
             return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
                     .success(false)
                     .message(e.getMessage())
@@ -194,6 +188,7 @@ public class AuthenticationService implements IAuthenticationService {
         }
     }
 
+    @Override
     public ResponseEntity<Object> findUser(String email) {
         try {
             logger.info("Finding user with email: {}", email);
@@ -205,14 +200,12 @@ public class AuthenticationService implements IAuthenticationService {
                         .message("User does not exist with this email.")
                         .build(), HttpStatus.NOT_FOUND);
             }
-            User currentUser = existingUser.get();
             logger.info("User found with this email");
             return new ResponseEntity<>(MetaBlogResponse.builder()
                     .success(true)
                     .message("A user with this email exists.")
                     .build(), HttpStatus.OK);
-        }
-        catch (MetaBlogException e) {
+        } catch (MetaBlogException e) {
             return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
                     .success(false)
                     .message(e.getMessage())
@@ -220,12 +213,13 @@ public class AuthenticationService implements IAuthenticationService {
         }
     }
 
+    @Override
     public ResponseEntity<Object> login(LoginRequestDto request) {
         try {
             User user = IUserRepository.findByEmail(request.getEmail())
                     .orElseThrow(() -> new MetaBlogException("User not found"));
 
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(),request.getPassword()));
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
 
             String accessToken = jwtService.generateJwtToken(user);
             String refreshToken = jwtService.generateRefreshToken(user);

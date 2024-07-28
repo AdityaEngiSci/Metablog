@@ -22,37 +22,39 @@ public class OTPService implements IOTPService {
         this.otpRepository = otpRepository;
         this.IUserRepository = IUserRepository;
     }
+
     public SecureRandom getSecureRandom() {
         return new SecureRandom();
     }
 
+    @Override
     public Integer generateOTP() {
         SecureRandom random = getSecureRandom();
         return 100000 + random.nextInt(900000);
     }
 
-    public boolean registerOTP(Integer otp_code, Long userId){
+    @Override
+    public boolean registerOTP(Integer otp_code, Long userId) {
         OTPModel otpModel = otpRepository.findByUserId(userId);
-        if(otpModel != null) {
+        if (otpModel != null) {
             otpModel.setOtp(otp_code);
             otpModel.setCreatedAt(System.currentTimeMillis());
-            // 30 minutes
-            otpModel.setExpiryTime(System.currentTimeMillis() + 600000*3);
+            otpModel.setExpiryTime(System.currentTimeMillis() + 600000 * 3); // 30 minutes
             otpRepository.save(otpModel);
-        }
-        else{
-            OTPModel otp = new OTPModel();
-            otp.setOtp(otp_code);
-            otp.setUserId(userId);
-            otp.setCreatedAt(System.currentTimeMillis());
-            // 30 minutes
-            otp.setExpiryTime(System.currentTimeMillis() + 600000*3);
+        } else {
+            OTPModel otp = OTPModel.builder()
+                    .otp(otp_code)
+                    .userId(userId)
+                    .createdAt(System.currentTimeMillis())
+                    .expiryTime(System.currentTimeMillis() + 600000 * 3) // 30 minutes
+                    .build();
             otpRepository.save(otp);
         }
         return true;
     }
 
-    public ResponseEntity<Object> verifyOTP(Integer otp_code, String Email){
+    @Override
+    public ResponseEntity<Object> verifyOTP(Integer otp_code, String Email) {
         try {
             Optional<User> user = IUserRepository.findByEmail(Email);
             if (user.isEmpty()) {
@@ -100,5 +102,4 @@ public class OTPService implements IOTPService {
                     .build());
         }
     }
-
 }

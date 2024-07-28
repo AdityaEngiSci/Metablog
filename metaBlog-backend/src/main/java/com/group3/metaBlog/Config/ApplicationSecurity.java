@@ -2,7 +2,6 @@ package com.group3.metaBlog.Config;
 
 import com.group3.metaBlog.Jwt.Filter.JwtFilter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -21,6 +20,7 @@ public class ApplicationSecurity {
 
     private final AuthenticationProvider authenticationProvider;
     private final JwtFilter jwtTokenFilter;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -33,7 +33,7 @@ public class ApplicationSecurity {
                                         "swagger-ui.html",
                                         "/v3/api-docs"
 
-                                    )
+                                )
                                 .permitAll()
                                 .anyRequest()
                                 .authenticated()

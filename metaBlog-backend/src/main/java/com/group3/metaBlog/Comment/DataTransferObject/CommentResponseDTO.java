@@ -7,7 +7,11 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateCommentDto {
+public class CommentResponseDTO {
+    private Long id;
     private String content;
-    private Long blogId;
+    private String author;
+    private String author_image_url;
+    private Double createdOn;
+
 }

@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { FiUser } from "react-icons/fi";
 import {
+  EyeIcon,
+  EyeSlashIcon,
   ArrowLeftOnRectangleIcon,
 } from "@heroicons/react/24/outline";
 import axios from "axios";
-import "./UserProfile.css";
-import Header from "../../components/Header/Header";
+import "./AdminProfile.css";
 import Footer from "../../components/Footer/Footer";
 
 const UserProfile = () => {
   const [profileImage, setProfileImage] = useState(null);
-  const [profileImageUrl, setProfileImageUrl] = useState("/image.svg");
+  const [profileImageUrl, setProfileImageUrl] = useState("https://via.placeholder.com/40");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [bio, setBio] = useState("");
@@ -110,7 +113,25 @@ const UserProfile = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
+      <header className="flex items-center justify-between h-16 px-4 border-b md:px-6 bg-white">
+        <div className="flex items-center space-x-10">
+        <Link
+          to="/admin-home"
+          className="flex items-center gap-2 text-lg font-semibold"
+        >
+          <img
+            src="/logo-black.svg"
+            alt="MetaBlog Logo"
+            className="w-25 h-25"
+          />
+          </Link>
+        </div>
+        <Link to="/admin-profile" className="text-gray-600">
+          <button className="rounded-full p-2 bg-gray-200">
+            <FiUser className="w-6 h-6 text-gray-600" />
+          </button>
+        </Link>
+      </header>
       <main className="w-3/4 max-w-xl mx-auto p-5 relative">
         <h2 className="text-2xl font-bold mb-5">User Profile</h2>
         <div className="text-center mb-8 ">
@@ -133,10 +154,7 @@ const UserProfile = () => {
             className="hidden"
           />
         </div>
-        <form
-          onSubmit={handleProfileUpdate}
-          className={`space-y-4 `}
-        >
+        <form onSubmit={handleProfileUpdate} className={`space-y-4 `}>
           <label className="block">
             Username
             <input

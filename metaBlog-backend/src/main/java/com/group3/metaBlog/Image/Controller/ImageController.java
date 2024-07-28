@@ -2,35 +2,31 @@ package com.group3.metaBlog.Image.Controller;
 
 import com.group3.metaBlog.Exception.MetaBlogException;
 import com.group3.metaBlog.Image.Model.Image;
-import com.group3.metaBlog.Image.Service.ImageService;
+import com.group3.metaBlog.Image.Service.IImageService;
 import com.group3.metaBlog.Utils.MetaBlogResponse;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.util.Optional;
+import jakarta.mail.MessagingException;
 
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/v1/images")
 public class ImageController {
-    private ImageService imageService;
+    private final IImageService imageService;
 
     @PostMapping("/upload-profile-image")
-    public ResponseEntity<Object> uploadProfileImage(@RequestParam("file") MultipartFile file,@RequestHeader("Authorization") String token) {
+    public ResponseEntity<Object> uploadProfileImage(@RequestParam("file") MultipartFile file, @RequestHeader("Authorization") String token) {
         try {
             Image image = imageService.uploadImage(file);
-            if(image == null)
+            if (image == null)
                 return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
                         .success(false)
                         .message("Image not uploaded")
                         .build());
-            return imageService.setUserUrl(image.getUrl(),token);
-        } catch (IllegalArgumentException | MetaBlogException e) {
+            return imageService.setUserUrl(image.getUrl(), token);
+        } catch (IllegalArgumentException | MetaBlogException | MessagingException e) {
             return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
                     .success(false)
                     .message(e.getMessage())

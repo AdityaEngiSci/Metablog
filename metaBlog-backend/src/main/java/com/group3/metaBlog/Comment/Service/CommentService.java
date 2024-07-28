@@ -2,10 +2,12 @@ package com.group3.metaBlog.Comment.Service;
 
 import com.group3.metaBlog.Blog.Model.Blog;
 import com.group3.metaBlog.Blog.Repository.IBlogRepository;
+import com.group3.metaBlog.Comment.DataTransferObject.CommentResponseDTO;
 import com.group3.metaBlog.Comment.DataTransferObject.CreateCommentDto;
 import com.group3.metaBlog.Comment.Model.Comment;
 import com.group3.metaBlog.Comment.Repository.ICommentRepository;
 import com.group3.metaBlog.Exception.MetaBlogException;
+import com.group3.metaBlog.Jwt.ServiceLayer.JwtService;
 import com.group3.metaBlog.User.Model.User;
 import com.group3.metaBlog.User.Repository.IUserRepository;
 import com.group3.metaBlog.Utils.MetaBlogResponse;
@@ -25,12 +27,15 @@ public class CommentService implements ICommentService {
     private final ICommentRepository commentRepository;
     private final IBlogRepository blogRepository;
     private final IUserRepository userRepository;
+    private final JwtService jwtService;
     private final Logger logger = LoggerFactory.getLogger(CommentService.class);
 
     @Override
-    public ResponseEntity<Object> createComment(CreateCommentDto request) {
+    public ResponseEntity<Object> createComment(CreateCommentDto request, String token) {
         try {
             logger.info("Creating comment for blogId: {}", request.getBlogId());
+
+            String userEmail = jwtService.extractUserEmailFromToken(token.split(" ")[1]);
 
             Optional<Blog> blogOptional = blogRepository.findById(request.getBlogId());
             if (blogOptional.isEmpty()) {
@@ -38,9 +43,9 @@ public class CommentService implements ICommentService {
                 throw new MetaBlogException("Blog not found.");
             }
 
-            Optional<User> userOptional = userRepository.findById(request.getUserId());
+            Optional<User> userOptional = userRepository.findByEmail(userEmail);
             if (userOptional.isEmpty()) {
-                logger.error("User not found with id: {}", request.getUserId());
+                logger.error("User not found with email: {}", userEmail);
                 throw new MetaBlogException("User not found.");
             }
 
@@ -56,10 +61,17 @@ public class CommentService implements ICommentService {
 
             commentRepository.save(comment);
 
+
             return ResponseEntity.ok().body(MetaBlogResponse.builder()
                     .success(true)
                     .message("Comment created successfully.")
-                    .data(comment)
+                    .data(CommentResponseDTO.builder()
+                            .id(comment.getId())
+                            .content(comment.getContent())
+                            .createdOn(comment.getCreatedOn())
+                            .author(comment.getUser().getUsername())
+                            .author_image_url(comment.getUser().getImageURL())
+                            .build())
                     .build());
         } catch (MetaBlogException e) {
             logger.error("Error creating comment: {}", e.getMessage());
@@ -84,10 +96,18 @@ public class CommentService implements ICommentService {
             Blog blog = blogOptional.get();
             List<Comment> comments = commentRepository.findByBlog(blog);
 
+            List<CommentResponseDTO> responseDTOs = comments.stream().map(comment -> CommentResponseDTO.builder()
+                    .id(comment.getId())
+                    .content(comment.getContent())
+                    .createdOn(comment.getCreatedOn())
+                    .author(comment.getUser().getUsername())
+                    .author_image_url(comment.getUser().getImageURL())
+                    .build()).toList();
+
             return ResponseEntity.ok().body(MetaBlogResponse.builder()
                     .success(true)
                     .message("Comments fetched successfully.")
-                    .data(comments)
+                    .data(responseDTOs)
                     .build());
         } catch (MetaBlogException e) {
             logger.error("Error fetching comments: {}", e.getMessage());
