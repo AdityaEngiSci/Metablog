@@ -33,23 +33,19 @@ const BlogPage = () => {
       }
     };
 
-    const fetchComments = () => {
-      // Simulated comments data
-      const commentsData = [
-        {
-          id: 1,
-          content: "Great post!",
-          authorName: "Alice",
-          createdOn: "2024-07-24T08:00:00Z",
-        },
-        {
-          id: 2,
-          content: "Thanks for sharing.",
-          authorName: "Bob",
-          createdOn: "2024-07-24T09:30:00Z",
-        },
-      ];
-      setComments(commentsData);
+    const fetchComments = async () => {
+      try {
+        const token = localStorage.getItem("accessToken");
+        const response = await axios.get(`${base_url}/comments/${blogId}`,{
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        setComments(response.data.data);
+      } catch (error) {
+        console.error("Error fetching comments:", error);
+        setError("Error fetching comments. Please try again later.");
+      }
     };
     fetchBlog();
     fetchComments();
@@ -67,17 +63,24 @@ const BlogPage = () => {
     setNewComment(e.target.value);
   };
 
-  const handleCommentSubmit = (e) => {
-    e.preventDefault();
-    // Simulated API call to post a new comment
-    const newCommentData = {
-      id: comments.length + 1,
-      content: newComment,
-      authorName: "Current User",
-      createdOn: new Date().toISOString(),
-    };
-    setComments([...comments, newCommentData]);
-    setNewComment("");
+  const handleCommentSubmit = async () => {
+    try{
+      const token = localStorage.getItem("accessToken");
+      const response = await axios.post(`${base_url}/comments`, {
+        content: newComment,
+        blogId: blogId,
+
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+    });
+    console.log("Comment posted successfully:", response.data);
+  } catch (error) {
+    console.error("Error posting comment:", error);
+    alert("Error posting comment. Please try again later.");
+  }
+    
   };
 
   const handleSaveBlog = async () => {
@@ -162,7 +165,6 @@ const BlogPage = () => {
                 className="comment p-4 bg-gray-100 rounded-lg flex items-start"
               >
                 <img
-                //   src={comment.author_image_url}
                   src={blog.author_image_url}
                   className="comment-author-image w-10 h-10 rounded-full mr-4"
                   alt="Comment Author"
@@ -170,7 +172,7 @@ const BlogPage = () => {
                 <div>
                   <p className="mb-2">{comment.content}</p>
                   <div className="text-sm text-gray-500">
-                    <span>{comment.authorName}</span> &bull;{" "}
+                    <span>{comment.author}</span> &bull;{" "}
                     <span>
                       {new Date(comment.createdOn).toLocaleDateString(
                         undefined,

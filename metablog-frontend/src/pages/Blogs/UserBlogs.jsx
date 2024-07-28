@@ -11,6 +11,7 @@ const UserBlogs = () => {
     const [savedBlogs, setSavedBlogs] = useState([]);
     const [error, setError] = useState(null);
     const token = localStorage.getItem("accessToken");
+    const [userDetails, setUserDetails] = useState({});
     const base_url = process.env.REACT_APP_BASE_URL;
 
     useEffect(() => {
@@ -29,7 +30,42 @@ const UserBlogs = () => {
                 setError("Error fetching blogs. Please try again later.");
             }
         };
+
+        const fetchSavedBlogs = async () => {
+            try{
+                axios.get(`${base_url}/blogs/saved-blogs`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }).then(response => {
+                    setSavedBlogs(response.data.data);
+                }).catch(error => {
+                    setError("Error fetching saved blogs. Please try again later.");
+                });
+            } catch (error) {
+                setError("Error fetching saved blogs. Please try again later.");
+            }
+        };
+
+        const fetchuserDetails = async () => {
+            try{
+                axios.get(`${base_url}/user/details`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }).then(response => {
+                    setUserDetails(response.data.data);
+                }).catch(error => {
+                    setError("Error fetching user details. Please try again later.");
+                });
+            } catch (error) {
+                setError("Error fetching user details. Please try again later.");
+            }
+        };
         fetchUserBlogs();
+        fetchSavedBlogs();
+        fetchuserDetails();
+
     }, []);
 
     const handleUnsave = async (blogId) => {
@@ -45,12 +81,8 @@ const UserBlogs = () => {
     return (
         <div>
             <Header />
-            <main className="container mb-12 mx-auto px-4">
-                <BlogList
-                    myBlogs={userBlogs}
-                    savedBlogs={savedBlogs}
-                    onUnsave={handleUnsave}
-                />
+            <main className="container mx-auto px-4">
+                <BlogList myBlogs={userBlogs} savedBlogs={savedBlogs} userDetails={userDetails} />
             </main>
             <Footer />
         </div>
