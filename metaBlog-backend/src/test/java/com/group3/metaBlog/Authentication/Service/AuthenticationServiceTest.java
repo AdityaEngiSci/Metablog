@@ -36,7 +36,17 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AuthenticationServiceTest {
-
+    private static final String TEST_EMAIL = "test@example.com";
+    private static final String TEST_USERNAME = "testUser";
+    private static final String TEST_PASSWORD = "password";
+    private static final String TEST_NEW_PASSWORD = "newPassword";
+    private static final String ACCESS_TOKEN = "accessToken";
+    private static final String REFRESH_TOKEN = "refreshToken";
+    private static final String USER_ROLE = "User";
+    private static final String ADMIN_ROLE = "Admin";
+    private static final long USER_ID = 1L;
+    private static final int OTP = 123456;
+    
     @Mock
     private IUserRepository userRepository;
 
@@ -70,36 +80,36 @@ class AuthenticationServiceTest {
         authenticationService = new AuthenticationService(userRepository, otpService, emailService, jwtService, applicationConfig, authenticationManager);
 
         user = User.builder()
-                .id(1L)
-                .username("testUser")
-                .email("test@example.com")
-                .password("password")
-                .accessToken("accessToken")
-                .refreshToken("refreshToken")
+                .id(USER_ID)
+                .username(TEST_USERNAME)
+                .email(TEST_EMAIL)
+                .password(TEST_PASSWORD)
+                .accessToken(ACCESS_TOKEN)
+                .refreshToken(REFRESH_TOKEN)
                 .role(Role.User)
                 .build();
         registerRequestDto = new RegisterRequestDto();
-        registerRequestDto.setUsername("testUser");
-        registerRequestDto.setEmail("test@example.com");
-        registerRequestDto.setPassword("password");
-        registerRequestDto.setRole("User");
+        registerRequestDto.setUsername(TEST_USERNAME);
+        registerRequestDto.setEmail(TEST_EMAIL);
+        registerRequestDto.setPassword(TEST_PASSWORD);
+        registerRequestDto.setRole(USER_ROLE);
 
         resetPasswordRequestDto = new ResetPasswordRequestDto();
-        resetPasswordRequestDto.setEmail("test@example.com");
-        resetPasswordRequestDto.setNewPassword("newPassword");
+        resetPasswordRequestDto.setEmail(TEST_EMAIL);
+        resetPasswordRequestDto.setNewPassword(TEST_NEW_PASSWORD);
 
         loginRequestDto = new LoginRequestDto();
-        loginRequestDto.setEmail("test@example.com");
-        loginRequestDto.setPassword("password");
+        loginRequestDto.setEmail(TEST_EMAIL);
+        loginRequestDto.setPassword(TEST_PASSWORD);
 
         LoginResponseDto loginResponseDto = new LoginResponseDto();
-        loginResponseDto.setAccessToken("accessToken");
-        loginResponseDto.setRefreshToken("refreshToken");
+        loginResponseDto.setAccessToken(ACCESS_TOKEN);
+        loginResponseDto.setRefreshToken(REFRESH_TOKEN);
     }
 
     @Test
     void testRegisterUserAlreadyExists() {
-        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(user));
 
         ResponseEntity<Object> response = authenticationService.register(registerRequestDto);
 
@@ -109,13 +119,13 @@ class AuthenticationServiceTest {
         assertEquals("User already exists with this email.", responseBody.getMessage());
         assertEquals(false, responseBody.getSuccess());
 
-        verify(userRepository, times(1)).findByEmail("test@example.com");
+        verify(userRepository, times(1)).findByEmail(TEST_EMAIL);
         verify(userRepository, never()).save(any(User.class));
     }
 
     @Test
     void testRegisterInvalidRole() {
-        registerRequestDto.setRole("Admin");
+        registerRequestDto.setRole(ADMIN_ROLE);
 
         ResponseEntity<Object> response = authenticationService.register(registerRequestDto);
 
@@ -131,9 +141,9 @@ class AuthenticationServiceTest {
     @Test
     void testRegisterSuccess() {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
-        when(otpService.generateOTP()).thenReturn(123456);
-        when(jwtService.generateJwtToken(any())).thenReturn("accessToken");
-        when(jwtService.generateRefreshToken(any())).thenReturn("refreshToken");
+        when(otpService.generateOTP()).thenReturn(OTP);
+        when(jwtService.generateJwtToken(any())).thenReturn(ACCESS_TOKEN);
+        when(jwtService.generateRefreshToken(any())).thenReturn(REFRESH_TOKEN);
         when(applicationConfig.passwordEncoder()).thenReturn(new BCryptPasswordEncoder());
         when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArguments()[0]);
 
@@ -147,9 +157,9 @@ class AuthenticationServiceTest {
 
         RegisterResponseDto data = (RegisterResponseDto) responseBody.getData();
         assert data != null;
-        assertEquals("accessToken", data.getAccessToken());
-        assertEquals("refreshToken", data.getRefreshToken());
-        assertEquals("User", data.getRole());
+        assertEquals(ACCESS_TOKEN, data.getAccessToken());
+        assertEquals(REFRESH_TOKEN, data.getRefreshToken());
+        assertEquals(USER_ROLE, data.getRole());
 
         verify(userRepository).findByEmail(anyString());
         verify(userRepository, times(3)).save(any(User.class)); // 1 for saving user, 2 for saving access and 3 for refresh token
@@ -157,14 +167,14 @@ class AuthenticationServiceTest {
     @Test
     void testRegisterEmailException() throws MessagingException {
         // Mock behavior for user creation
-        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.empty());
         when(applicationConfig.passwordEncoder()).thenReturn(new BCryptPasswordEncoder());
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
             User savedUser = invocation.getArgument(0);
-            savedUser.setId(1L);
+            savedUser.setId(USER_ID);
             return savedUser;
         });
-        when(otpService.generateOTP()).thenReturn(123456);
+        when(otpService.generateOTP()).thenReturn(OTP);
 
         doThrow(new MessagingException("Email error")).when(emailService).sendVerificationOTP(anyString(), anyInt());
 
@@ -177,17 +187,17 @@ class AuthenticationServiceTest {
         assertFalse(responseBody.getSuccess());
 
         InOrder inOrder = inOrder(userRepository, otpService, emailService);
-        inOrder.verify(userRepository).findByEmail("test@example.com");
+        inOrder.verify(userRepository).findByEmail(TEST_EMAIL);
         inOrder.verify(userRepository).save(any(User.class));
         inOrder.verify(otpService).generateOTP();
-        inOrder.verify(otpService).registerOTP(anyInt(), eq(1L)); // Use 1L directly for verification
+        inOrder.verify(otpService).registerOTP(anyInt(), eq(USER_ID)); // Use USER_ID directly for verification
         inOrder.verify(emailService).sendVerificationOTP(anyString(), anyInt());
     }
 
     @Test
     void testRegisterMetaBlogException() {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
-        when(otpService.generateOTP()).thenReturn(123456);
+        when(otpService.generateOTP()).thenReturn(OTP);
         when(applicationConfig.passwordEncoder()).thenReturn(new BCryptPasswordEncoder());
         when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArguments()[0]);
 
@@ -203,9 +213,9 @@ class AuthenticationServiceTest {
     }
     @Test
     void testForgetPasswordUserDoesNotExist() throws MessagingException {
-        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.empty());
 
-        ResponseEntity<Object> response = authenticationService.forgetPassword("test@example.com");
+        ResponseEntity<Object> response = authenticationService.forgetPassword(TEST_EMAIL);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         MetaBlogResponse responseBody = (MetaBlogResponse) response.getBody();
@@ -213,7 +223,7 @@ class AuthenticationServiceTest {
         assertEquals("User does not exist with this email.", responseBody.getMessage());
         assertFalse(responseBody.getSuccess());
 
-        verify(userRepository, times(1)).findByEmail("test@example.com");
+        verify(userRepository, times(1)).findByEmail(TEST_EMAIL);
         verify(otpService, never()).generateOTP();
         verify(otpService, never()).registerOTP(anyInt(), anyLong());
         verify(emailService, never()).sendVerificationOTP(anyString(), anyInt());
@@ -221,10 +231,10 @@ class AuthenticationServiceTest {
 
     @Test
     void testForgetPasswordSuccess() throws MessagingException {
-        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
-        when(otpService.generateOTP()).thenReturn(123456);
+        when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(user));
+        when(otpService.generateOTP()).thenReturn(OTP);
 
-        ResponseEntity<Object> response = authenticationService.forgetPassword("test@example.com");
+        ResponseEntity<Object> response = authenticationService.forgetPassword(TEST_EMAIL);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         MetaBlogResponse responseBody = (MetaBlogResponse) response.getBody();
@@ -233,19 +243,19 @@ class AuthenticationServiceTest {
         assertTrue(responseBody.getSuccess());
 
         InOrder inOrder = inOrder(userRepository, otpService, emailService);
-        inOrder.verify(userRepository).findByEmail("test@example.com");
+        inOrder.verify(userRepository).findByEmail(TEST_EMAIL);
         inOrder.verify(otpService).generateOTP();
-        inOrder.verify(otpService).registerOTP(anyInt(), eq(1L));
+        inOrder.verify(otpService).registerOTP(anyInt(), eq(USER_ID));
         inOrder.verify(emailService).sendVerificationOTP(anyString(), anyInt());
     }
 
     @Test
     void testForgetPasswordEmailException() throws MessagingException {
-        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
-        when(otpService.generateOTP()).thenReturn(123456);
+        when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(user));
+        when(otpService.generateOTP()).thenReturn(OTP);
         doThrow(new MessagingException("Email error")).when(emailService).sendVerificationOTP(anyString(), anyInt());
 
-        ResponseEntity<Object> response = authenticationService.forgetPassword("test@example.com");
+        ResponseEntity<Object> response = authenticationService.forgetPassword(TEST_EMAIL);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         MetaBlogResponse responseBody = (MetaBlogResponse) response.getBody();
@@ -254,19 +264,19 @@ class AuthenticationServiceTest {
         assertFalse(responseBody.getSuccess());
 
         InOrder inOrder = inOrder(userRepository, otpService, emailService);
-        inOrder.verify(userRepository).findByEmail("test@example.com");
+        inOrder.verify(userRepository).findByEmail(TEST_EMAIL);
         inOrder.verify(otpService).generateOTP();
-        inOrder.verify(otpService).registerOTP(anyInt(), eq(1L));
+        inOrder.verify(otpService).registerOTP(anyInt(), eq(USER_ID));
         inOrder.verify(emailService).sendVerificationOTP(anyString(), anyInt());
     }
 
     @Test
     void testForgetPasswordMetaBlogException() {
-        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
-        when(otpService.generateOTP()).thenReturn(123456);
+        when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(user));
+        when(otpService.generateOTP()).thenReturn(OTP);
         doThrow(new MetaBlogException("MetaBlogException occurred")).when(otpService).registerOTP(anyInt(), anyLong());
 
-        ResponseEntity<Object> response = authenticationService.forgetPassword("test@example.com");
+        ResponseEntity<Object> response = authenticationService.forgetPassword(TEST_EMAIL);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         MetaBlogResponse responseBody = (MetaBlogResponse) response.getBody();
@@ -277,7 +287,7 @@ class AuthenticationServiceTest {
 
     @Test
     void testResetPasswordUserNotFound() {
-        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.empty());
 
         ResponseEntity<Object> response = authenticationService.resetPassword(resetPasswordRequestDto);
 
@@ -287,13 +297,13 @@ class AuthenticationServiceTest {
         assertEquals("User not found.", responseBody.getMessage());
         assertFalse(responseBody.getSuccess());
 
-        verify(userRepository, times(1)).findByEmail("test@example.com");
+        verify(userRepository, times(1)).findByEmail(TEST_EMAIL);
         verify(userRepository, never()).save(any(User.class));
     }
 
     @Test
     void testResetPasswordSuccess() {
-        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(user));
         when(applicationConfig.passwordEncoder()).thenReturn(new BCryptPasswordEncoder());
 
         ResponseEntity<Object> response = authenticationService.resetPassword(resetPasswordRequestDto);
@@ -304,13 +314,13 @@ class AuthenticationServiceTest {
         assertEquals("Password reset successfully.", responseBody.getMessage());
         assertTrue(responseBody.getSuccess());
 
-        verify(userRepository, times(1)).findByEmail("test@example.com");
+        verify(userRepository, times(1)).findByEmail(TEST_EMAIL);
         verify(userRepository, times(1)).save(user);
     }
 
     @Test
     void testResetPasswordMetaBlogException() {
-        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(user));
         when(applicationConfig.passwordEncoder()).thenReturn(new BCryptPasswordEncoder());
         doThrow(new MetaBlogException("MetaBlogException occurred")).when(userRepository).save(any(User.class));
 
@@ -325,9 +335,9 @@ class AuthenticationServiceTest {
 
     @Test
     void testFindUserNotFound() {
-        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.empty());
 
-        ResponseEntity<Object> response = authenticationService.findUser("test@example.com");
+        ResponseEntity<Object> response = authenticationService.findUser(TEST_EMAIL);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         MetaBlogResponse responseBody = (MetaBlogResponse) response.getBody();
@@ -335,13 +345,13 @@ class AuthenticationServiceTest {
         assertEquals("User does not exist with this email.", responseBody.getMessage());
         assertEquals(false, responseBody.getSuccess());
 
-        verify(userRepository, times(1)).findByEmail("test@example.com");
+        verify(userRepository, times(1)).findByEmail(TEST_EMAIL);
     }
     @Test
     void testFindUserSuccess() {
-        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(user));
 
-        ResponseEntity<Object> response = authenticationService.findUser("test@example.com");
+        ResponseEntity<Object> response = authenticationService.findUser(TEST_EMAIL);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         MetaBlogResponse responseBody = (MetaBlogResponse) response.getBody();
@@ -349,14 +359,14 @@ class AuthenticationServiceTest {
         assertEquals("A user with this email exists.", responseBody.getMessage());
         assertEquals(true, responseBody.getSuccess());
 
-        verify(userRepository, times(1)).findByEmail("test@example.com");
+        verify(userRepository, times(1)).findByEmail(TEST_EMAIL);
     }
 
     @Test
     void testFindUserMetaBlogException() {
         doThrow(new MetaBlogException("MetaBlogException occurred")).when(userRepository).findByEmail(anyString());
 
-        ResponseEntity<Object> response = authenticationService.findUser("test@example.com");
+        ResponseEntity<Object> response = authenticationService.findUser(TEST_EMAIL);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         MetaBlogResponse responseBody = (MetaBlogResponse) response.getBody();
@@ -367,7 +377,7 @@ class AuthenticationServiceTest {
 
     @Test
     void loginSuccessTest() {
-        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(user));
         when(jwtService.generateJwtToken(user)).thenReturn(user.getAccessToken());
         when(jwtService.generateRefreshToken(user)).thenReturn(user.getRefreshToken());
 
@@ -393,6 +403,7 @@ class AuthenticationServiceTest {
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         MetaBlogResponse metaBlogResponse = (MetaBlogResponse) response.getBody();
+        assert metaBlogResponse != null;
         assertFalse(metaBlogResponse.getSuccess());
         assertEquals("User not found", metaBlogResponse.getMessage());
         verify(userRepository, never()).save(any(User.class));
@@ -400,7 +411,7 @@ class AuthenticationServiceTest {
 
     @Test
     void loginMetaBlogExceptionTest() {
-        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(user));
         doThrow(new MetaBlogException("MetaBlogException occurred")).when(authenticationManager).authenticate(any());
 
         ResponseEntity<Object> response = authenticationService.login(loginRequestDto);
