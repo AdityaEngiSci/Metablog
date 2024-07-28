@@ -19,13 +19,13 @@ import java.util.List;
 @AllArgsConstructor
 public class AdminBlogService {
 
-    private final AdminBlogRepository adminBlogRepository;
     private static final Logger logger = LoggerFactory.getLogger(AdminBlogService.class);
+    private final AdminBlogRepository adminBlogRepository;
 
     public ResponseEntity<Object> getPendingBlogs() {
         try {
             List<Blog> blogs = adminBlogRepository.findByStatus(BlogStatus.PENDING);
-            List<AdminResponseDto> responseDtos = blogs.stream().map(blog -> AdminResponseDto.builder()
+            List<AdminResponseDto> responseDTO = blogs.stream().map(blog -> AdminResponseDto.builder()
                     .id(blog.getId())
                     .title(blog.getTitle())
                     .content(blog.getContent())
@@ -37,7 +37,7 @@ public class AdminBlogService {
             return ResponseEntity.ok(MetaBlogResponse.builder()
                     .success(true)
                     .message("Pending blogs retrieved successfully")
-                    .data(responseDtos)
+                    .data(responseDTO)
                     .build());
         } catch (Exception e) {
             logger.error("Error retrieving pending blogs: {}", e.getMessage());
@@ -51,7 +51,7 @@ public class AdminBlogService {
     public ResponseEntity<Object> getApprovedBlogs() {
         try {
             List<Blog> blogs = adminBlogRepository.findByStatus(BlogStatus.APPROVED);
-            List<AdminResponseDto> responseDtos = blogs.stream().map(blog -> AdminResponseDto.builder()
+            List<AdminResponseDto> responseDTO = blogs.stream().map(blog -> AdminResponseDto.builder()
                     .id(blog.getId())
                     .title(blog.getTitle())
                     .content(blog.getContent())
@@ -63,7 +63,7 @@ public class AdminBlogService {
             return ResponseEntity.ok(MetaBlogResponse.builder()
                     .success(true)
                     .message("Approved blogs retrieved successfully")
-                    .data(responseDtos)
+                    .data(responseDTO)
                     .build());
         } catch (Exception e) {
             logger.error("Error retrieving approved blogs: {}", e.getMessage());
@@ -77,7 +77,7 @@ public class AdminBlogService {
     public ResponseEntity<Object> getRejectedBlogs() {
         try {
             List<Blog> blogs = adminBlogRepository.findByStatus(BlogStatus.REJECTED);
-            List<AdminResponseDto> responseDtos = blogs.stream().map(blog -> AdminResponseDto.builder()
+            List<AdminResponseDto> responseDTO = blogs.stream().map(blog -> AdminResponseDto.builder()
                     .id(blog.getId())
                     .title(blog.getTitle())
                     .content(blog.getContent())
@@ -89,7 +89,7 @@ public class AdminBlogService {
             return ResponseEntity.ok(MetaBlogResponse.builder()
                     .success(true)
                     .message("Rejected blogs retrieved successfully")
-                    .data(responseDtos)
+                    .data(responseDTO)
                     .build());
         } catch (Exception e) {
             logger.error("Error retrieving rejected blogs: {}", e.getMessage());

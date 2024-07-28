@@ -6,7 +6,6 @@ import com.group3.metaBlog.Utils.MetaBlogResponse;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,10 +14,10 @@ import org.springframework.web.bind.annotation.*;
 @AllArgsConstructor
 public class BlogController {
 
-    private final BlogService blogService;
     private static final Logger logger = LoggerFactory.getLogger(BlogController.class);
+    private final BlogService blogService;
 
-    @PostMapping(path="/create-blog")
+    @PostMapping(path = "/create-blog")
     public ResponseEntity<Object> createBlog(@ModelAttribute BlogRequestDto blogRequestDto, @RequestHeader("Authorization") String token) {
         if (token == null || token.isEmpty()) {
             logger.error("Token not provided");
@@ -29,14 +28,12 @@ public class BlogController {
         }
 
         logger.info("Creating blog with token: {}", token);
-        ResponseEntity<Object> blogResponse = blogService.createBlog(blogRequestDto, token.replace("Bearer ", ""));
-        return blogResponse;
+        return blogService.createBlog(blogRequestDto, token.replace("Bearer ", ""));
     }
 
     @GetMapping("/all-blogs")
-    public ResponseEntity<Object> getAllBlogs(@RequestHeader("Authorization") String token) {
-        ResponseEntity<Object> response = blogService.getAllBlogs();
-        return response;
+    public ResponseEntity<Object> getAllBlogs() {
+        return blogService.getAllBlogs();
     }
 
     @GetMapping("/my-blogs")
@@ -54,14 +51,12 @@ public class BlogController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Object> searchBlogsByTitle(@RequestParam String title, @RequestHeader("Authorization") String token) {
-        ResponseEntity<Object> response = blogService.searchBlogsByTitle(title);
-        return response;
+    public ResponseEntity<Object> searchBlogsByTitle(@RequestParam String title) {
+        return blogService.searchBlogsByTitle(title);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Object> getBlogById(@PathVariable Long id) {
-        ResponseEntity<Object> response = blogService.getBlogById(id);
-        return response;
+        return blogService.getBlogById(id);
     }
 }

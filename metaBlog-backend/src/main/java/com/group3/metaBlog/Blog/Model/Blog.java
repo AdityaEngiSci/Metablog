@@ -23,10 +23,9 @@ public class Blog {
     private String title;
 
     @Lob
-    @Column( columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "LONGTEXT")
     private String content;
 
-    @Column(nullable = true)
     private String imageUrl;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)

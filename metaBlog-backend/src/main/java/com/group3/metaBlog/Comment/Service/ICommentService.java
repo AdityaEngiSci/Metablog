@@ -5,5 +5,6 @@ import org.springframework.http.ResponseEntity;
 
 public interface ICommentService {
     ResponseEntity<Object> createComment(CreateCommentDto request);
+
     ResponseEntity<Object> getCommentsByBlog(Long blogId);
 }

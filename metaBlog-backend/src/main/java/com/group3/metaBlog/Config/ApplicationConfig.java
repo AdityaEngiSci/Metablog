@@ -17,14 +17,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 @RequiredArgsConstructor
 public class ApplicationConfig {
-    // this is the configuration class and this will be called in the starting of the application
-    // and it will try to include all the configuration that is required for the application to run
-    // and all the beans required for the application to run.
 
     private final IUserRepository IUserRepository;
-
-    @Value("${jwt.secret.key}")
-    private String SECRET_KEY;
 
     @Bean
     public UserDetailsService userDetailsService() {
@@ -33,7 +27,7 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public AuthenticationProvider authenticationProvider(){
+    public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
         authenticationProvider.setUserDetailsService(userDetailsService());
         authenticationProvider.setPasswordEncoder(passwordEncoder());

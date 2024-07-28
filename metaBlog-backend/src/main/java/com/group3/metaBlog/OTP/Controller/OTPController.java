@@ -24,13 +24,13 @@ public class OTPController {
     public ResponseEntity<Object> verifyOTP(@NotNull @RequestBody VerifyOTPRequestDto verifyOTPRequest) {
         String email = verifyOTPRequest.getEmail();
         Integer otp = verifyOTPRequest.getOtp();
-           if(otp.toString().length() != 6){
-               return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
-                       .success(false)
-                       .message("Invalid OTP")
-                       .build());
-           }
-            return otpService.verifyOTP(otp, email);
+        if (otp.toString().length() != 6) {
+            return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
+                    .success(false)
+                    .message("Invalid OTP")
+                    .build());
+        }
+        return otpService.verifyOTP(otp, email);
     }
 
 }

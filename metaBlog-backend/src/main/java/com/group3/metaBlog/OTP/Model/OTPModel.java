@@ -2,9 +2,7 @@ package com.group3.metaBlog.OTP.Model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.checkerframework.checker.units.qual.C;
 
-import java.util.UUID;
 
 @Data
 @Builder

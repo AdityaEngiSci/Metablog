@@ -25,7 +25,7 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Size(min=4, message = "Minimum username length: 4 characters")
+    @Size(min = 4, message = "Minimum username length: 4 characters")
     private String username;
 
     @Getter

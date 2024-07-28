@@ -9,49 +9,29 @@ import com.group3.metaBlog.Jwt.ServiceLayer.JwtService;
 import com.group3.metaBlog.User.Model.User;
 import com.group3.metaBlog.User.Repository.IUserRepository;
 import com.group3.metaBlog.Utils.MetaBlogResponse;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.FileOutputStream;
 import java.util.Objects;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class ImageService {
 
-    @Autowired
-    private final IUserRepository userRepository;
-
-    @Autowired
-    private final JwtService jwtService;
-
-    @Autowired
     private static final Logger logger = LoggerFactory.getLogger(ImageService.class);
-    @Autowired
-    private ImageRepository imageRepository;
-
-    @Autowired
-    private AmazonS3 s3client;
-
-    @Value("${cloud.aws.s3.bucket}")
-    public final String bucketName;
-
-    public ImageService(IUserRepository userRepository, JwtService jwtService, @Value("${cloud.aws.s3.bucket}") String bucketName) {
-        this.userRepository = userRepository;
-        this.jwtService = jwtService;
-        this.bucketName = bucketName;
-        this.s3client = s3client;
-    }
+    private final IUserRepository userRepository;
+    private final JwtService jwtService;
+    private final ImageRepository imageRepository;
+    private final AmazonS3 s3client;
+    public String bucketName;
 
     public Image uploadImage(MultipartFile file) {
         try {
@@ -66,7 +46,7 @@ public class ImageService {
             var image = Image.builder()
                     .name(fileName)
                     .url(s3client.getUrl(bucketName, fileName).toString())
-                    .uploadTime((double)System.currentTimeMillis())
+                    .uploadTime((double) System.currentTimeMillis())
                     .type(file.getContentType())
                     .build();
             imageRepository.save(image);
@@ -81,7 +61,7 @@ public class ImageService {
         try {
             String userEmail = jwtService.extractUserEmailFromToken(token);
             Optional<User> userOptional = userRepository.findByEmail(userEmail);
-            if (!userOptional.isPresent()) {
+            if (userOptional.isEmpty()) {
                 logger.error("User not found: {}", userEmail);
                 return new ResponseEntity<>(MetaBlogResponse.builder()
                         .success(false)
@@ -90,7 +70,7 @@ public class ImageService {
             }
             User user = userOptional.get();
             Optional<Image> image = imageRepository.findByName(user.getImageURL());
-            if(image.isEmpty()) {
+            if (image.isEmpty()) {
                 logger.error("Error retrieving image: image not found");
                 return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
                         .success(false)
@@ -103,8 +83,7 @@ public class ImageService {
                     .data(image.get())
                     .build());
 
-        }
-        catch (MetaBlogException e) {
+        } catch (MetaBlogException e) {
             logger.error("Error retrieving image: {}", e.getMessage());
             return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
                     .success(false)
@@ -115,11 +94,11 @@ public class ImageService {
 
     private File convertMultiPartFileToFile(MultipartFile file) {
         try {
-        File convFile = new File(Objects.requireNonNull(file.getOriginalFilename()));
-        FileOutputStream fos = new FileOutputStream(convFile);
-        fos.write(file.getBytes());
-        fos.close();
-        return convFile;
+            File convFile = new File(Objects.requireNonNull(file.getOriginalFilename()));
+            FileOutputStream fos = new FileOutputStream(convFile);
+            fos.write(file.getBytes());
+            fos.close();
+            return convFile;
         } catch (java.io.IOException | MetaBlogException e) {
             logger.error("Error converting multipart file to file: {}", e.getMessage());
             return null;
@@ -130,7 +109,7 @@ public class ImageService {
         try {
             String userEmail = jwtService.extractUserEmailFromToken(token.split(" ")[1]);
             Optional<User> userOptional = userRepository.findByEmail(userEmail);
-            if (!userOptional.isPresent()) {
+            if (userOptional.isEmpty()) {
                 logger.error("User not found: {}", userEmail);
                 return new ResponseEntity<>(MetaBlogResponse.builder()
                         .success(false)

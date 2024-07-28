@@ -5,8 +5,10 @@ import org.springframework.http.ResponseEntity;
 
 public interface IAuthenticationService {
 
-    public ResponseEntity<Object> register(RegisterRequestDto request);
-    public ResponseEntity<Object> forgetPassword(String email);
-    public ResponseEntity<Object> findUser(String email);
+    ResponseEntity<Object> register(RegisterRequestDto request);
+
+    ResponseEntity<Object> forgetPassword(String email);
+
+    ResponseEntity<Object> findUser(String email);
 
 }

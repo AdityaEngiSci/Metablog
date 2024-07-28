@@ -25,17 +25,17 @@ import java.util.Optional;
 @AllArgsConstructor
 public class BlogService {
 
+    private static final Logger logger = LoggerFactory.getLogger(BlogService.class);
     private final IBlogRepository blogRepository;
     private final IUserRepository userRepository;
     private final JwtService jwtService;
     private final ImageService imageService;
-    private static final Logger logger = LoggerFactory.getLogger(BlogService.class);
 
     public ResponseEntity<Object> createBlog(BlogRequestDto blogRequestDto, String token) {
         try {
             String userEmail = jwtService.extractUserEmailFromToken(token);
             Optional<User> userOptional = userRepository.findByEmail(userEmail);
-            if (!userOptional.isPresent()) {
+            if (userOptional.isEmpty()) {
                 logger.error("User not found: {}", userEmail);
                 return new ResponseEntity<>(MetaBlogResponse.builder()
                         .success(false)
@@ -99,7 +99,7 @@ public class BlogService {
         try {
             List<Blog> blogs = blogRepository.findAll();
             logger.info("Retrieved {} blogs", blogs.size());
-            List<BlogResponseDto> responseDtos = blogs.stream().map(blog -> BlogResponseDto.builder()
+            List<BlogResponseDto> responseDTO = blogs.stream().map(blog -> BlogResponseDto.builder()
                     .id(blog.getId())
                     .title(blog.getTitle())
                     .content(blog.getContent())
@@ -112,7 +112,7 @@ public class BlogService {
             return ResponseEntity.ok(MetaBlogResponse.builder()
                     .success(true)
                     .message("Blogs retrieved successfully")
-                    .data(responseDtos)
+                    .data(responseDTO)
                     .build());
         } catch (Exception e) {
             logger.error("Error retrieving blogs: {}", e.getMessage());
@@ -127,7 +127,7 @@ public class BlogService {
         try {
             String userEmail = jwtService.extractUserEmailFromToken(token);
             Optional<User> userOptional = userRepository.findByEmail(userEmail);
-            if (!userOptional.isPresent()) {
+            if (userOptional.isEmpty()) {
                 logger.error("User not found: {}", userEmail);
                 return new ResponseEntity<>(MetaBlogResponse.builder()
                         .success(false)
@@ -137,7 +137,7 @@ public class BlogService {
             User user = userOptional.get();
             List<Blog> blogs = blogRepository.findByAuthorId(user.getId());
             logger.info("Retrieved {} blogs for user {}", blogs.size(), user.getUsername());
-            List<BlogResponseDto> responseDtos = blogs.stream().map(blog -> BlogResponseDto.builder()
+            List<BlogResponseDto> responseDTO = blogs.stream().map(blog -> BlogResponseDto.builder()
                     .id(blog.getId())
                     .title(blog.getTitle())
                     .content(blog.getContent())
@@ -150,7 +150,7 @@ public class BlogService {
             return ResponseEntity.ok(MetaBlogResponse.builder()
                     .success(true)
                     .message("Blogs retrieved successfully")
-                    .data(responseDtos)
+                    .data(responseDTO)
                     .build());
         } catch (Exception e) {
             logger.error("Error retrieving user's blogs: {}", e.getMessage());
@@ -173,7 +173,7 @@ public class BlogService {
                 blogRepository.save(blog);
             });
 
-            List<BlogResponseDto> responseDtos = blogs.stream().map(blog -> BlogResponseDto.builder()
+            List<BlogResponseDto> responseDTO = blogs.stream().map(blog -> BlogResponseDto.builder()
                     .id(blog.getId())
                     .title(blog.getTitle())
                     .content(blog.getContent())
@@ -187,7 +187,7 @@ public class BlogService {
             return ResponseEntity.ok(MetaBlogResponse.builder()
                     .success(true)
                     .message("Blogs retrieved successfully")
-                    .data(responseDtos)
+                    .data(responseDTO)
                     .build());
         } catch (Exception e) {
             logger.error("Error searching blogs by title: {}", e.getMessage());
@@ -201,7 +201,7 @@ public class BlogService {
     public ResponseEntity<Object> getBlogById(Long id) {
         try {
             Optional<Blog> blogOptional = blogRepository.findById(id);
-            if (!blogOptional.isPresent()) {
+            if (blogOptional.isEmpty()) {
                 logger.error("Blog not found with id: {}", id);
                 return new ResponseEntity<>(MetaBlogResponse.builder()
                         .success(false)

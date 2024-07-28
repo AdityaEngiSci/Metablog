@@ -5,10 +5,16 @@ import org.springframework.http.ResponseEntity;
 
 public interface IUserService {
     ResponseEntity<Object> getUserById(Long id, String token);
+
     ResponseEntity<Object> getUserDetails(String token);
+
     ResponseEntity<Object> updateUserDetails(UserDetailsResponseDto request, String token);
+
     ResponseEntity<Object> getUserBlogs(String token);
+
     ResponseEntity<Object> getUserSavedBlogs(String token);
+
     ResponseEntity<Object> saveBlog(Long blogId, String token);
+
     ResponseEntity<Object> removeSavedBlog(Long blogId, String token);
 }

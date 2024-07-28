@@ -5,7 +5,6 @@ import com.group3.metaBlog.Authentication.DataTransferObject.RegisterRequestDto;
 import com.group3.metaBlog.Authentication.DataTransferObject.ResetPasswordRequestDto;
 import com.group3.metaBlog.Authentication.Service.AuthenticationService;
 import com.group3.metaBlog.Exception.MetaBlogException;
-import com.group3.metaBlog.MetaBlogApplication;
 import com.group3.metaBlog.Utils.MetaBlogResponse;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
@@ -15,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/auth")
-public class AuthenticationController{
+public class AuthenticationController {
 
     private final AuthenticationService AuthenticationService;
 
@@ -30,7 +29,7 @@ public class AuthenticationController{
         try {
             return AuthenticationService.register(request);
         } catch (MetaBlogException e) {
-            logger.error("Error registering user with email: {}" , request.getEmail());
+            logger.error("Error registering user with email: {}", request.getEmail());
             logger.error("Message of the error: {}", e.getMessage());
             return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
                     .success(false)
@@ -45,7 +44,7 @@ public class AuthenticationController{
             return AuthenticationService.forgetPassword(email);
 
         } catch (MetaBlogException e) {
-            logger.error("Error forgetting password for user with email: {}" , email);
+            logger.error("Error forgetting password for user with email: {}", email);
             logger.error("Message of the error: {}", e.getMessage());
             return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
                     .success(false)
@@ -59,7 +58,7 @@ public class AuthenticationController{
         try {
             return AuthenticationService.resetPassword(request);
         } catch (MetaBlogException e) {
-            logger.error("Error resetting password for user with email: {}" , request.getEmail());
+            logger.error("Error resetting password for user with email: {}", request.getEmail());
             logger.error("Message of the error: {}", e.getMessage());
             return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
                     .success(false)
@@ -71,7 +70,7 @@ public class AuthenticationController{
     @GetMapping("/get-user")
     public ResponseEntity<Object> getUser(@NotNull @RequestParam String email) {
         try {
-            if(email.isEmpty()){
+            if (email.isEmpty()) {
                 return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
                         .success(false)
                         .message("Email is empty")
@@ -79,7 +78,7 @@ public class AuthenticationController{
             }
             return AuthenticationService.findUser(email);
         } catch (MetaBlogException e) {
-            logger.error("Error getting user with email: {}" , email);
+            logger.error("Error getting user with email: {}", email);
             logger.error("Message of the error: {}", e.getMessage());
             return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
                     .success(false)

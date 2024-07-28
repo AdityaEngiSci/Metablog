@@ -9,6 +9,7 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+
 import javax.crypto.SecretKey;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -26,26 +27,26 @@ public class JwtService {
     private String SECRET_KEY;
 
     public String extractUserEmailFromToken(String jwtToken) {
-        return extractClaims(jwtToken,Claims::getSubject);
+        return extractClaims(jwtToken, Claims::getSubject);
     }
 
-    public boolean isTokenValid(String jwt, Object userDetail){
+    public boolean isTokenValid(String jwt, Object userDetail) {
         return false;
     }
 
-    public String generateJwtToken(UserDetails userDetails){
-        return generateJwtToken(new HashMap<>(),userDetails);
+    public String generateJwtToken(UserDetails userDetails) {
+        return generateJwtToken(new HashMap<>(), userDetails);
     }
 
     private String generateJwtToken(Map<String, Objects> claims, UserDetails userDetails) {
-        Map<String,Object> userClaims = new HashMap<>();
-        userClaims.put("isAccountExpired",!userDetails.isAccountNonExpired());
-        userClaims.put("id",((User) userDetails).getId());
-        userClaims.put("role",userDetails.getAuthorities().toArray()[0].toString());
-        userClaims.put("username",userDetails.getUsername());
-        userClaims.put("lastLogin",((User) userDetails).getLastLoginTime());
-        userClaims.put("registerAt",((User) userDetails).getRegisterAt());
-        userClaims.put("type","access");
+        Map<String, Object> userClaims = new HashMap<>();
+        userClaims.put("isAccountExpired", !userDetails.isAccountNonExpired());
+        userClaims.put("id", ((User) userDetails).getId());
+        userClaims.put("role", userDetails.getAuthorities().toArray()[0].toString());
+        userClaims.put("username", userDetails.getUsername());
+        userClaims.put("lastLogin", ((User) userDetails).getLastLoginTime());
+        userClaims.put("registerAt", ((User) userDetails).getRegisterAt());
+        userClaims.put("type", "access");
         return Jwts.builder()
                 .claims(userClaims)
                 .subject(((User) userDetails).getEmail())
@@ -56,8 +57,7 @@ public class JwtService {
     }
 
 
-
-    public Boolean isTokenValid(String jwtToken, UserDetails userDetails){
+    public Boolean isTokenValid(String jwtToken, UserDetails userDetails) {
         final String username = extractUserEmailFromToken(jwtToken);
         User currentUser = (User) userDetails;
         return (username.equals(currentUser.getEmail()) && !isTokenExpired(jwtToken));
@@ -75,8 +75,8 @@ public class JwtService {
             UserDetails userDetails,
             long expiration
     ) {
-        Map<String,Object> userClaims = new HashMap<>();
-        userClaims.put("type","refresh");
+        Map<String, Object> userClaims = new HashMap<>();
+        userClaims.put("type", "refresh");
         return Jwts
                 .builder()
                 .claims(extraClaims)
@@ -94,20 +94,20 @@ public class JwtService {
     }
 
     private Date extractExpirationOfJwt(String jwtToken) {
-        return extractClaims(jwtToken,Claims::getExpiration);
+        return extractClaims(jwtToken, Claims::getExpiration);
     }
 
-    private <T> T extractClaims(String token, Function<Claims, T> claimsTFunction){
+    private <T> T extractClaims(String token, Function<Claims, T> claimsTFunction) {
         Claims claims = extractAllClaims(token);
         return claimsTFunction.apply(claims);
     }
 
-    public String extractJwtTokenType(String jwtToken){
+    public String extractJwtTokenType(String jwtToken) {
 
         return extractAllClaims(jwtToken).get("type").toString();
     }
 
-    private Claims extractAllClaims(String jwtToken){
+    private Claims extractAllClaims(String jwtToken) {
         return Jwts.parser().verifyWith(getSigningKey()).build().parseSignedClaims(jwtToken).getPayload();
     }
 
@@ -116,7 +116,7 @@ public class JwtService {
         return Keys.hmacShaKeyFor(bytes);
     }
 
-    public String getUserEmailFromToken(String token){
+    public String getUserEmailFromToken(String token) {
         return extractUserEmailFromToken(token);
     }
 }

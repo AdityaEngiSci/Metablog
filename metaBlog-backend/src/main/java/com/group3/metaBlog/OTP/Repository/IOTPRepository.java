@@ -5,4 +5,4 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface IOTPRepository extends JpaRepository<OTPModel, Integer> {
     OTPModel findByUserId(Long userId);
-    OTPModel findByOtp(Integer otp);}
+}

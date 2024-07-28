@@ -18,7 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -114,8 +113,7 @@ public class AuthenticationService implements IAuthenticationService {
                             .role("User")
                             .build())
                     .build(), HttpStatus.CREATED);
-        }
-        catch (MetaBlogException e) {
+        } catch (MetaBlogException e) {
             return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
                     .success(false)
                     .message(e.getMessage())
@@ -154,8 +152,7 @@ public class AuthenticationService implements IAuthenticationService {
                     .success(true)
                     .message("OTP has been sent to your email successfully.")
                     .build(), HttpStatus.OK);
-        }
-        catch (MetaBlogException e) {
+        } catch (MetaBlogException e) {
             return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
                     .success(false)
                     .message(e.getMessage())
@@ -185,8 +182,7 @@ public class AuthenticationService implements IAuthenticationService {
                     .success(true)
                     .message("Password reset successfully.")
                     .build());
-        }
-        catch (MetaBlogException e) {
+        } catch (MetaBlogException e) {
             return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
                     .success(false)
                     .message(e.getMessage())
@@ -205,14 +201,12 @@ public class AuthenticationService implements IAuthenticationService {
                         .message("User does not exist with this email.")
                         .build(), HttpStatus.NOT_FOUND);
             }
-            User currentUser = existingUser.get();
             logger.info("User found with this email");
             return new ResponseEntity<>(MetaBlogResponse.builder()
                     .success(true)
                     .message("A user with this email exists.")
                     .build(), HttpStatus.OK);
-        }
-        catch (MetaBlogException e) {
+        } catch (MetaBlogException e) {
             return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
                     .success(false)
                     .message(e.getMessage())
@@ -225,7 +219,7 @@ public class AuthenticationService implements IAuthenticationService {
             User user = IUserRepository.findByEmail(request.getEmail())
                     .orElseThrow(() -> new MetaBlogException("User not found"));
 
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(),request.getPassword()));
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
 
             String accessToken = jwtService.generateJwtToken(user);
             String refreshToken = jwtService.generateRefreshToken(user);

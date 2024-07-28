@@ -1,4 +1,3 @@
-
 package com.group3.metaBlog.Authentication.DataTransferObject;
 
 import lombok.AllArgsConstructor;

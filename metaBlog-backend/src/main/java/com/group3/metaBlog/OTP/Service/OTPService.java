@@ -22,6 +22,7 @@ public class OTPService implements IOTPService {
         this.otpRepository = otpRepository;
         this.IUserRepository = IUserRepository;
     }
+
     public SecureRandom getSecureRandom() {
         return new SecureRandom();
     }
@@ -31,28 +32,27 @@ public class OTPService implements IOTPService {
         return 100000 + random.nextInt(900000);
     }
 
-    public boolean registerOTP(Integer otp_code, Long userId){
+    public boolean registerOTP(Integer otp_code, Long userId) {
         OTPModel otpModel = otpRepository.findByUserId(userId);
-        if(otpModel != null) {
+        if (otpModel != null) {
             otpModel.setOtp(otp_code);
             otpModel.setCreatedAt(System.currentTimeMillis());
             // 30 minutes
-            otpModel.setExpiryTime(System.currentTimeMillis() + 600000*3);
+            otpModel.setExpiryTime(System.currentTimeMillis() + 600000 * 3);
             otpRepository.save(otpModel);
-        }
-        else{
+        } else {
             OTPModel otp = new OTPModel();
             otp.setOtp(otp_code);
             otp.setUserId(userId);
             otp.setCreatedAt(System.currentTimeMillis());
             // 30 minutes
-            otp.setExpiryTime(System.currentTimeMillis() + 600000*3);
+            otp.setExpiryTime(System.currentTimeMillis() + 600000 * 3);
             otpRepository.save(otp);
         }
         return true;
     }
 
-    public ResponseEntity<Object> verifyOTP(Integer otp_code, String Email){
+    public ResponseEntity<Object> verifyOTP(Integer otp_code, String Email) {
         try {
             Optional<User> user = IUserRepository.findByEmail(Email);
             if (user.isEmpty()) {
