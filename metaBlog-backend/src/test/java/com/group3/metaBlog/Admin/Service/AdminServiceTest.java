@@ -2,7 +2,7 @@ package com.group3.metaBlog.Admin.Service;
 
 import com.group3.metaBlog.Admin.DTO.AdminRequestDto;
 import com.group3.metaBlog.Admin.DTO.AdminResponseDto;
-import com.group3.metaBlog.Admin.Repository.AdminBlogRepository;
+import com.group3.metaBlog.Admin.Repository.IAdminBlogRepository;
 import com.group3.metaBlog.Blog.Model.Blog;
 import com.group3.metaBlog.Enum.BlogStatus;
 import com.group3.metaBlog.User.Model.User;
@@ -42,7 +42,7 @@ class AdminServiceTest {
     private static final String TEST_IMAGE_URL = "http://test.com/image.jpg";
 
     @Mock
-    private AdminBlogRepository adminBlogRepository;
+    private IAdminBlogRepository adminBlogRepository;
 
     @InjectMocks
     private AdminBlogService adminBlogService;
