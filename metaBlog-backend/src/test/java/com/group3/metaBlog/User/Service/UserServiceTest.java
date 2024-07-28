@@ -185,9 +185,24 @@ public class UserServiceTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(true, ((MetaBlogResponse<?>) Objects.requireNonNull(response.getBody())).getSuccess());
     }
+
+    @Test
+    public void SaveBlogAlreadySavedTest() {
+        user.getSavedBlogs().add(blog);
+        when(jwtService.extractUserEmailFromToken(token)).thenReturn(user.getEmail());
+        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+        when(blogRepository.findById(blog.getId())).thenReturn(Optional.of(blog));
+
+        ResponseEntity<Object> response = userService.saveBlog(blog.getId(), token);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(false, ((MetaBlogResponse<?>) Objects.requireNonNull(response.getBody())).getSuccess());
+        assertEquals("Blog is already saved.", ((MetaBlogResponse<?>) response.getBody()).getMessage());
+    }
+
     @Test
     public void SaveBlogBlogNotFoundTest() {
-        user.getBlogs().clear(); // Ensure the user has no blogs
+        user.getBlogs().clear();
         when(jwtService.extractUserEmailFromToken(token)).thenReturn(user.getEmail());
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(blogRepository.findById(1L)).thenReturn(Optional.empty());
@@ -200,9 +215,10 @@ public class UserServiceTest {
 
         assertFalse(user.getSavedBlogs().contains(blog));
     }
+
     @Test
     public void RemoveSavedBlogSavedBlogNotFoundTest() {
-        user.getSavedBlogs().clear(); // Ensure the user has no saved blogs
+        user.getSavedBlogs().clear();
         when(jwtService.extractUserEmailFromToken(token)).thenReturn(user.getEmail());
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
 

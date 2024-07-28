@@ -5,7 +5,7 @@ import Avatar from "react-avatar";
 import { FaFacebookF, FaTwitter, FaInstagram , FaGithub, FaLinkedin,FaYoutube, FaGlobe} from 'react-icons/fa';
 
 
-const BlogList = ({ myBlogs, savedBlogs }) => {
+const BlogList = ({ myBlogs, savedBlogs ,onUnsave }) => {
     const [view, setView] = useState('myBlogs');
 
     const blogsToDisplay = view === 'myBlogs' ? myBlogs : savedBlogs;
@@ -26,6 +26,7 @@ const BlogList = ({ myBlogs, savedBlogs }) => {
     }
     return (
         <div>
+            {/* User profile section */}
             <div className="bg-gray-200 p-6 rounded-lg shadow-md mt-8 mx-auto md:w-3/5">
                 <div className="flex items-center mb-4">
                     <Avatar className="mr-4">
@@ -83,6 +84,7 @@ const BlogList = ({ myBlogs, savedBlogs }) => {
                     })}
                 </div>
             </div>
+            {/* Blog view toggle buttons */}
             <div className="flex justify-center items-center mb-4 md:p-5">
                 <button
                     className={`px-4 py-2 ${view === 'myBlogs' ? 'bg-black text-white' : 'bg-gray-200 text-black'}`}
@@ -97,9 +99,16 @@ const BlogList = ({ myBlogs, savedBlogs }) => {
                     Saved Blogs
                 </button>
             </div>
+            {/* Blog cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {blogsToDisplay.map((blog) => (
-                    <BlogCard key={blog.id} blog={blog} showStatus={view === 'myBlogs'}/>
+                    <BlogCard
+                        key={blog.id}
+                        blog={blog}
+                        showStatus={view === 'myBlogs'}
+                        isSavedBlog={view === 'savedBlogs'}
+                        onUnsave={view === 'savedBlogs' ? () => onUnsave(blog.id) : null}
+                    />
                 ))}
             </div>
         </div>

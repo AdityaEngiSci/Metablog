@@ -165,7 +165,7 @@ public class UserService implements IUserService {
                     .author(blog.getAuthor().getUsername())
                     .author_image_url(blog.getAuthor().getImageURL())
                     .createdOn(blog.getCreatedOn())
-                    .build()).collect(Collectors.toList());
+                    .build()).toList();
 
             return ResponseEntity.ok().body(MetaBlogResponse.builder()
                     .success(true)
@@ -194,6 +194,14 @@ public class UserService implements IUserService {
                         logger.error("Blog not found with id: {}", blogId);
                         return new MetaBlogException("Blog not found.");
                     });
+
+            if (user.getSavedBlogs().contains(blog)) {
+                logger.warn("Blog with id: {} is already saved for user with email: {}", blogId, email);
+                return ResponseEntity.badRequest().body(MetaBlogResponse.builder()
+                        .success(false)
+                        .message("Blog is already saved.")
+                        .build());
+            }
 
             user.getSavedBlogs().add(blog);
             userRepository.save(user);

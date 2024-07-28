@@ -7,6 +7,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
 import "./BlogPage.css";
 import { useState } from "react";
 import { useEffect } from "react";
+import Swal from "sweetalert2";
 
 const BlogPage = () => {
   const { blogId } = useParams();
@@ -82,8 +83,8 @@ const BlogPage = () => {
   const handleSaveBlog = async () => {
     try {
       const token = localStorage.getItem("accessToken");
-      await axios.post(
-        `${base_url}/users/save-blog`,
+      const response = await axios.post(
+        `${base_url}/user/save-blog/${blogId}`,
         { blogId },
         {
           headers: {
@@ -91,10 +92,19 @@ const BlogPage = () => {
           },
         }
       );
-      alert("Blog saved successfully!");
-    } catch (error) {
+        Swal.fire ({
+            icon: "success",
+            title: "Blog saved",
+            text: response.data.message || "Blog saved successfully.",
+            });
+        }
+        catch (error) {
       console.error("Error saving blog:", error);
-      alert("Error saving blog. Please try again later.");
+        Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: error.response.data.message || "An error occurred while saving the blog. Please try again.",
+        });
     }
   };
 

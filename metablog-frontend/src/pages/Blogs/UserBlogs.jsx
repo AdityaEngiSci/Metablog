@@ -5,68 +5,6 @@ import { useEffect } from "react";
 import axios from "axios";  
 import { useState } from "react";
 
-const savedBlogs = [
-    // Example data
-    {id: 2,
-    imageUrl: "blog-sample-images/blog-image-1.png",
-    category: "Technology",
-    title: "The Impact of Technology on the Workplace: How Technology is Changing",
-    authorImageUrl: "/img.png",
-    authorInitials: "TW",
-    authorName: "Tracey Wilson",
-    date: "2022-08-20"
-    },
-    {
-        id: 3,
-        imageUrl: "blog-sample-images/blog-image-2.png",
-        category: "Technology",
-        title: "The Impact of Technology on the Workplace: How Technology is Changing",
-        authorImageUrl: "/img.png",
-        authorInitials: "JF",
-        authorName: "Jason Francisco",
-        date: "2022-08-20",
-    },
-    {
-        id: 4,
-        imageUrl: "blog-sample-images/blog-image-3.png",
-        category: "Technology",
-        title: "The Impact of Technology on the Workplace: How Technology is Changing",
-        authorImageUrl: "/img.png",
-        authorInitials: "TW",
-        authorName: "Tracey Wilson",
-        date: "2022-08-20",
-    },
-    {
-        id: 5,
-        imageUrl: "blog-sample-images/blog-image-3.png",
-        category: "Technology",
-        title: "The Impact of Technology on the Workplace: How Technology is Changing",
-        authorImageUrl: "/img.png",
-        authorInitials: "TW",
-        authorName: "Tracey Wilson",
-        date: "2022-08-20",
-    },
-    {
-        id: 6,
-        imageUrl: "blog-sample-images/blog-image-1.png",
-        category: "Technology",
-        title: "The Impact of Technology on the Workplace: How Technology is Changing",
-        authorImageUrl: "/img.png",
-        authorInitials: "TW",
-        authorName: "Tracey Wilson",
-        date: "2022-08-20",
-    },
-    {
-        id: 7,
-        imageUrl: "blog-sample-images/blog-image-2.png",
-        category: "Technology",
-        title: "The Impact of Technology on the Workplace: How Technology is Changing",
-        authorImageUrl: "/img.png",
-        authorInitials: "JF",
-        authorName: "Jason Francisco",
-        date: "2022-08-20",
-    }
-];
 
 const UserBlogs = () => {
     const [userBlogs, setUserBlogs] = useState([]);
@@ -77,28 +15,42 @@ const UserBlogs = () => {
 
     useEffect(() => {
         const fetchUserBlogs = async () => {
-            try{
-                axios.get(`${base_url}/blogs/my-blogs`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                }).then(response => {
-                    setUserBlogs(response.data.data);
-                }).catch(error => {
-                    setError("Error fetching user blogs. Please try again later.");
+            try {
+                const userBlogsResponse = await axios.get(`${base_url}/blogs/my-blogs`, {
+                    headers: { Authorization: `Bearer ${token}` }
                 });
+                setUserBlogs(userBlogsResponse.data.data);
+
+                const savedBlogsResponse = await axios.get(`${base_url}/user/saved-blogs`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setSavedBlogs(savedBlogsResponse.data.data);
             } catch (error) {
-                setError("Error fetching user blogs. Please try again later.");
+                setError("Error fetching blogs. Please try again later.");
             }
         };
         fetchUserBlogs();
     }, []);
 
+    const handleUnsave = async (blogId) => {
+        try {
+            await axios.delete(`${base_url}/user/remove-saved-blog/${blogId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setSavedBlogs(savedBlogs.filter(blog => blog.id !== blogId));
+        } catch (error) {
+            setError("Error unsaving blog. Please try again later.");
+        }
+    };
     return (
         <div>
             <Header />
-            <main className="container mx-auto px-4">
-                <BlogList myBlogs={userBlogs} savedBlogs={savedBlogs} />
+            <main className="container mb-12 mx-auto px-4">
+                <BlogList
+                    myBlogs={userBlogs}
+                    savedBlogs={savedBlogs}
+                    onUnsave={handleUnsave}
+                />
             </main>
             <Footer />
         </div>

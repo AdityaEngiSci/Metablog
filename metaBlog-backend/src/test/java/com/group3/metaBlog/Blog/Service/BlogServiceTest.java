@@ -51,12 +51,13 @@ class BlogServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
     }
+
     MultipartFile testFile = new MockMultipartFile("image", "test.jpg", "image/jpeg", "test image content".getBytes());
 
     @Test
     void createBlogTest() {
         // Arrange
-        BlogRequestDto requestDto = new BlogRequestDto("Test Title", "Test Content", testFile, "Test Name", "Test description" );
+        BlogRequestDto requestDto = new BlogRequestDto("Test Title", "Test Content", testFile, "Test Name", "Test description");
         String token = "testToken";
         User user = new User();
         user.setEmail("test@example.com");
@@ -135,8 +136,8 @@ class BlogServiceTest {
     void getAllBlogsTest() {
         // Arrange
         List<Blog> blogs = Arrays.asList(
-                createBlog(1L, "Title 1", "Content 1"),
-                createBlog(2L, "Title 2", "Content 2")
+                createBlog(1L, "Title 1", "Content 1", BlogStatus.APPROVED),
+                createBlog(2L, "Title 2", "Content 2", BlogStatus.APPROVED)
         );
         when(blogRepository.findAll()).thenReturn(blogs);
 
@@ -172,8 +173,8 @@ class BlogServiceTest {
         user.setUsername("testUser");
 
         List<Blog> blogs = Arrays.asList(
-                createBlog(1L, "Title 1", "Content 1"),
-                createBlog(2L, "Title 2", "Content 2")
+                createBlog(1L, "Title 1", "Content 1", BlogStatus.APPROVED),
+                createBlog(2L, "Title 2", "Content 2", BlogStatus.APPROVED)
         );
 
         when(jwtService.extractUserEmailFromToken(token)).thenReturn("test@example.com");
@@ -225,8 +226,8 @@ class BlogServiceTest {
         // Arrange
         String title = "Test";
         List<Blog> blogs = Arrays.asList(
-                createBlog(1L, "Test Title 1", "Content 1"),
-                createBlog(2L, "Test Title 2", "Content 2")
+                createBlog(1L, "Test Title 1", "Content 1", BlogStatus.APPROVED),
+                createBlog(2L, "Test Title 2", "Content 2", BlogStatus.APPROVED)
         );
 
         when(blogRepository.findByTitleContaining(title)).thenReturn(blogs);
@@ -256,14 +257,62 @@ class BlogServiceTest {
         assertFalse(((MetaBlogResponse) response.getBody()).getSuccess());
     }
 
-    private Blog createBlog(Long id, String title, String content) {
+    @Test
+    void getBlogByIdTest() {
+        // Arrange
+        Long id = 1L;
+        Blog blog = createBlog(id, "Title", "Content", BlogStatus.APPROVED);
+
+        when(blogRepository.findById(id)).thenReturn(Optional.of(blog));
+
+        // Act
+        ResponseEntity<Object> response = blogService.getBlogById(id);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertTrue(((MetaBlogResponse) response.getBody()).getSuccess());
+        BlogResponseDto responseDto = (BlogResponseDto) ((MetaBlogResponse) response.getBody()).getData();
+        assertEquals(id, responseDto.getId());
+    }
+
+    @Test
+    void getBlogByIdNotFoundTest() {
+        // Arrange
+        Long id = 1L;
+
+        when(blogRepository.findById(id)).thenReturn(Optional.empty());
+
+        // Act
+        ResponseEntity<Object> response = blogService.getBlogById(id);
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertFalse(((MetaBlogResponse) response.getBody()).getSuccess());
+    }
+
+    @Test
+    void getBlogByIdExceptionTest() {
+        // Arrange
+        Long id = 1L;
+
+        when(blogRepository.findById(id)).thenThrow(new RuntimeException("Test exception"));
+
+        // Act
+        ResponseEntity<Object> response = blogService.getBlogById(id);
+
+        // Assert
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertFalse(((MetaBlogResponse) response.getBody()).getSuccess());
+    }
+
+    private Blog createBlog(Long id, String title, String content, BlogStatus status) {
         Blog blog = new Blog();
         blog.setId(id);
         blog.setTitle(title);
         blog.setContent(content);
         blog.setImageUrl("test.jpg");
         blog.setCreatedOn((double) System.currentTimeMillis());
-        blog.setStatus(BlogStatus.PENDING);
+        blog.setStatus(status);
         User author = new User();
         author.setUsername("testUser");
         blog.setAuthor(author);
