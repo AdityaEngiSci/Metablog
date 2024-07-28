@@ -1,7 +1,6 @@
 package com.group3.metaBlog.Email.Service;
 
 import com.group3.metaBlog.Exception.MetaBlogException;
-import com.group3.metaBlog.Utils.MetaBlogResponse;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,7 +10,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
@@ -33,11 +31,9 @@ public class EmailServiceTest {
     @InjectMocks
     private EmailService emailService;
 
-    private MimeMessage mimeMessage;
-
     @BeforeEach
     public void setUp() {
-        mimeMessage = mock(MimeMessage.class);
+        MimeMessage mimeMessage = mock(MimeMessage.class);
         when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
     }
 
@@ -66,9 +62,7 @@ public class EmailServiceTest {
         int otp = 123456;
 
         when(javaMailSender.createMimeMessage()).thenThrow(new MetaBlogException("Failed to send reset email: "));
-        MetaBlogException exception = assertThrows(MetaBlogException.class, () -> {
-            emailService.sendVerificationOTP(email, otp);
-        });
+        MetaBlogException exception = assertThrows(MetaBlogException.class, () -> emailService.sendVerificationOTP(email, otp));
         assertEquals("Failed to send reset email: ", exception.getMessage());
     }
 }

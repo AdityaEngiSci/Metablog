@@ -109,7 +109,7 @@ class CommentServiceTest {
         ResponseEntity<Object> response = commentService.getCommentsByBlog(blogId);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertTrue(((MetaBlogResponse) Objects.requireNonNull(response.getBody())).getSuccess());
+        assertTrue(((MetaBlogResponse<?>) Objects.requireNonNull(response.getBody())).getSuccess());
         assertEquals(2, ((List<Comment>) ((MetaBlogResponse) response.getBody()).getData()).size());
     }
 
