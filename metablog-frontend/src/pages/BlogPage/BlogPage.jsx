@@ -63,24 +63,42 @@ const BlogPage = () => {
     setNewComment(e.target.value);
   };
 
-  const handleCommentSubmit = async () => {
-    try{
+  const handleCommentSubmit = async (e) => {
+    e.preventDefault();
+    try {
       const token = localStorage.getItem("accessToken");
-      const response = await axios.post(`${base_url}/comments`, {
-        content: newComment,
-        blogId: blogId,
-
-      }, {
-        headers: {
-          Authorization: `Bearer ${token}`
+      const response = await axios.post(
+        `${base_url}/comments`,
+        {
+          content: newComment,
+          blogId: blogId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-    });
-    console.log("Comment posted successfully:", response.data);
-  } catch (error) {
-    console.error("Error posting comment:", error);
-    alert("Error posting comment. Please try again later.");
-  }
-    
+      );
+
+      if (response.data.success) {
+        Swal.fire({
+          icon: "success",
+          title: "Comment posted",
+          text: response.data.message || "Comment posted successfully.",
+        });
+
+        // Update comments state to include the new comment
+        setComments([...comments, response.data.data]);
+        setNewComment(""); // Clear the textarea
+      }
+    } catch (error) {
+      console.error("Error posting comment:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Error posting comment. Please try again later.",
+      });
+    }
   };
 
   const handleSaveBlog = async () => {

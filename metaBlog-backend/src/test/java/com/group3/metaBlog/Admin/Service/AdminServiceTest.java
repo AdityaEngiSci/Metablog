@@ -2,11 +2,18 @@ package com.group3.metaBlog.Admin.Service;
 
 import com.group3.metaBlog.Admin.DTO.AdminRequestDto;
 import com.group3.metaBlog.Admin.DTO.AdminResponseDto;
+import com.group3.metaBlog.Admin.DTO.RegisterAdminDto;
 import com.group3.metaBlog.Admin.Repository.IAdminBlogRepository;
 import com.group3.metaBlog.Blog.Model.Blog;
+import com.group3.metaBlog.Config.ApplicationConfig;
+import com.group3.metaBlog.Email.Service.IEmailService;
 import com.group3.metaBlog.Enum.BlogStatus;
+import com.group3.metaBlog.Enum.Role;
+import com.group3.metaBlog.OTP.Service.IOTPService;
 import com.group3.metaBlog.User.Model.User;
+import com.group3.metaBlog.User.Repository.IUserRepository;
 import com.group3.metaBlog.Utils.MetaBlogResponse;
+import jakarta.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -14,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Arrays;
 import java.util.List;
@@ -40,19 +48,32 @@ class AdminServiceTest {
     private static final String TEST_USER_NAME = "testUser";
     private static final String TEST_CONTENT = "Test content";
     private static final String TEST_IMAGE_URL = "http://test.com/image.jpg";
+    @Mock
+    private IOTPService otpService;
+    @Mock
+    private IEmailService emailService;
 
     @Mock
+    private ApplicationConfig applicationConfig;
+    @Mock
     private IAdminBlogRepository adminBlogRepository;
-
+    @Mock
+    private IUserRepository userRepository;
+    @Mock
+    private PasswordEncoder passwordEncoder;
     @InjectMocks
     private AdminBlogService adminBlogService;
     private AdminRequestDto requestDto;
     private Blog blog;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
         requestDto = new AdminRequestDto();
         requestDto.setBlogId(1L);
+
+        when(applicationConfig.passwordEncoder()).thenReturn(passwordEncoder);
+        when(passwordEncoder.encode(any(CharSequence.class))).thenReturn("encodedPassword");
 
         blog = new Blog();
         blog.setId(1L);
@@ -229,6 +250,120 @@ class AdminServiceTest {
         assertFalse(metaBlogResponse.getSuccess());
         assertEquals("Error updating blog status", metaBlogResponse.getMessage());
         verify(adminBlogRepository, never()).save(any(Blog.class));
+    }
+
+    @Test
+    void registerAdmin_UserAlreadyExistsTest() {
+        RegisterAdminDto requestDto = new RegisterAdminDto("admin", "password", "admin@example.com");
+
+        when(userRepository.findByEmail(requestDto.getEmail())).thenReturn(Optional.of(new User()));
+
+        ResponseEntity<Object> response = adminBlogService.registerAdmin(requestDto);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        MetaBlogResponse<?> metaBlogResponse = (MetaBlogResponse<?>) response.getBody();
+        assertNotNull(metaBlogResponse);
+        assertFalse(metaBlogResponse.getSuccess());
+        assertEquals("User already exists", metaBlogResponse.getMessage());
+    }
+
+    @Test
+    void registerAdmin_UsernameAlreadyExistsTest() {
+        RegisterAdminDto requestDto = new RegisterAdminDto("admin", "password", "admin@example.com");
+
+        when(userRepository.findByEmail(requestDto.getEmail())).thenReturn(Optional.empty());
+        when(userRepository.findByUsername(requestDto.getUsername())).thenReturn(Optional.of(new User()));
+
+        ResponseEntity<Object> response = adminBlogService.registerAdmin(requestDto);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        MetaBlogResponse<?> metaBlogResponse = (MetaBlogResponse<?>) response.getBody();
+        assertNotNull(metaBlogResponse);
+        assertFalse(metaBlogResponse.getSuccess());
+        assertEquals("Username already exists", metaBlogResponse.getMessage());
+    }
+
+    @Test
+    void registerAdmin_SuccessTest() {
+        RegisterAdminDto requestDto = new RegisterAdminDto("admin", "password", "admin@example.com");
+        when(userRepository.findByEmail(requestDto.getEmail())).thenReturn(Optional.empty());
+        when(userRepository.findByUsername(requestDto.getUsername())).thenReturn(Optional.empty());
+        when(applicationConfig.passwordEncoder().encode(requestDto.getPassword())).thenReturn("encodedPassword");
+
+        User savedUser = User.builder()
+                .email(requestDto.getEmail())
+                .username(requestDto.getUsername())
+                .password("encodedPassword")
+                .role(Role.Admin)
+                .registerAt((double) (System.currentTimeMillis()))
+                .lastLoginTime((double) (System.currentTimeMillis()))
+                .isEmailVerified(false)
+                .isAccountLocked(false)
+                .isResetPasswordRequested(false)
+                .isTermsAccepted(true)
+                .build();
+
+        when(userRepository.save(any(User.class))).thenReturn(savedUser);
+        when(otpService.generateOTP()).thenReturn(123456);
+
+        ResponseEntity<Object> response = adminBlogService.registerAdmin(requestDto);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        MetaBlogResponse<?> metaBlogResponse = (MetaBlogResponse<?>) response.getBody();
+        assertNotNull(metaBlogResponse);
+        assertTrue(metaBlogResponse.getSuccess());
+        assertEquals("Admin registered successfully", metaBlogResponse.getMessage());
+    }
+
+    @Test
+    void registerAdmin_EmailServiceExceptionTest() throws MessagingException {
+        RegisterAdminDto requestDto = new RegisterAdminDto("admin", "password", "admin@example.com");
+        when(userRepository.findByEmail(requestDto.getEmail())).thenReturn(Optional.empty());
+        when(userRepository.findByUsername(requestDto.getUsername())).thenReturn(Optional.empty());
+        when(applicationConfig.passwordEncoder().encode(requestDto.getPassword())).thenReturn("encodedPassword");
+
+        User savedUser = User.builder()
+                .email(requestDto.getEmail())
+                .username(requestDto.getUsername())
+                .password("encodedPassword")
+                .role(Role.Admin)
+                .registerAt((double) (System.currentTimeMillis()))
+                .lastLoginTime((double) (System.currentTimeMillis()))
+                .isEmailVerified(false)
+                .isAccountLocked(false)
+                .isResetPasswordRequested(false)
+                .isTermsAccepted(true)
+                .build();
+
+        when(userRepository.save(any(User.class))).thenReturn(savedUser);
+        when(otpService.generateOTP()).thenReturn(123456);
+        doThrow(new MessagingException("Email service error")).when(emailService).sendVerificationOTP(requestDto.getEmail(), 123456);
+
+        ResponseEntity<Object> response = adminBlogService.registerAdmin(requestDto);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        MetaBlogResponse<?> metaBlogResponse = (MetaBlogResponse<?>) response.getBody();
+        assertNotNull(metaBlogResponse);
+        assertFalse(metaBlogResponse.getSuccess());
+        assertEquals("Error sending email to the admin.", metaBlogResponse.getMessage());
+    }
+
+    @Test
+    void registerAdmin_ExceptionTest() {
+        RegisterAdminDto requestDto = new RegisterAdminDto("admin", "password", "admin@example.com");
+        when(userRepository.findByEmail(requestDto.getEmail())).thenReturn(Optional.empty());
+        when(userRepository.findByUsername(requestDto.getUsername())).thenReturn(Optional.empty());
+        when(applicationConfig.passwordEncoder().encode(requestDto.getPassword())).thenReturn("encodedPassword");
+
+        doThrow(new RuntimeException("Unexpected error")).when(userRepository).save(any(User.class));
+
+        ResponseEntity<Object> response = adminBlogService.registerAdmin(requestDto);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        MetaBlogResponse<?> metaBlogResponse = (MetaBlogResponse<?>) response.getBody();
+        assertNotNull(metaBlogResponse);
+        assertFalse(metaBlogResponse.getSuccess());
+        assertEquals("Error registering admin", metaBlogResponse.getMessage());
     }
 
     private Blog createBlog(Long id, String title, BlogStatus status) {

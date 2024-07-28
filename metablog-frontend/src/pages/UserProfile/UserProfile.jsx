@@ -6,6 +6,7 @@ import axios from "axios";
 import "./UserProfile.css";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
+import Swal from 'sweetalert2';
 
 const UserProfile = () => {
   const [profileImage, setProfileImage] = useState(null);
@@ -94,7 +95,11 @@ const UserProfile = () => {
       });
 
       console.log("Profile updated successfully:", response.data.data);
-      alert("Profile updated successfully");
+      Swal.fire({
+        icon: "success",
+        title: "Profile Updated",
+        text: "Your profile has been updated successfully.",
+      })
       fetchUserData(); // Reload the user data
     } catch (error) {
       console.error("Error updating profile:", error);
