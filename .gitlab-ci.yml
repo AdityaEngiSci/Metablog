@@ -10,7 +10,7 @@ build-backend:
   before_script:
       - cd metaBlog-backend
   tags:
-    - aws-runner
+    - dalfcs_docker_autoscale
   script:
     - echo "Starting backend build......"
     - mvn clean install -DskipTests
@@ -19,15 +19,15 @@ build-backend:
   artifacts:
     paths: 
       - metaBlog-backend/target
-  # rules:
-  #   - changes: 
-  #     - metaBlog-backend/**/*
+  rules:
+    - changes: 
+      - metaBlog-backend/**/*
 
 build-frontend:
   stage: build
   image: node:latest
   tags:
-    - aws-runner
+    - dalfcs_docker_autoscale
   before_script:
     - cd metablog-frontend
     - npm install
@@ -38,9 +38,9 @@ build-frontend:
   artifacts:
     paths:
       - metablog-frontend/build
-  # rules:
-  #   - changes: 
-  #     - metablog-frontend/**/*
+  rules:
+    - changes: 
+      - metablog-frontend/**/*
 
 test-backend:
     stage: test
