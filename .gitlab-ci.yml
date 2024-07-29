@@ -61,7 +61,8 @@ publish_backend:
   stage: publish
   image: docker:latest
   services:
-  - docker:dind
+  - name: docker:dind
+    command: ["--host=tcp://0.0.0.0:2375", "--host=unix:///var/run/docker.sock"]
   variables:
     # DOCKER_DRIVER: overlay2
     DOCKER_TLS_CERTDIR: ""
@@ -90,7 +91,8 @@ publish_frontend:
   stage: publish
   image: docker:latest
   services:
-  - docker:dind
+  - name: docker:dind
+    command: ["--host=tcp://0.0.0.0:2375", "--host=unix:///var/run/docker.sock"]
   variables:
     # DOCKER_DRIVER: overlay2
     DOCKER_TLS_CERTDIR: ""
