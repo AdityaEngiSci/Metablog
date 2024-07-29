@@ -113,24 +113,34 @@ const UserProfile = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="flex items-center justify-between h-16 px-4 border-b md:px-6 bg-white">
-        <div className="flex items-center space-x-10">
-        <Link
-          to="/admin-home"
-          className="flex items-center gap-2 text-lg font-semibold"
-        >
-          <img
-            src="/logo-black.svg"
-            alt="MetaBlog Logo"
-            className="w-25 h-25"
-          />
-          </Link>
+      <header className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            <Link
+              to="/admin-home"
+              className="flex items-center gap-2 text-lg font-semibold"
+            >
+              <img
+                src="/logo-black.svg"
+                alt="MetaBlog Logo"
+                className="w-25 h-25"
+              />
+            </Link>
+            <div className="flex items-center space-x-4">
+              <Link
+                to="/register-admin"
+                className="text-gray-600 hidden sm:inline-block"
+              >
+                Register Admin
+              </Link>
+              <Link to="/admin-profile" className="text-gray-600">
+                <button className="rounded-full p-2 bg-gray-200 hover:bg-gray-300 transition duration-300 ease-in-out">
+                  <FiUser className="w-6 h-6 text-gray-600" />
+                </button>
+              </Link>
+            </div>
+          </div>
         </div>
-        <Link to="/admin-profile" className="text-gray-600">
-          <button className="rounded-full p-2 bg-gray-200">
-            <FiUser className="w-6 h-6 text-gray-600" />
-          </button>
-        </Link>
       </header>
       <main className="w-3/4 max-w-xl mx-auto p-5 relative">
         <h2 className="text-2xl font-bold mb-5">User Profile</h2>
