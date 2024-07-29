@@ -30,23 +30,6 @@ const UserBlogs = () => {
                 setError("Error fetching blogs. Please try again later.");
             }
         };
-
-        const fetchSavedBlogs = async () => {
-            try{
-                axios.get(`${base_url}/blogs/saved-blogs`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                }).then(response => {
-                    setSavedBlogs(response.data.data);
-                }).catch(error => {
-                    setError("Error fetching saved blogs. Please try again later.");
-                });
-            } catch (error) {
-                setError("Error fetching saved blogs. Please try again later.");
-            }
-        };
-
         const fetchuserDetails = async () => {
             try{
                 axios.get(`${base_url}/user/details`, {
@@ -63,7 +46,6 @@ const UserBlogs = () => {
             }
         };
         fetchUserBlogs();
-        fetchSavedBlogs();
         fetchuserDetails();
 
     }, []);
@@ -82,7 +64,10 @@ const UserBlogs = () => {
         <div>
             <Header />
             <main className="container mx-auto px-4">
-                <BlogList myBlogs={userBlogs} savedBlogs={savedBlogs} userDetails={userDetails} />
+                <BlogList myBlogs={userBlogs}
+                          savedBlogs={savedBlogs}
+                          onUnsave={handleUnsave}
+                          userDetails={userDetails} />
             </main>
             <Footer />
         </div>

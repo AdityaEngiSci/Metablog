@@ -11,7 +11,6 @@ const SignUp = () => {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
-    username: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -19,27 +18,23 @@ const SignUp = () => {
     comingFrom: 'signup',
   });
 
+  const [validationMessages, setValidationMessages] = useState({});
   const [errorMessage, setErrorMessage] = useState('');
 
   const handleLoginClick = () => {
     navigate('/login');
   };
 
-  const isEmailValid = (email) => {
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailPattern.test(email);
-  };
-
   const isFormValid = () => {
     const { firstName, lastName, email, password, confirmPassword, isChecked } = formData;
+    const combinedNameLength = (firstName + lastName).trim().length;
     return (
-      firstName.trim() !== '' &&
-      lastName.trim() !== '' &&
-      isEmailValid(email) &&
-      password.trim() !== '' &&
-      confirmPassword.trim() !== '' &&
-      isChecked &&
-      password === confirmPassword
+        combinedNameLength >= 4 &&
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) &&
+        password.trim() !== '' &&
+        confirmPassword.trim() !== '' &&
+        isChecked &&
+        password === confirmPassword
     );
   };
 
@@ -61,24 +56,8 @@ const SignUp = () => {
       role: 'User', // Assuming the role is fixed as 'User'
     };
 
-    const formDataObj = new FormData();
-    Object.keys(registerData).forEach(key => {
-      formDataObj.append(key, registerData[key]);
-    });
-    if (formData.image) {
-      formDataObj.append('image', formData.image);
-    }
-
-    const requestObj = {
-      username: `${formData.firstName} ${formData.lastName}`,
-      email: formData.email,
-      password: formData.password,
-      role: 'User'
-    }
-
     try {
-      const response = await axios.post(`${BASE_URL}/auth/register`, requestObj, {
-      });
+      const response = await axios.post(`${BASE_URL}/auth/register`, registerData);
 
       if (response.status === 201) {
         // Handle successful registration
@@ -118,38 +97,43 @@ const SignUp = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row w-full h-screen">
-      <div className="relative w-full md:w-1/2">
-        <img className="absolute inset-0 w-full h-full object-cover" src="/background.svg" alt="background" />
-        <div className="relative flex flex-col items-start justify-start p-20 h-full">
-          <img className="w-40 mb-10" src="/logo.svg" alt="MetaBlog Logo" />
-          <h1 className="text-4xl font-bold text-white">Blogs to dive into tech</h1>
+      <div className="flex flex-col md:flex-row w-full h-screen">
+        <div className="relative w-full md:w-1/2">
+          <img className="absolute inset-0 w-full h-full object-cover" src="/background.svg" alt="background"/>
+          <div className="relative flex flex-col items-start justify-start p-20 h-full">
+            <img className="w-40 mb-10" src="/logo.svg" alt="MetaBlog Logo"/>
+            <h1 className="text-4xl font-bold text-white">Blogs to dive into tech</h1>
+          </div>
         </div>
-      </div>
-      <div className="flex flex-col items-center justify-center w-full md:w-1/2 p-8 md:p-20 bg-white">
-        <div className="w-full max-w-md">
-          <h1 className="text-3xl font-bold mb-6 text-gray-900">Create Account</h1>
-          <p className="text-base mb-4 text-gray-700">
-            Already have an account?{' '}
-            <span className="text-blue-600 cursor-pointer" onClick={handleLoginClick}>
+        <div className="flex flex-col items-center justify-center w-full md:w-1/2 p-8 md:p-20 bg-white">
+          <div className="w-full max-w-md">
+            <h1 className="text-3xl font-bold mb-6 text-gray-900">Create Account</h1>
+            <p className="text-base mb-4 text-gray-700">
+              Already have an account?{' '}
+              <span className="text-blue-600 cursor-pointer" onClick={handleLoginClick}>
               Login
             </span>
-          </p>
-          {errorMessage && <div className="text-red-500 mb-4">{errorMessage}</div>}
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            <InputFields formData={formData} setFormData={setFormData} />
-            <button
-              className={`w-full py-3 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition ${!isFormValid() ? 'opacity-50 cursor-not-allowed' : ''}`}
-              type="submit"
-              disabled={!isFormValid()}
-            >
-              Create Account
-            </button>
-          </form>
+            </p>
+            {errorMessage && <div className="text-red-500 mb-4">{errorMessage}</div>}
+            <form className="space-y-6" onSubmit={handleSubmit}>
+              <InputFields
+                  formData={formData}
+                  setFormData={setFormData}
+                  validationMessages={validationMessages}
+                  setValidationMessages={setValidationMessages}
+              />
+              <button
+                  className={`w-full py-3 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition ${!isFormValid() ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  type="submit"
+                  disabled={!isFormValid()}
+              >
+                Create Account
+              </button>
+            </form>
+            {errorMessage && <div className="mt-4 text-red-500">{errorMessage}</div>}
+          </div>
         </div>
-      </div>
-    </div>
-  );
+      </div>);
 };
 
 export default SignUp;
