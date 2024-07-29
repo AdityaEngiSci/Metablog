@@ -46,7 +46,7 @@ test-backend:
   stage: test
   image: maven:latest
   tags:
-  - dalfcs_docker_kvm
+  - dalfcs_docker_autoscale
   before_script:
   - cd metaBlog-backend
   script:
@@ -74,7 +74,7 @@ publish_backend:
   - docker login -u $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD docker.io
   - echo "Docker login success"
   tags:
-  - dalfcs_docker_kvm
+  - dalfcs_docker_autoscale
   script:
   - ls
   - pwd
@@ -101,7 +101,7 @@ publish_frontend:
   - docker login -u $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD docker.io
   - echo "Docker login success"
   tags:
-  - dalfcs_docker_kvm
+  - dalfcs_docker_autoscale
   script:
   - echo "Docker build for frontend started"
   - docker build -t $DOCKER_HUB_USERNAME/metablog_frontend .
@@ -115,7 +115,7 @@ deploy-backend:
   stage: deploy
   image: alpine:latest
   tags:
-  - dalfcs_docker_kvm
+  - dalfcs_docker_autoscale
   before_script:
   - cd metaBlog-backend
   - ls
@@ -138,7 +138,7 @@ deploy-frontend:
   stage: deploy
   image: alpine:latest
   tags:
-  - dalfcs_docker_kvm
+  - dalfcs_docker_autoscale
   before_script:
   - cd metablog-frontend
   - ls
