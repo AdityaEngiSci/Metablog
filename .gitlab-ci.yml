@@ -19,9 +19,9 @@ build-backend:
   artifacts:
     paths:
     - metaBlog-backend/target
-    # rules:
-    # - changes:
-    #   - metaBlog-backend/**/*
+  rules:
+    - changes:
+      - metaBlog-backend/**/*
 
 build-frontend:
   stage: build
@@ -117,7 +117,7 @@ deploy-backend:
   stage: deploy
   image: alpine:latest
   tags:
-  - dalfcs_docker_kvm
+  - vm-runner
   before_script:
   - cd metaBlog-backend
   - ls
@@ -140,7 +140,7 @@ deploy-frontend:
   stage: deploy
   image: alpine:latest
   tags:
-  - dalfcs_docker_autoscale
+  - vm-runner
   before_script:
   - cd metablog-frontend
   - ls
