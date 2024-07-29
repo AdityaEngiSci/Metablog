@@ -56,9 +56,6 @@ test-backend:
     only: 
       - develop
       - main
-    rules:
-    - changes: 
-      - metaBlog-backend/**/*
 
 publish_backend:
   stage: publish
