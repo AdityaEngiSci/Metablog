@@ -19,6 +19,9 @@ build-backend:
   artifacts:
     paths:
     - metaBlog-backend/target
+  rules:
+  - changes:
+    - metaBlog-backend/**/*
 
 build-frontend:
   stage: build
@@ -51,9 +54,9 @@ test-backend:
   - mvn test
   - echo "backedn testing completed......"
   rules:
-    - if: $CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "main"
-      changes:
-        - metaBlog-backend/**/*
+  - if: $CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "main"
+    changes:
+    - metaBlog-backend/**/*
 
 publish_backend:
   stage: publish
@@ -82,8 +85,10 @@ publish_backend:
   - echo "Docker build for backend done now pushing the image to the docker hub"
   - docker push $DOCKER_HUB_USERNAME/metablog_backend
   - echo "Docker image for backend pushed to the docker hub"
-  only:
-  - main
+  rules:
+  - if: $CI_COMMIT_BRANCH == "main"
+    changes:
+    - metaBlog-backend/**/*
 
 publish_frontend:
   stage: publish
@@ -108,8 +113,10 @@ publish_frontend:
   - echo "Docker build for frontend done now pushing the image to the docker hub"
   - docker push $DOCKER_HUB_USERNAME/metablog_frontend
   - echo "Docker image for frontend pushed to the docker hub"
-  only:
-  - main
+  rules:
+  - if: $CI_COMMIT_BRANCH == "main"
+    changes:
+    - metablog-frontend/**/*
 
 deploy-backend:
   stage: deploy
@@ -131,8 +138,10 @@ deploy-backend:
   - sshpass -p $VM_PASSWORD ssh -o StrictHostKeyChecking=no student@$VM_NAME "docker pull $DOCKER_BACKEND_IMAGE"
   - sshpass -p $VM_PASSWORD ssh -o StrictHostKeyChecking=no student@$VM_NAME  "docker container rm -f metablog-backend-container || true"
   - sshpass -p $VM_PASSWORD ssh -o StrictHostKeyChecking=no student@$VM_NAME "docker run -d -p 8080:8080 --name metablog-backend-container $DOCKER_BACKEND_IMAGE"
-  only:
-  - main
+  rules:
+  - if: $CI_COMMIT_BRANCH == "main"
+    changes:
+    - metaBlog-backend/**/*
 
 deploy-frontend:
   stage: deploy
@@ -154,5 +163,7 @@ deploy-frontend:
   - sshpass -p $VM_PASSWORD ssh -o StrictHostKeyChecking=no student@$VM_NAME "docker pull $DOCKER_FRONTEND_IMAGE"
   - sshpass -p $VM_PASSWORD ssh -o StrictHostKeyChecking=no student@$VM_NAME  "docker container rm -f metablog-frontend-container || true"
   - sshpass -p $VM_PASSWORD ssh -o StrictHostKeyChecking=no student@$VM_NAME "docker run -d -p 3000:3000 --name metablog-frontend-container $DOCKER_FRONTEND_IMAGE"
-  only:
-  - main
+  rules:
+  - if: $CI_COMMIT_BRANCH == "main"
+    changes:
+    - metablog-frontend/**/*
