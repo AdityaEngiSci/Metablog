@@ -53,9 +53,6 @@ test-backend:
   - echo "backend testing started......"
   - mvn test
   - echo "backedn testing completed......"
-  rules:
-  - changes:
-    - metaBlog-backend/**/*
   only:
   - develop
   - main
