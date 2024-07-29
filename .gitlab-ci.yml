@@ -19,9 +19,9 @@ build-backend:
   artifacts:
     paths: 
       - metaBlog-backend/target
-  rules:
-    - changes: 
-      - metaBlog-backend/**/*
+  # rules:
+  #   - changes: 
+  #     - metaBlog-backend/**/*
 
 build-frontend:
   stage: build
@@ -38,9 +38,9 @@ build-frontend:
   artifacts:
     paths:
       - metablog-frontend/build
-  rules:
-    - changes: 
-      - metablog-frontend/**/*
+  # rules:
+  #   - changes: 
+  #     - metablog-frontend/**/*
 
 test-backend:
     stage: test
