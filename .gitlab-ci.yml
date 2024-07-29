@@ -78,6 +78,7 @@ publish_backend:
   script:
   - ls
   - pwd
+  - mvn clean install -DskipTests
   - echo "Docker build for backend started"
   - docker build -t $DOCKER_HUB_USERNAME/metablog_backend .
   - echo "Docker build for backend done now pushing the image to the docker hub"
