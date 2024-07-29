@@ -1,7 +1,6 @@
 import { useState } from "react";
 import BlogCard from "../../components/BlogCard/BlogCard";
 import { FaGithub, FaLinkedin, FaEnvelope } from "react-icons/fa";
-import axios from "axios";
 
 const BlogList = ({ myBlogs, savedBlogs, userDetails , onUnsave}) => {
     const token = localStorage.getItem("accessToken");
