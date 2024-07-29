@@ -1,9 +1,6 @@
 package com.group3.metaBlog.Authentication.DataTransferObject;
 
-import com.group3.metaBlog.Enum.Role;
 import lombok.*;
-
-import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor

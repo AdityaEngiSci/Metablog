@@ -1,5 +1,6 @@
 package com.group3.metaBlog.User.Model;
 
+import com.group3.metaBlog.Blog.Model.Blog;
 import com.group3.metaBlog.Enum.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
@@ -11,7 +12,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,25 +22,26 @@ import java.util.List;
 public class User implements UserDetails {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Integer id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Size(min=4, message = "Minimum username length: 4 characters")
+    @Size(min = 4, message = "Minimum username length: 4 characters")
     private String username;
 
     @Getter
-    @Column(unique = true,nullable = false)
+    @Column(unique = true, nullable = false)
     private String email;
 
+    @Column(columnDefinition = "boolean default false")
     private Boolean isEmailVerified = false;
 
     @Column(nullable = false)
     private String password;
 
-    @Column(length = 4000,unique = true)
+    @Column(length = 4000, unique = true)
     private String accessToken;
 
-    @Column(length = 4000,unique = true)
+    @Column(length = 4000, unique = true)
     private String refreshToken;
 
     private Double lastLoginTime;
@@ -47,14 +50,35 @@ public class User implements UserDetails {
 
     private String imageURL;
 
-    private Boolean isTermsAccepted;
+    @Column(length = 5000)
+    private String bio;
+
+    private String githubURL;
+
+    private String linkedinURL;
+
+    @Column(columnDefinition = "boolean default false")
+    private Boolean isTermsAccepted = false;
 
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Column(columnDefinition = "boolean default false")
     private Boolean isResetPasswordRequested = false;
 
+    @Column(columnDefinition = "boolean default false")
     private Boolean isAccountLocked = false;
+
+    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Blog> blogs;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "user_saved_blogs",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "blog_id")
+    )
+    private List<Blog> savedBlogs;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -90,6 +114,4 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
-
 }
-

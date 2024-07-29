@@ -13,12 +13,15 @@ build-backend:
     - dalfcs_docker_autoscale
   script:
     - echo "Starting backend build......"
-    - mvn clean install
+    - mvn clean install -DskipTests
     - echo "Compile complete."
     - echo "Backend build completed"
   artifacts:
     paths: 
       - metaBlog-backend/target
+  rules:
+    - changes: 
+      - metaBlog-backend/**/*
 
 build-frontend:
   stage: build
@@ -35,6 +38,9 @@ build-frontend:
   artifacts:
     paths:
       - metablog-frontend/build
+  rules:
+    - changes: 
+      - metablog-frontend/**/*
 
 test-backend:
     stage: test
@@ -105,67 +111,6 @@ publish_frontend:
   only:
     - main
 
-
-# publish_backend:
-#   stage: publish
-#   image: docker:20.10.7
-#   services:
-#     - name: docker:20.10.7-dind
-#       alias: docker
-#   variables:
-#     DOCKER_HOST: tcp://docker:2375/
-#     DOCKER_DRIVER: overlay2
-#     DOCKER_TLS_CERTDIR: ""
-#   before_script:
-#       - cd metaBlog-backend
-#       - ls
-#       - pwd
-#       - echo "Docker login started"
-#       - docker login -u $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD docker.io
-#       - echo "Docker login success"
-#   tags:
-#     - dalfcs_docker_kvm
-#   script:
-#     - ls
-#     - pwd
-#     - echo "Docker build for backend started"
-#     - docker build -t $DOCKER_HUB_USERNAME/metablog_backend .
-#     - echo "Docker build for backend done now pushing the image to the docker hub"
-#     - docker push $DOCKER_HUB_USERNAME/metablog_backend
-#     - echo "Docker image for backend pushed to the docker hub"
-#   only:
-#     - main
-
-# publish_frontend:
-#   stage: publish
-#   image: docker:20.10.7
-#   services:
-#     - name: docker:20.10.7-dind
-#       alias: docker
-#   variables:
-#     DOCKER_HOST: tcp://docker:2375/
-#     DOCKER_DRIVER: overlay2
-#     DOCKER_TLS_CERTDIR: ""
-#   before_script:
-#       - cd metablog-frontend
-#       - ls
-#       - pwd
-#       - echo "Docker login started"
-#       - docker login -u $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD docker.io
-#       - echo "Docker login success"
-#   tags:
-#     - dalfcs_docker_kvm
-#   script:
-#     - ls
-#     - pwd
-#     - echo "Docker build for frontend started"
-#     - docker build -t $DOCKER_HUB_USERNAME/metablog_frontend .
-#     - echo "Docker build for frontend done now pushing the image to the docker hub"
-#     - docker push $DOCKER_HUB_USERNAME/metablog_frontend
-#     - echo "Docker image for frontend pushed to the docker hub"
-#   only:
-#     - main
-  
 deploy-backend:
   stage: deploy
   image: alpine:latest
