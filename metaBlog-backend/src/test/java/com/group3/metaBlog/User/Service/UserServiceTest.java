@@ -2,12 +2,10 @@ package com.group3.metaBlog.User.Service;
 
 import com.group3.metaBlog.Blog.Model.Blog;
 import com.group3.metaBlog.Blog.Repository.IBlogRepository;
-import com.group3.metaBlog.Config.ApplicationConfig;
 import com.group3.metaBlog.Image.Model.Image;
 import com.group3.metaBlog.Image.Service.ImageService;
 import com.group3.metaBlog.Jwt.ServiceLayer.JwtService;
 import com.group3.metaBlog.User.DataTransferObject.SavedBlogResponseDto;
-import com.group3.metaBlog.User.DataTransferObject.UserDetailsResponseDto;
 import com.group3.metaBlog.User.DataTransferObject.UserUpdateRequestDto;
 import com.group3.metaBlog.User.Model.User;
 import com.group3.metaBlog.User.Repository.IUserRepository;
@@ -39,9 +37,6 @@ public class UserServiceTest {
 
     @Mock
     private ImageService imageService;
-
-    @Mock
-    private ApplicationConfig applicationConfig;
 
     @Mock
     private JwtService jwtService;

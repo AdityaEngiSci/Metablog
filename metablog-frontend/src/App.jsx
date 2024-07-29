@@ -22,6 +22,7 @@ import BlogManagement from "./pages/AdminPage/BlogManagement";
 import ProtectedRoute from "./components/RouteProtection/ProtectedRoute";
 import AdminRoute from "./components/RouteProtection/AdminRoute";
 import AdminProfile from "./pages/AdminProfile/AdminProfile";
+import RegisterAdmin from "./pages/RegisterAdmin/RegisterAdmin";
 
 function App() {
   const action = useNavigationType();
@@ -197,6 +198,18 @@ function App() {
             userRole={getUserRole()}
           >
             <AdminProfile />
+          </AdminRoute>
+        }
+      />
+
+      <Route
+        path="/register-admin"
+        element={
+          <AdminRoute
+            isAuthenticated={isAuthenticated()}
+            userRole={getUserRole()}
+          >
+            <RegisterAdmin />
           </AdminRoute>
         }
       />

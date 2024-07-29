@@ -37,7 +37,7 @@ class OTPServiceTest {
     }
 
     @Test
-    void testGenerateOTP() {
+    void GenerateOTPTest() {
         SecureRandom random = mock(SecureRandom.class);
         when(random.nextInt(anyInt())).thenReturn(123456);
 
@@ -48,13 +48,13 @@ class OTPServiceTest {
         assertEquals(223456, otp);
     }
     @Test
-    void TestSecureRandom() {
+    void SecureRandomTest() {
         SecureRandom secureRandom = otpService.getSecureRandom();
         assertNotNull(secureRandom);
     }
 
     @Test
-    void testRegisterOTP_NewOTP() {
+    void RegisterOTP_NewOTPTest() {
         Long userId = 1L;
         int otpCode = 123456;
 
@@ -67,7 +67,7 @@ class OTPServiceTest {
     }
 
     @Test
-    void testRegisterOTP_UpdateExistingOTP() {
+    void RegisterOTP_UpdateExistingOTPTest() {
         Long userId = 1L;
         int otpCode = 123456;
         OTPModel existingOtp = new OTPModel();
@@ -81,7 +81,7 @@ class OTPServiceTest {
     }
 
     @Test
-    void testVerifyOTP_UserNotFound() {
+    void VerifyOTP_UserNotFoundTest() {
         String email = "test@example.com";
         int otpCode = 123456;
 
@@ -96,7 +96,7 @@ class OTPServiceTest {
     }
 
     @Test
-    void testVerifyOTP_OTPNotFound() {
+    void VerifyOTP_OTPNotFoundTest() {
         String email = "test@example.com";
         int otpCode = 123456;
         User user = new User();
@@ -114,7 +114,7 @@ class OTPServiceTest {
     }
 
     @Test
-    void testVerifyOTP_OTPMatchesAndNotExpired() {
+    void VerifyOTP_OTPMatchesAndNotExpiredTest() {
         String email = "test@example.com";
         int otpCode = 123456;
         User user = new User();
@@ -138,7 +138,7 @@ class OTPServiceTest {
     }
 
     @Test
-    void testVerifyOTP_OTPMatchesButExpired() {
+    void VerifyOTP_OTPMatchesButExpiredTest() {
         String email = "test@example.com";
         int otpCode = 123456;
         User user = new User();
@@ -160,7 +160,7 @@ class OTPServiceTest {
     }
 
     @Test
-    void testVerifyOTP_OTPDoesNotMatch() {
+    void VerifyOTP_OTPDoesNotMatchTest() {
         String email = "test@example.com";
         int otpCode = 123456;
         User user = new User();
@@ -181,7 +181,7 @@ class OTPServiceTest {
     }
 
     @Test
-    void testVerifyOTP_IllegalArgumentException() {
+    void VerifyOTP_IllegalArgumentExceptionTest() {
         String email = "test@example.com";
         int otpCode = 123456;
 
