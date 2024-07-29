@@ -27,14 +27,10 @@ public class ApplicationSecurity {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req ->
                         req.requestMatchers("/api/**",
-                                        "/api/auth/**",
-                                        "/v3/api-docs/**",
-                                        "swagger-ui/**",
-                                        "swagger-ui.html",
-                                        "/v3/api-docs"
-
+                                        "/api/auth/**"
                                 )
                                 .permitAll()
+                                .requestMatchers("/api/v1/admin/**").hasAuthority("Admin")
                                 .anyRequest()
                                 .authenticated()
                 )
