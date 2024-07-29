@@ -19,9 +19,6 @@ build-backend:
   artifacts:
     paths:
     - metaBlog-backend/target
-  rules:
-    - changes:
-      - metaBlog-backend/**/*
 
 build-frontend:
   stage: build
