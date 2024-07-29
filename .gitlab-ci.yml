@@ -75,6 +75,8 @@ publish_backend:
   tags:
   - dalfcs_docker_autoscale
   script:
+  - echo $DOCKER_HOST
+  - docker --version
   - ls
   - pwd
   - echo "Docker build for backend started"
@@ -99,8 +101,10 @@ publish_frontend:
   - docker login -u $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD docker.io
   - echo "Docker login success"
   tags:
-  - dalfcs_docker_autoscale
+  - dalfcs_docker_kvm
   script:
+  - echo $DOCKER_HOST
+  - docker --version
   - echo "Docker build for frontend started"
   - docker build -t $DOCKER_HUB_USERNAME/metablog_frontend .
   - echo "Docker build for frontend done now pushing the image to the docker hub"
@@ -113,7 +117,7 @@ deploy-backend:
   stage: deploy
   image: alpine:latest
   tags:
-  - dalfcs_docker_autoscale
+  - dalfcs_docker_kvm
   before_script:
   - cd metaBlog-backend
   - ls
