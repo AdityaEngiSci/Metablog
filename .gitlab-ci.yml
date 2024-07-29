@@ -1,158 +1,161 @@
 stages:
-  - build
-  - test
-  - publish
-  - deploy
-  
+- build
+- test
+- publish
+- deploy
+
 build-backend:
   stage: build
   image: maven:latest
   before_script:
-      - cd metaBlog-backend
+  - cd metaBlog-backend
   tags:
-    - dalfcs_docker_autoscale
+  - dalfcs_docker_autoscale
   script:
-    - echo "Starting backend build......"
-    - mvn clean install -DskipTests
-    - echo "Compile complete."
-    - echo "Backend build completed"
+  - echo "Starting backend build......"
+  - mvn clean install -DskipTests
+  - echo "Compile complete."
+  - echo "Backend build completed"
   artifacts:
-    paths: 
-      - metaBlog-backend/target
+    paths:
+    - metaBlog-backend/target
   rules:
-    - changes: 
-      - metaBlog-backend/**/*
+  - changes:
+    - metaBlog-backend/**/*
 
 build-frontend:
   stage: build
   image: node:latest
   tags:
-    - dalfcs_docker_autoscale
+  - dalfcs_docker_autoscale
   before_script:
-    - cd metablog-frontend
-    - npm install
-    - npm i react-icons
+  - cd metablog-frontend
+  - npm install
+  - npm i react-icons
   script:
-    - echo "Frontend building started......"
-    - npm run build
+  - echo "Frontend building started......"
+  - npm run build
   artifacts:
     paths:
-      - metablog-frontend/build
+    - metablog-frontend/build
   rules:
-    - changes: 
-      - metablog-frontend/**/*
+  - changes:
+    - metablog-frontend/**/*
 
 test-backend:
-    stage: test
-    image: maven:latest
-    # tags:
-    # - dalfcs_gitlab_docker_ci
-    before_script: 
-        - cd metaBlog-backend
-    script:
-        - echo "backend testing started......"
-        - mvn test
-        - echo "backedn testing completed......"
-    only: 
-      - develop
-      - main
+  stage: test
+  image: maven:latest
+  tags:
+  - dalfcs_docker_kvm
+  before_script:
+  - cd metaBlog-backend
+  script:
+  - echo "backend testing started......"
+  - mvn test
+  - echo "backedn testing completed......"
+  rules:
+  - changes:
+    - metaBlog-backend/**/*
+  only:
+  - develop
+  - main
 
 publish_backend:
   stage: publish
   image: docker:latest
   services:
-    - docker:dind
+  - docker:dind
   variables:
-    DOCKER_DRIVER: overlay2
+    # DOCKER_DRIVER: overlay2
     DOCKER_TLS_CERTDIR: ""
     DOCKER_HOST: "tcp://docker:2375"
   before_script:
-      - cd metaBlog-backend
-      - ls
-      - pwd
-      - echo "Docker login started"
-      - docker login -u $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD docker.io
-      - echo "Docker login success"
-  # tags:
-  #   - dalfcs_gitlab_docker_ci
+  - cd metaBlog-backend
+  - ls
+  - pwd
+  - echo "Docker login started"
+  - docker login -u $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD docker.io
+  - echo "Docker login success"
+  tags:
+  - dalfcs_docker_kvm
   script:
-    - ls
-    - pwd
-    - echo "Docker build for backend started"
-    - docker build -t $DOCKER_HUB_USERNAME/metablog_backend .
-    - echo "Docker build for backend done now pushing the image to the docker hub"
-    - docker push $DOCKER_HUB_USERNAME/metablog_backend
-    - echo "Docker image for backend pushed to the docker hub"
+  - ls
+  - pwd
+  - echo "Docker build for backend started"
+  - docker build -t $DOCKER_HUB_USERNAME/metablog_backend .
+  - echo "Docker build for backend done now pushing the image to the docker hub"
+  - docker push $DOCKER_HUB_USERNAME/metablog_backend
+  - echo "Docker image for backend pushed to the docker hub"
   only:
-    - main
+  - main
 
 publish_frontend:
   stage: publish
   image: docker:latest
   services:
-    - docker:dind
+  - docker:dind
   variables:
-    DOCKER_DRIVER: overlay2
+    # DOCKER_DRIVER: overlay2
     DOCKER_TLS_CERTDIR: ""
     DOCKER_HOST: "tcp://docker:2375"
   before_script:
-      - cd metablog-frontend
-      - echo "Docker login started"
-      - docker login -u $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD docker.io
-      - echo "Docker login success"
-  # tags:
-  #   - dalfcs_gitlab_docker_ci
+  - cd metablog-frontend
+  - echo "Docker login started"
+  - docker login -u $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD docker.io
+  - echo "Docker login success"
+  tags:
+  - dalfcs_docker_kvm
   script:
-    - echo "Docker build for frontend started"
-    - docker build -t $DOCKER_HUB_USERNAME/metablog_frontend .
-    - echo "Docker build for frontend done now pushing the image to the docker hub"
-    - docker push $DOCKER_HUB_USERNAME/metablog_frontend
-    - echo "Docker image for frontend pushed to the docker hub"
+  - echo "Docker build for frontend started"
+  - docker build -t $DOCKER_HUB_USERNAME/metablog_frontend .
+  - echo "Docker build for frontend done now pushing the image to the docker hub"
+  - docker push $DOCKER_HUB_USERNAME/metablog_frontend
+  - echo "Docker image for frontend pushed to the docker hub"
   only:
-    - main
+  - main
 
 deploy-backend:
   stage: deploy
   image: alpine:latest
-  # tags:
-  #   - dalfcs_gitlab_docker_ci
+  tags:
+  - dalfcs_docker_kvm
   before_script:
-    - cd metaBlog-backend
-    - ls
-    - pwd
-    - apk update && apk add openssh-client sshpass
-    - sudo apt-get install sshpass || true
-    - chmod 600 $VM_RSA 
-    
+  - cd metaBlog-backend
+  - ls
+  - pwd
+  - apk update && apk add openssh-client sshpass
+  - sudo apt-get install sshpass || true
+  - chmod 600 $VM_RSA
+
   script:
-    - echo "Docker login started"
-    - sshpass -p $VM_PASSWORD ssh -o StrictHostKeyChecking=no student@$VM_NAME "docker login -u $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD docker.io"
-    - echo "Docker login success"
-    - sshpass -p $VM_PASSWORD ssh -o StrictHostKeyChecking=no student@$VM_NAME "docker pull $DOCKER_BACKEND_IMAGE"
-    - sshpass -p $VM_PASSWORD ssh -o StrictHostKeyChecking=no student@$VM_NAME  "docker container rm -f metablog-backend-container || true"
-    - sshpass -p $VM_PASSWORD ssh -o StrictHostKeyChecking=no student@$VM_NAME "docker run -d -p 8080:8080 --name metablog-backend-container $DOCKER_BACKEND_IMAGE"
+  - echo "Docker login started"
+  - sshpass -p $VM_PASSWORD ssh -o StrictHostKeyChecking=no student@$VM_NAME "docker login -u $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD docker.io"
+  - echo "Docker login success"
+  - sshpass -p $VM_PASSWORD ssh -o StrictHostKeyChecking=no student@$VM_NAME "docker pull $DOCKER_BACKEND_IMAGE"
+  - sshpass -p $VM_PASSWORD ssh -o StrictHostKeyChecking=no student@$VM_NAME  "docker container rm -f metablog-backend-container || true"
+  - sshpass -p $VM_PASSWORD ssh -o StrictHostKeyChecking=no student@$VM_NAME "docker run -d -p 8080:8080 --name metablog-backend-container $DOCKER_BACKEND_IMAGE"
   only:
-    - main
+  - main
 
 deploy-frontend:
   stage: deploy
   image: alpine:latest
-  # tags:
-  #   - dalfcs_gitlab_docker_ci
+  tags:
+  - dalfcs_docker_kvm
   before_script:
-    - cd metablog-frontend
-    - ls
-    - pwd
-    - apk update && apk add openssh-client sshpass
-    - sudo apt-get install sshpass || true
-    - chmod 600 $VM_RSA 
-    
+  - cd metablog-frontend
+  - ls
+  - pwd
+  - apk update && apk add openssh-client sshpass
+  - sudo apt-get install sshpass || true
+  - chmod 600 $VM_RSA
+
   script:
-    - echo "Docker login started"
-    - sshpass -p $VM_PASSWORD ssh -o StrictHostKeyChecking=no student@$VM_NAME "docker login -u $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD docker.io"
-    - echo "Docker login success"
-    - sshpass -p $VM_PASSWORD ssh -o StrictHostKeyChecking=no student@$VM_NAME "docker pull $DOCKER_FRONTEND_IMAGE"
-    - sshpass -p $VM_PASSWORD ssh -o StrictHostKeyChecking=no student@$VM_NAME  "docker container rm -f metablog-frontend-container || true"
-    - sshpass -p $VM_PASSWORD ssh -o StrictHostKeyChecking=no student@$VM_NAME "docker run -d -p 3000:3000 --name metablog-frontend-container $DOCKER_FRONTEND_IMAGE"
+  - echo "Docker login started"
+  - sshpass -p $VM_PASSWORD ssh -o StrictHostKeyChecking=no student@$VM_NAME "docker login -u $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD docker.io"
+  - echo "Docker login success"
+  - sshpass -p $VM_PASSWORD ssh -o StrictHostKeyChecking=no student@$VM_NAME "docker pull $DOCKER_FRONTEND_IMAGE"
+  - sshpass -p $VM_PASSWORD ssh -o StrictHostKeyChecking=no student@$VM_NAME  "docker container rm -f metablog-frontend-container || true"
+  - sshpass -p $VM_PASSWORD ssh -o StrictHostKeyChecking=no student@$VM_NAME "docker run -d -p 3000:3000 --name metablog-frontend-container $DOCKER_FRONTEND_IMAGE"
   only:
-    - main
+  - main

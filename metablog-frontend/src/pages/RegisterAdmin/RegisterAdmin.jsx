@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
+import { FiUser } from "react-icons/fi";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import "./RegisterAdmin.css";
@@ -58,15 +60,22 @@ const RegisterAdmin = () => {
     };
 
     try {
-      const response = await axios.post(`${base_url}/admin/blogs/register-admin`, registerData, {
-        headers: {
+      const response = await axios.post(
+        `${base_url}/admin/blogs/register-admin`,
+        registerData,
+        {
+          headers: {
             Authorization: `Bearer ${accessToken}`,
-        }});
+          },
+        }
+      );
       if (response.data.success) {
         Swal.fire({
           icon: "success",
           title: "User Created",
-          text: response.data.message || "User created successfully. Please verify the OTP sent to your email.",
+          text:
+            response.data.message ||
+            "User created successfully. Please verify the OTP sent to your email.",
         });
         setShowOtpField(true);
       }
@@ -74,7 +83,8 @@ const RegisterAdmin = () => {
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: error.response.data.message || "An error occurred. Please try again.",
+        text:
+          error.response.data.message || "An error occurred. Please try again.",
       });
     }
   };
@@ -104,69 +114,118 @@ const RegisterAdmin = () => {
   };
 
   return (
-    <div className="admin-create-page">
-      <h1>Create Admin User</h1>
-      <form onSubmit={handleSubmit} className="admin-create-form">
-        <input
-          type="text"
-          name="firstName"
-          value={formData.firstName}
-          onChange={handleChange}
-          placeholder="First Name"
-          required
-        />
-        <input
-          type="text"
-          name="lastName"
-          value={formData.lastName}
-          onChange={handleChange}
-          placeholder="Last Name"
-          required
-        />
-        <input
-          type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          placeholder="Email"
-          required
-        />
-        <input
-          type="password"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          placeholder="Password"
-          required
-        />
-        <input
-          type="password"
-          name="confirmPassword"
-          value={formData.confirmPassword}
-          onChange={handleChange}
-          placeholder="Confirm Password"
-          required
-        />
-        <button type="submit" className="submit-button" disabled={!isFormValid}>
-          Create User
-        </button>
-      </form>
+    <div className="min-h-screen bg-gray-100">
+      <header className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            <Link
+              to="/admin-home"
+              className="flex items-center gap-2 text-lg font-semibold"
+            >
+              <img
+                src="/logo-black.svg"
+                alt="MetaBlog Logo"
+                className="w-25 h-25"
+              />
+            </Link>
+            <div className="flex items-center space-x-4">
+              <Link
+                to="/register-admin"
+                className="text-gray-600 hidden sm:inline-block"
+              >
+                Register Admin
+              </Link>
+              <Link to="/admin-profile" className="text-gray-600">
+                <button className="rounded-full p-2 bg-gray-200 hover:bg-gray-300 transition duration-300 ease-in-out">
+                  <FiUser className="w-6 h-6 text-gray-600" />
+                </button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </header>
 
-      {showOtpField && (
-        <form onSubmit={handleOtpSubmit} className="otp-form">
+      <main className="max-w-md mx-auto mt-10 bg-white p-8 border border-gray-300 rounded-lg shadow-lg">
+        <h1 className="text-2xl font-bold mb-6 text-center text-gray-800">
+          Create Admin User
+        </h1>
+        <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
-            name="otp"
-            value={otp}
-            onChange={(e) => setOtp(e.target.value)}
-            placeholder="Enter OTP"
+            name="firstName"
+            value={formData.firstName}
+            onChange={handleChange}
+            placeholder="First Name"
             required
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          <button type="submit" className="submit-button">
-            Verify OTP
+          <input
+            type="text"
+            name="lastName"
+            value={formData.lastName}
+            onChange={handleChange}
+            placeholder="Last Name"
+            required
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="Email"
+            required
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <input
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            placeholder="Password"
+            required
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <input
+            type="password"
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            placeholder="Confirm Password"
+            required
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            type="submit"
+            className={`w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+              !isFormValid && "opacity-50 cursor-not-allowed"
+            }`}
+            disabled={!isFormValid}
+          >
+            Create User
           </button>
         </form>
-      )}
+
+        {showOtpField && (
+          <form onSubmit={handleOtpSubmit} className="mt-6 space-y-4">
+            <input
+              type="text"
+              name="otp"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              placeholder="Enter OTP"
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              type="submit"
+              className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+            >
+              Verify OTP
+            </button>
+          </form>
+        )}
+      </main>
     </div>
   );
 };
